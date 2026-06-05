@@ -33,7 +33,9 @@ serve(async (req) => {
     if (req.method === 'POST') {
       try {
         reqBody = await req.json();
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Could not parse JSON body in chatbot-cron:", e);
+      }
     }
 
     if (reqBody.action === 'notify_delivery' && reqBody.elevator) {

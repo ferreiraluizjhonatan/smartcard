@@ -5,33 +5,20 @@ import { Plus, Building2, Users, Wrench, Bell, CheckCircle2, TrendingUp, Edit, T
 import * as XLSX from 'xlsx';
 
 // Subcomponent for each Elevator Card
-const ElevatorCard = ({ elevator, onEdit, onStartAjuste }: { elevator: any, onEdit: (el: any) => void, onStartAjuste?: (el: any) => void }) => {
+const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { elevator: any, onEdit: (el: any) => void, onStartAjuste?: (el: any) => void, realizedPct?: number }) => {
   const navigate = useNavigate();
-  const [realizado, setRealizado] = useState(0);
+  const [realizado, setRealizado] = useState(realizedPct);
+
+  useEffect(() => {
+    setRealizado(realizedPct);
+  }, [realizedPct]);
   const [liberacaoStatus, setLiberacaoStatus] = useState(elevator.liberacao_montagem || '🔴 AGUARDANDO FABRICAÇÃO');
   const [montagemPrevista, setMontagemPrevista] = useState(elevator.data_prevista_montagem || '');
 
   useEffect(() => {
-    fetchProgress();
     setLiberacaoStatus(elevator.liberacao_montagem || '🔴 AGUARDANDO FABRICAÇÃO');
     setMontagemPrevista(elevator.data_prevista_montagem || '');
   }, [elevator]);
-
-  const fetchProgress = async () => {
-    let tableName = 'pre_installation_checklists';
-    if(elevator.status === 'montagem') tableName = 'assembly_checklists';
-    if(elevator.status === 'ajuste') tableName = 'adjustment_checklists';
-    if(elevator.status === 'concluido') {
-      setRealizado(100);
-      return;
-    }
-    
-    const { data } = await supabase.from(tableName).select('percentage').eq('elevator_id', elevator.id);
-    if(data && data.length > 0) {
-      const sum = data.reduce((acc: number, curr: any) => acc + curr.percentage, 0);
-      setRealizado(Math.round(sum / data.length));
-    }
-  };
 
   const calcExpected = () => {
     if(!elevator.start_date || !elevator.expected_end_date) return 0;
@@ -350,7 +337,7 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjust
         <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
             {group.items.map((el: any) => (
-              <ElevatorCard key={el.id} elevator={el} onEdit={onEdit} onStartAjuste={onStartAjuste} />
+              <ElevatorCard key={el.id} elevator={el} onEdit={onEdit} onStartAjuste={onStartAjuste} realizedPct={progressMap[el.id] || 0} />
             ))}
           </div>
         </div>
@@ -372,6 +359,7 @@ export default function ElevatorsList() {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [companiesList, setCompaniesList] = useState<any[]>([]);
   const [tecnicosList, setTecnicosList] = useState<any[]>([]);
+  const [progressMap, setProgressMap] = useState<Record<string, number>>({});
   const [searchText, setSearchText] = useState('');
 
   const groupedElevators = useMemo(() => {
@@ -440,7 +428,39 @@ export default function ElevatorsList() {
     }
     
     const { data } = await query;
-    if (data) setElevators(data);
+    if (data) {
+       setElevators(data);
+       
+       // Bulk fetch progress
+       const [pre, asm, adj] = await Promise.all([
+         supabase.from('pre_installation_checklists').select('elevator_id, percentage'),
+         supabase.from('assembly_checklists').select('elevator_id, percentage'),
+         supabase.from('adjustment_checklists').select('elevator_id, percentage')
+       ]);
+       
+       const pMap: Record<string, number> = {};
+       
+       data.forEach(el => {
+         if(el.status === 'concluido') {
+           pMap[el.id] = 100;
+           return;
+         }
+         
+         let items = [];
+         if(el.status === 'pre_instalacao') items = pre.data?.filter(i => i.elevator_id === el.id) || [];
+         else if(el.status === 'montagem') items = asm.data?.filter(i => i.elevator_id === el.id) || [];
+         else if(el.status === 'ajuste') items = adj.data?.filter(i => i.elevator_id === el.id) || [];
+         
+         if(items.length > 0) {
+           const sum = items.reduce((acc, curr) => acc + curr.percentage, 0);
+           pMap[el.id] = Math.round(sum / items.length);
+         } else {
+           pMap[el.id] = 0;
+         }
+       });
+       
+       setProgressMap(pMap);
+    }
   };
 
   const handleClearDatabase = async () => {

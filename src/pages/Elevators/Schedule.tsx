@@ -38,7 +38,7 @@ export default function Schedule() {
     // Busca dados históricos de outras obras para aprendizado de máquina
     const { data: history } = await supabase.from(tableName).select('elevator_id, completed_at').eq('percentage', 100).not('completed_at', 'is', null).order('elevator_id').order('id');
     
-    let weights = new Array(currentItemsCount).fill(1); // Peso padrão igualitário
+    const weights = new Array(currentItemsCount).fill(1); // Peso padrão igualitário
     
     if (history && history.length > 50) { // Se houver massa de dados suficiente
        // Lógica de ML simplificada: calcular tempo médio entre a conclusão do passo atual e do anterior

@@ -89,7 +89,7 @@ export default function Dashboard() {
 
   // KPIs
   const stats = useMemo(() => {
-    let prodScore = 0;
+    const prodScore = 0;
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     let endingThisMonth = 0;
