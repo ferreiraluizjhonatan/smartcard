@@ -351,6 +351,10 @@ export default function ElevatorsList() {
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const statusFilter = searchParams.get('status');
+  const branchFilter = searchParams.get('branch');
+  const regionFilter = searchParams.get('region');
+  const countryFilter = searchParams.get('country');
+  const supervisorFilter = searchParams.get('supervisor');
   
   // Modal Edit State
   const [editModal, setEditModal] = useState<any>(null);
@@ -364,7 +368,15 @@ export default function ElevatorsList() {
   const [searchText, setSearchText] = useState('');
 
   const groupedElevators = useMemo(() => {
-    let filtered = elevators.filter(el => statusFilter ? el.status === statusFilter : true);
+    let filtered = elevators.filter(el => {
+      let keep = true;
+      if (statusFilter) keep = keep && el.status === statusFilter;
+      if (branchFilter) keep = keep && el.branch === branchFilter;
+      if (regionFilter) keep = keep && el.region === regionFilter;
+      if (countryFilter) keep = keep && (el.country || 'Brasil') === countryFilter;
+      if (supervisorFilter) keep = keep && el.supervisor_name === supervisorFilter;
+      return keep;
+    });
     
     if (searchText) {
       const lowerSearch = searchText.toLowerCase();
@@ -852,15 +864,21 @@ export default function ElevatorsList() {
         </div>
       </div>
 
-      {statusFilter && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-           <span style={{ color: 'var(--text-secondary)' }}>Filtrando por fase: <strong style={{ color: 'white', textTransform: 'uppercase' }}>{statusFilter === 'concluido' ? 'ENTREGUES' : statusFilter.replace('_', ' ')}</strong></span>
+      {(statusFilter || branchFilter || regionFilter || countryFilter || supervisorFilter) && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', flexWrap: 'wrap' }}>
+           <span style={{ color: 'var(--text-secondary)' }}>Filtros Ativos: </span>
+           {statusFilter && <strong style={{ color: 'white', textTransform: 'uppercase' }}>Fase: {statusFilter === 'concluido' ? 'ENTREGUES' : statusFilter.replace('_', ' ')}</strong>}
+           {branchFilter && <strong style={{ color: 'white' }}>Filial: {branchFilter}</strong>}
+           {regionFilter && <strong style={{ color: 'white' }}>Região: {regionFilter}</strong>}
+           {countryFilter && <strong style={{ color: 'white' }}>País: {countryFilter}</strong>}
+           {supervisorFilter && <strong style={{ color: 'white' }}>Supervisor: {supervisorFilter}</strong>}
+
            <button 
              className="btn btn-secondary" 
-             style={{ padding: '4px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem' }}
+             style={{ padding: '4px 12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', marginLeft: 'auto' }}
              onClick={() => setSearchParams({})}
            >
-             <XCircle size={14}/> Limpar Filtro
+             <XCircle size={14}/> Limpar Filtros
            </button>
         </div>
       )}

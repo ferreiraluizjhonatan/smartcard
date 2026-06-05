@@ -314,7 +314,7 @@ export default function Dashboard() {
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
           
-          <div className="neon-card border-purple" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=pre_instalacao')}>
+          <div className="neon-card border-purple" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'pre_instalacao'))}>
             <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
               <CheckCircle2 size={18} color="var(--accent-purple)" /> Em Pré-Instalação
             </div>
@@ -322,7 +322,7 @@ export default function Dashboard() {
             <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1' }}>{stats.pre}</div>
           </div>
 
-          <div className="neon-card border-cyan" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=montagem')}>
+          <div className="neon-card border-cyan" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'montagem'))}>
             <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
               <Activity size={18} color="var(--accent-cyan)" /> Em Montagem
             </div>
@@ -330,7 +330,7 @@ export default function Dashboard() {
             <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1' }}>{stats.montagem}</div>
           </div>
 
-          <div className="neon-card border-yellow" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=ajuste')}>
+          <div className="neon-card border-yellow" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'ajuste'))}>
             <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
               <Clock size={18} color="var(--accent-yellow)" /> Elevadores para Ajustes
             </div>
@@ -338,7 +338,7 @@ export default function Dashboard() {
             <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1' }}>{stats.ajuste}</div>
           </div>
 
-          <div className="neon-card border-green" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=concluido')}>
+          <div className="neon-card border-green" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'concluido'))}>
             <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
               <Award size={18} color="var(--accent-green)" /> Elevadores Entregues
             </div>
@@ -468,7 +468,7 @@ export default function Dashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
         
         {/* Card 0: Em Pré-Instalação */}
-        <div className="neon-card border-purple" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=pre_instalacao')}>
+        <div className="neon-card border-purple" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'pre_instalacao'))}>
           <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
             <CheckCircle2 size={18} color="var(--accent-purple)" /> Em Pré-Instalação
           </div>
@@ -477,7 +477,7 @@ export default function Dashboard() {
         </div>
 
         {/* Card 1: Elevadores em Montagem */}
-        <div className="neon-card border-cyan" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=montagem')}>
+        <div className="neon-card border-cyan" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'montagem'))}>
           <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
             <Activity size={18} color="var(--accent-cyan)" /> Elevadores em Montagem
           </div>
@@ -486,7 +486,7 @@ export default function Dashboard() {
         </div>
 
         {/* Card 2: Elevadores para Ajustes */}
-        <div className="neon-card border-yellow" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate('/elevators?status=ajuste')}>
+        <div className="neon-card border-yellow" style={{ cursor: 'pointer', padding: '24px' }} onClick={() => navigate(buildUrl('/elevators', 'ajuste'))}>
           <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
             <Clock size={18} color="var(--accent-yellow)" /> Elevadores para Ajustes
           </div>
@@ -510,7 +510,7 @@ export default function Dashboard() {
         <div 
           className="neon-card border-green" 
           style={{ padding: '24px', cursor: 'pointer' }}
-          onClick={() => navigate('/elevators?status=concluido')}
+          onClick={() => navigate(buildUrl('/elevators', 'concluido'))}
         >
           <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
             <Award size={18} color="var(--accent-green)" /> Elevadores Entregues
