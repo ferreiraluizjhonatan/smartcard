@@ -257,7 +257,7 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
   );
 };
 
-const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjuste }: { group: any, colorClass: string, accentColor: string, onEdit: (el: any) => void, onStartAjuste?: (el: any) => void }) => {
+const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjuste, progressMap }: { group: any, colorClass: string, accentColor: string, onEdit: (el: any) => void, onStartAjuste?: (el: any) => void, progressMap: Record<string, number> }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -459,7 +459,7 @@ export default function ElevatorsList() {
            return;
          }
          
-         let items = [];
+         let items: any[] = [];
          if(el.status === 'pre_instalacao') items = pre.data?.filter(i => i.elevator_id === el.id) || [];
          else if(el.status === 'montagem') items = asm.data?.filter(i => i.elevator_id === el.id) || [];
          else if(el.status === 'ajuste') items = adj.data?.filter(i => i.elevator_id === el.id) || [];
@@ -893,7 +893,7 @@ export default function ElevatorsList() {
           ];
           const style = styles[idx % styles.length];
           return (
-            <ProjectGroupCard key={idx} group={group} colorClass={style.border} accentColor={style.accent} onEdit={setEditModal} onStartAjuste={handleStartAjuste} />
+            <ProjectGroupCard key={idx} group={group} colorClass={style.border} accentColor={style.accent} onEdit={setEditModal} onStartAjuste={handleStartAjuste} progressMap={progressMap} />
           );
         })}
       </div>

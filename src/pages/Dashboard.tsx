@@ -247,6 +247,16 @@ export default function Dashboard() {
     return data;
   }, [filteredData, preChecklists]);
 
+  const buildUrl = (base: string, status?: string) => {
+    const params = new URLSearchParams();
+    if(status) params.append('status', status);
+    if(fCountry) params.append('country', fCountry);
+    if(fRegion) params.append('region', fRegion);
+    if(fBranch) params.append('branch', fBranch);
+    if(fSupervisor) params.append('supervisor', fSupervisor);
+    return `${base}?${params.toString()}`;
+  };
+
   // Rankings
   const getRankings = (groupBy: 'branch' | 'supervisor_name') => {
     const map: any = {};
