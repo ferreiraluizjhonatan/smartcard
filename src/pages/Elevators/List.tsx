@@ -739,8 +739,9 @@ export default function ElevatorsList() {
 
             const rawFase = idxFase !== -1 ? String(cols[idxFase] || '').trim().toLowerCase() : '';
             let parsedStatus = 'pre_instalacao';
-            if (['montagem', 'mon'].includes(rawFase)) parsedStatus = 'montagem';
-            else if (['ajuste', 'aj'].includes(rawFase)) parsedStatus = 'ajuste';
+            
+            if (rawFase.includes('montagem') || rawFase === 'mon') parsedStatus = 'montagem';
+            else if (rawFase.includes('ajuste') || rawFase === 'aj') parsedStatus = 'ajuste';
             else if (['entregue', 'entrega', 'concluído', 'concluido', 'finalizado', 'encerrado'].some(kw => rawFase.includes(kw))) parsedStatus = 'concluido';
 
             const payload = {
