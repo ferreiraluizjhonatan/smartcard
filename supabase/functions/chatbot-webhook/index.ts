@@ -241,7 +241,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
     try {
       const elev = Array.isArray(elevator) ? elevator[0] : elevator;
       if (!elev) throw new Error("Elevator missing in state");
-      const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard.vercel.app';
+      const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
       const link = `${frontendUrl}/tracking/${elev.id}`;
       const projectName = `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
       const msg = `Feito! Obra *${projectName}* atualizada para ${percentage}%.\n🔗 Enviar fotos/ocorrências: ${link}`;
@@ -348,7 +348,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
     try {
        const elev = Array.isArray(elevator) ? elevator[0] : elevator;
        if (!elev) throw new Error("Elevator missing in state");
-       const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard.vercel.app';
+       const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
        const link = `${frontendUrl}/tracking/${elev.id}`;
        const projectName = md.projectName || `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
        const msg = `Obrigado por completar o checklist da obra *${projectName}*!\n🔗 Enviar fotos/ocorrências: ${link}`;
@@ -426,7 +426,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
     try {
        const elev = Array.isArray(elevator) ? elevator[0] : elevator;
        if (!elev) throw new Error("Elevator missing in state");
-       const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard.vercel.app';
+       const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
        const link = `${frontendUrl}/tracking/${elev.id}`;
        const projectName = md.projectName || `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
        const msg = `Obrigado por atualizar a evolução da obra *${projectName}*!\n🔗 Enviar fotos/ocorrências: ${link}`;
