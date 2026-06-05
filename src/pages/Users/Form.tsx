@@ -10,7 +10,7 @@ export default function UsersForm() {
     full_name: '', matricula: '', email: '', telefone: '', telegram_id: '',
     role: 'montador', region_id: '', branch_id: '', supervisor_id: '',
     is_active: true, data_admissao: '', password: '', can_register_users: false,
-    branch_name: '', region_name: ''
+    branch_name: '', region_name: '', company_id: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -35,7 +35,8 @@ export default function UsersForm() {
           can_register_users: data.can_register_users || false,
           branch_name: data.branch_name || '',
           region_name: data.region_name || '',
-          company_id: data.company_id || ''
+          company_id: data.company_id || '',
+          password: ''
         });
       });
     }
@@ -94,8 +95,7 @@ export default function UsersForm() {
         user_can_register: formData.can_register_users,
         user_supervisor_id: formData.supervisor_id || null,
         user_branch_name: formData.branch_name || null,
-        user_region_name: formData.region_name || null,
-        user_company_id: formData.company_id || null
+        user_region_name: formData.region_name || null
       });
 
       if (error) {
