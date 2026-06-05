@@ -647,8 +647,8 @@ export default function ElevatorsList() {
         
         const idxCC = findCol(['cc', 'cabina']);
         const idxCM = findCol(['cm', 'contramarco', 'contra marco']);
-        const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast']);
-        const idxFase = findCol(['fase', 'status', 'etapa']);
+        const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast', 'expedid. prevista', 'expedid prevista']);
+        const idxFase = findCol(['fase', 'status', 'etapa', 'fase inst.']);
 
         const parseWeekToDate = (weekStr: string) => {
             if (!weekStr) return null;
@@ -1150,13 +1150,10 @@ export default function ElevatorsList() {
             <div style={{ background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px', marginBottom: '24px', fontFamily: 'monospace', color: 'var(--accent-cyan)', fontSize: '0.8rem', overflowX: 'auto', display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <span>• <strong>ID Elevador</strong> (coluna: elevador) - <em>Obrigatório</em></span>
               <span>• <strong>Empreendimento</strong> (coluna: cliente)</span>
-              <span>• <strong>Empresa</strong> (em branco para editar no sistema)</span>
               <span>• <strong>Endereço</strong> (colunas: endereço e cidade)</span>
-              <span>• <strong>N_Serie</strong> (coluna: elevador)</span>
-              <span>• <strong>Modelo</strong> (coluna: linha)</span>
-              <span>• <strong>Capacidade</strong> (coluna: capacid.)</span>
-              <span>• <strong>Velocidade</strong> (coluna: veloc.)</span>
-              <span>• <strong>Demais campos:</strong> Podem ser editados no sistema</span>
+              <span>• <strong>Especificações</strong> (linha, capacid., veloc.)</span>
+              <span>• <strong>Expedição Prevista</strong> (colunas: expedição, expedid. prevista) <em>*Chegada auto-calculada</em></span>
+              <span>• <strong>Fase Inst.</strong> (Sincroniza obras e preenche % automaticamente)</span>
             </div>
 
             <div className="input-group">
