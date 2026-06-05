@@ -1,0 +1,374 @@
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+
+export default function ClientPortal() {
+  const { id } = useParams();
+  const [elevator, setElevator] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
+  const [phaseTable, setPhaseTable] = useState<string>('pre_installation_checklists');
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState('');
+  const [sendingMsg, setSendingMsg] = useState(false);
+  const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({
+    'pre_installation_checklists': true,
+    'assembly_checklists': true,
+    'adjustment_checklists': true
+  });
+
+  const togglePhase = (phase: string) => {
+    setExpandedPhases(prev => ({ ...prev, [phase]: !prev[phase] }));
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, [id]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('get-tracking-data', {
+        body: { elevator_id: id }
+      });
+
+      if (error) throw error;
+      if (result.error) throw new Error(result.error);
+      
+      setElevator(result.elevator);
+      setItems(result.checklists);
+      if (result.phase_table) {
+        setPhaseTable(result.phase_table);
+      }
+    } catch (err: any) {
+      console.error(err);
+      // Fallback message if not found
+    }
+    setLoading(false);
+  };
+
+  const requestVisit = async () => {
+    if (!message.trim()) {
+       alert("Por favor, digite sua mensagem ou solicitação.");
+       return;
+    }
+    setSendingMsg(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('client-portal-action', {
+        body: { 
+          action: 'send_message', 
+          payload: { 
+            elevator_id: id, 
+            message: message, 
+            company_id: elevator?.company_id 
+          }
+        }
+      });
+      if (error || (result && result.error)) throw error || new Error(result.error);
+      alert('Mensagem enviada com sucesso! A equipe SmartCard entrará em contato em breve.');
+      setMessage('');
+    } catch(err) {
+      console.error(err);
+      alert('Erro ao enviar mensagem.');
+    } finally {
+      setSendingMsg(false);
+    }
+  };
+
+  const handleUploadPhoto = async (e: React.ChangeEvent<HTMLInputElement>, itemId: string, itemTableName: string) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    setUploadingItemId(itemId);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${id}/${itemId}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('client-evidences')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('client-evidences')
+        .getPublicUrl(filePath);
+
+      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'save_photo',
+          payload: {
+            elevator_id: id,
+            phase_table: itemTableName,
+            item_id: itemId,
+            photo_url: publicUrl
+          }
+        }
+      });
+
+      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+      
+      // Update local state to show the photo immediately
+      setItems(items.map(it => {
+        if (it.id === itemId) {
+          return { ...it, photos_urls: [...(it.photos_urls || []), publicUrl] };
+        }
+        return it;
+      }));
+
+      alert('Foto anexada com sucesso!');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao anexar foto. Tente novamente.');
+    } finally {
+      setUploadingItemId(null);
+      if (e.target) e.target.value = ''; // Reset input
+    }
+  };
+
+  const getPercentageCompleted = () => {
+    if (!items || !items.length) return 0;
+    const completed = items.filter(i => i.percentage === 100).length;
+    return Math.round((completed / items.length) * 100);
+  };
+
+  const getExpectedPercentage = () => {
+    if (!elevator?.start_date || !elevator?.expected_end_date) return 0;
+    const start = new Date(elevator.start_date).getTime();
+    const end = new Date(elevator.expected_end_date).getTime();
+    const today = new Date().getTime();
+    
+    if (today < start) return 0;
+    if (today > end) return 100;
+    
+    return Math.round(((today - start) / (end - start)) * 100);
+  };
+
+  if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--accent-cyan)' }}>Carregando dados da obra...</div>;
+  if (!elevator) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--accent-red)' }}>Obra não encontrada ou link inválido.</div>;
+
+  const realPerc = getPercentageCompleted();
+  const expectedPerc = getExpectedPercentage();
+
+  return (
+    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+      
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+        <div>
+          <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem' }}>Acompanhamento de Obra</h1>
+          <div style={{ display: 'flex', gap: '16px', color: 'var(--text-secondary)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={16}/> {elevator.name}</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Building2 size={16}/> {elevator.customer_company || 'Cliente'} - {elevator.project_name || 'Obra'}</span>
+          </div>
+        </div>
+        <button 
+          className="btn-glow border-cyan print-hide" 
+          onClick={() => window.print()}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+        >
+          <Printer size={18} /> Gerar Relatório PDF
+        </button>
+      </div>
+
+      {/* Supervisor Notes Alert */}
+      {elevator.supervisor_notes && (
+        <div style={{ 
+          background: 'rgba(255, 170, 0, 0.1)', 
+          border: '1px solid var(--accent-yellow)', 
+          padding: '16px', 
+          borderRadius: '8px', 
+          marginBottom: '32px',
+          display: 'flex',
+          gap: '12px'
+        }}>
+          <AlertCircle size={24} color="var(--accent-yellow)" style={{ flexShrink: 0 }} />
+          <div>
+            <h4 style={{ margin: '0 0 4px 0', color: 'var(--accent-yellow)' }}>Aviso do Supervisor / Engenharia</h4>
+            <p style={{ margin: 0, color: 'var(--text-primary)', lineHeight: '1.5' }}>{elevator.supervisor_notes}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Progress Bars */}
+      <div className="neon-card border-cyan" style={{ marginBottom: '32px' }}>
+        <h3 style={{ marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Clock size={20} color="var(--accent-cyan)"/> Evolução do Projeto
+        </h3>
+        
+        <div style={{ display: 'flex', gap: '40px', flexWrap: 'wrap' }}>
+           <div style={{ flex: '1 1 200px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Realizado (Físico)</span>
+                <span style={{ color: 'var(--accent-cyan)', fontWeight: 'bold', fontSize: '1.2rem' }}>{realPerc}%</span>
+              </div>
+              <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${realPerc}%`, background: 'var(--accent-cyan)' }}></div>
+              </div>
+           </div>
+
+           <div style={{ flex: '1 1 200px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span style={{ color: 'var(--text-secondary)' }}>Esperado (Cronograma)</span>
+                <span style={{ color: 'var(--accent-yellow)', fontWeight: 'bold', fontSize: '1.2rem' }}>{expectedPerc}%</span>
+              </div>
+              <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${expectedPerc}%`, background: 'var(--accent-yellow)' }}></div>
+              </div>
+           </div>
+        </div>
+      </div>
+
+      {/* Gantt / Checklist with Accordion */}
+      <div className="glass-panel" style={{ padding: '24px' }}>
+        <h3 style={{ marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Calendar size={20} color="var(--accent-purple)"/> Cronograma Completo e Fases Executivas
+        </h3>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {[
+            { key: 'pre_installation_checklists', title: 'Pré-Instalação' },
+            { key: 'assembly_checklists', title: 'Montagem' },
+            { key: 'adjustment_checklists', title: 'Ajustes' }
+          ].map(phase => {
+            const phaseItems = items.filter(i => i.table_name === phase.key);
+            if (phaseItems.length === 0) return null;
+            const isExpanded = expandedPhases[phase.key];
+            const completedCount = phaseItems.filter(i => i.percentage === 100).length;
+
+            return (
+              <div key={phase.key} style={{ marginBottom: '8px' }}>
+                <div 
+                  onClick={() => togglePhase(phase.key)}
+                  style={{ 
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
+                    padding: '16px', background: 'rgba(255,255,255,0.05)', 
+                    borderRadius: '8px', cursor: 'pointer',
+                    border: '1px solid rgba(255,255,255,0.1)'
+                  }}
+                >
+                  <h4 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>
+                    {phase.title} <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginLeft: '8px' }}>({completedCount}/{phaseItems.length})</span>
+                  </h4>
+                  {isExpanded ? <ChevronUp size={20} color="var(--text-secondary)" /> : <ChevronDown size={20} color="var(--text-secondary)" />}
+                </div>
+
+                {isExpanded && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', paddingLeft: '8px' }}>
+                    {phaseItems.map((item, index) => {
+                      const isDone = item.percentage === 100;
+                      const hasPhotos = item.photos_urls && item.photos_urls.length > 0;
+                      
+                      // Strip prefix for cleaner mobile look
+                      const cleanItemName = item.item_name.replace(/^\[.*?\]\s*/, '');
+                      
+                      return (
+                        <div key={item.id} style={{ 
+                          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px',
+                          padding: '16px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px',
+                          borderLeft: `4px solid ${isDone ? 'var(--accent-cyan)' : 'transparent'}`
+                        }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: '250px' }}>
+                            <div style={{ 
+                              width: '32px', height: '32px', borderRadius: '50%', 
+                              background: isDone ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.1)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              color: isDone ? '#000' : '#fff', flexShrink: 0
+                            }}>
+                              {isDone ? <CheckCircle2 size={18} /> : index + 1}
+                            </div>
+                            <div>
+                              <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', wordBreak: 'break-word' }}>{cleanItemName}</h4>
+                              <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                                {item.planned_start_date ? new Date(item.planned_start_date).toLocaleDateString('pt-BR') : 'Sem data'} 
+                                {' - '} 
+                                {item.planned_end_date ? new Date(item.planned_end_date).toLocaleDateString('pt-BR') : 'Sem data'}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            {!isDone && <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Pendente</span>}
+                            
+                            {hasPhotos && (
+                              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                {item.photos_urls.map((url: string, pIdx: number) => (
+                                  <a 
+                                    key={pIdx} 
+                                    href={url} 
+                                    target="_blank" 
+                                    rel="noreferrer" 
+                                    className="badge badge-purple print-hide" 
+                                    style={{ display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                                    title="Visualizar Evidência"
+                                  >
+                                    <ImageIcon size={12} /> Foto {pIdx + 1}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+
+                            <label className="badge badge-yellow print-hide" style={{ display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', opacity: uploadingItemId === item.id ? 0.5 : 1 }}>
+                               <Upload size={12} />
+                               {uploadingItemId === item.id ? 'Enviando...' : 'Anexar'}
+                               <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploadingItemId === item.id} onChange={(e) => handleUploadPhoto(e, item.id, item.table_name)} />
+                            </label>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px' }}>
+        <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <MessageSquare size={20} color="var(--accent-cyan)"/> Enviar Mensagem ou Solicitação
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
+          Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Envie uma mensagem direta para nossa equipe técnica.
+        </p>
+        
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+           <textarea
+             value={message}
+             onChange={(e) => setMessage(e.target.value)}
+             className="input-field"
+             rows={4}
+             placeholder="Digite sua solicitação aqui... ex: A obra está liberada para instalação do poço amanhã."
+             style={{ resize: 'vertical' }}
+           />
+           <button 
+             onClick={requestVisit} 
+             disabled={sendingMsg}
+             className="btn-glow border-cyan" 
+             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
+           >
+             <Send size={18} />
+             {sendingMsg ? 'Enviando Mensagem...' : 'Enviar Mensagem'}
+           </button>
+        </div>
+      </div>
+      
+      {/* Print styles inserted directly to hide elements when generating PDF */}
+      <style>
+        {`
+          @media print {
+            body { background: white; color: black; }
+            .print-hide { display: none !important; }
+            .neon-card, .glass-panel { border: 1px solid #ccc !important; background: transparent !important; color: black !important; box-shadow: none !important; }
+            span, p, h1, h2, h3, h4 { color: black !important; }
+            .badge { border: 1px solid #ccc; color: black !important; }
+          }
+        `}
+      </style>
+    </div>
+  );
+}
