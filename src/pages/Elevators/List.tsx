@@ -370,11 +370,11 @@ export default function ElevatorsList() {
   const groupedElevators = useMemo(() => {
     let filtered = elevators.filter(el => {
       let keep = true;
-      if (statusFilter) keep = keep && el.status === statusFilter;
-      if (branchFilter) keep = keep && el.branch === branchFilter;
-      if (regionFilter) keep = keep && el.region === regionFilter;
-      if (countryFilter) keep = keep && (el.country || 'Brasil') === countryFilter;
-      if (supervisorFilter) keep = keep && el.supervisor_name === supervisorFilter;
+      if (statusFilter) keep = keep && String(el.status) === String(statusFilter);
+      if (branchFilter) keep = keep && String(el.branch) === String(branchFilter);
+      if (regionFilter) keep = keep && String(el.region) === String(regionFilter);
+      if (countryFilter) keep = keep && String(el.country || 'Brasil') === String(countryFilter);
+      if (supervisorFilter) keep = keep && String(el.supervisor_name) === String(supervisorFilter);
       return keep;
     });
     
