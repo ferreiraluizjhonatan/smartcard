@@ -22,6 +22,7 @@ import Layout from './components/Layout';
 import { EmpresasContratadasList } from './pages/EmpresasContratadasList';
 import { EmpresaDetail } from './pages/EmpresaDetail';
 import MestrePortal from './pages/MestrePortal';
+import MechanicPortal from './pages/MechanicPortal';
 import './App.css';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/tracking/:id" element={<ClientPortal />} />
         <Route path="/mestre/:contract" element={<MestrePortal />} />
+        <Route path="/mecanico/:telegramId" element={<MechanicPortal />} />
         <Route path="/" element={session ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
           <Route path="/forecasts" element={<Forecasts />} />
