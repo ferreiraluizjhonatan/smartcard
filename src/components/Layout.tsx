@@ -20,7 +20,7 @@ export default function Layout() {
                 const fetchCount = () => {
                   supabase.from('tickets').select('id', { count: 'exact' })
                     .eq('company_id', data.company_id)
-                    .eq('status', 'aberto')
+                    .neq('status', 'fechado')
                     .then(({ count }) => setOpenTicketsCount(count || 0));
                 };
                 
