@@ -625,7 +625,8 @@ export default function ElevatorsList() {
         }
         if(headers.length === 0) headers = rows[0].map(h => String(h).toLowerCase().trim());
 
-        const findCol = (aliases: string[]) => headers.findIndex(h => aliases.some(a => h.includes(a)));
+        const findCol = (aliases: string[]) => headers.findIndex(h => aliases.some(a => h === a || h.includes(a)));
+        const findColExact = (aliases: string[]) => headers.findIndex(h => aliases.some(a => h === a));
 
         const idxName = findCol(['elevador']);
         const idxProject = findCol(['cliente']);
@@ -645,9 +646,10 @@ export default function ElevatorsList() {
         const idxRegion = findCol(['região', 'regiao']);
         const idxSupervisor = findCol(['supervisor', 'líder', 'lider']);
         
-        const idxCC = findCol(['cc', 'cabina']);
-        const idxCM = findCol(['cm', 'contramarco', 'contra marco']);
-        const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast', 'expedid. prevista', 'expedid prevista']);
+        const idxPrevMontagem = findCol(['cc+cm', 'cc + cm', 'previsao montagem', 'previsão montagem', 'prev montagem', 'previsao de montagem']);
+        const idxCC = findColExact(['cc', 'cabina', 'cc ']); // exact to avoid matching cc+cm
+        const idxCM = findColExact(['cm', 'contramarco', 'contra marco', 'cm ']);
+        const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast', 'expedid. prevista', 'expedid prevista', 'exped. prevista']);
         const idxFase = findCol(['fase', 'status', 'etapa', 'fase inst.']);
 
         const parseAnyDate = (val: any) => {
@@ -736,11 +738,19 @@ export default function ElevatorsList() {
             const rawExp = idxExpedicao !== -1 ? String(cols[idxExpedicao] || '').trim() : '';
             const data_prevista_expedicao = parseWeekToDate(rawExp);
             
+            const rawPrevMontagem = idxPrevMontagem !== -1 ? String(cols[idxPrevMontagem] || '').trim() : '';
+            const explicitPrevMontagem = parseWeekToDate(rawPrevMontagem);
+            
             let data_prevista_chegada = null;
             let data_prevista_montagem = null;
             if (data_prevista_expedicao) {
                 data_prevista_chegada = new Date(data_prevista_expedicao);
                 data_prevista_chegada.setDate(data_prevista_chegada.getDate() + 7);
+            }
+            
+            if (explicitPrevMontagem) {
+                data_prevista_montagem = explicitPrevMontagem;
+            } else if (data_prevista_chegada) {
                 data_prevista_montagem = new Date(data_prevista_chegada);
                 data_prevista_montagem.setDate(data_prevista_montagem.getDate() + 3);
             }
@@ -1164,7 +1174,8 @@ export default function ElevatorsList() {
               <span>• <strong>Empreendimento</strong> (coluna: cliente)</span>
               <span>• <strong>Endereço</strong> (colunas: endereço e cidade)</span>
               <span>• <strong>Especificações</strong> (linha, capacid., veloc.)</span>
-              <span>• <strong>Expedição Prevista</strong> (colunas: expedição, expedid. prevista) <em>*Chegada auto-calculada</em></span>
+              <span>• <strong>Expedição Prevista</strong> (colunas: expedição, exped. prevista)</span>
+              <span>• <strong>Prev. Montagem</strong> (coluna: cc+cm) <em>*Opcional</em></span>
               <span>• <strong>Fase Inst.</strong> (Sincroniza obras e preenche % automaticamente)</span>
             </div>
 
