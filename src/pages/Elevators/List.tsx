@@ -483,7 +483,7 @@ export default function ElevatorsList() {
     if(user?.user) {
        const { data: profile } = await supabase.from('user_profiles').select('company_id').eq('id', user.user.id).single();
        if(profile) {
-           const { error } = await supabase.from('elevators').delete().eq('company_id', profile.company_id);
+           const { error } = await supabase.rpc('clear_company_elevators', { p_company_id: profile.company_id });
            if(error) alert('Erro: ' + error.message);
            else {
              alert('Base limpa com sucesso!');
