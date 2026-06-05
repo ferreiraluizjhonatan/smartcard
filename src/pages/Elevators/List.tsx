@@ -355,6 +355,7 @@ export default function ElevatorsList() {
   // Modal Edit State
   const [editModal, setEditModal] = useState<any>(null);
   const [importModal, setImportModal] = useState(false);
+  const [importReport, setImportReport] = useState<any>(null);
   const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
   const [usersList, setUsersList] = useState<any[]>([]);
   const [companiesList, setCompaniesList] = useState<any[]>([]);
@@ -593,6 +594,7 @@ export default function ElevatorsList() {
         if(!profile) return;
 
         let count = 0;
+        let stats = { kept: 0, movedMontagem: 0, movedAjuste: 0, movedEntregue: 0 };
         const totalRows = rows.length - 1;
         setImportProgress({ current: 0, total: totalRows });
         
@@ -725,9 +727,9 @@ export default function ElevatorsList() {
 
             const rawFase = idxFase !== -1 ? String(cols[idxFase] || '').trim().toLowerCase() : '';
             let parsedStatus = 'pre_instalacao';
-            if (rawFase.includes('montagem')) parsedStatus = 'montagem';
-            else if (rawFase.includes('ajuste')) parsedStatus = 'ajuste';
-            else if (rawFase.includes('concluido') || rawFase.includes('entregue')) parsedStatus = 'concluido';
+            if (['montagem', 'mon'].includes(rawFase)) parsedStatus = 'montagem';
+            else if (['ajuste', 'aj'].includes(rawFase)) parsedStatus = 'ajuste';
+            else if (['entregue', 'entrega', 'concluído', 'concluido', 'finalizado', 'encerrado'].some(kw => rawFase.includes(kw))) parsedStatus = 'concluido';
 
             const payload = {
                 name: name,
@@ -750,8 +752,7 @@ export default function ElevatorsList() {
                 liberacao_montagem,
                 data_prevista_expedicao: expStr,
                 data_prevista_chegada: cheStr,
-                data_prevista_montagem: monStr,
-                status: parsedStatus
+                data_prevista_montagem: monStr
             };
 
             let existing = null;
@@ -776,25 +777,39 @@ export default function ElevatorsList() {
                 const { error } = await supabase.from('elevators')
                   .update(payload)
                   .eq('id', existing.id);
-                if (!error) count++;
-                else console.error("Erro ao atualizar:", error);
+                if (!error) {
+                    count++;
+                    const { data: syncRes } = await supabase.rpc('sync_elevator_phase_from_import', { p_elevator_id: existing.id, p_new_status: parsedStatus, p_user_id: user.user.id });
+                    if(syncRes === 'MOVED_MONTAGEM') stats.movedMontagem++;
+                    else if(syncRes === 'MOVED_AJUSTE') stats.movedAjuste++;
+                    else if(syncRes === 'MOVED_ENTREGUE') stats.movedEntregue++;
+                    else stats.kept++;
+                } else console.error("Erro ao atualizar:", error);
             } else {
                 // Insert
-                const { error } = await supabase.from('elevators').insert({
+                const { error, data: newElevator } = await supabase.from('elevators').insert({
                     ...payload,
                     supervisor_name: supervisor,
                     company_id: profile.company_id,
-                    empresa_contratada_id: null
-                });
-                if (!error) count++;
-                else console.error("Erro ao inserir:", error);
+                    empresa_contratada_id: null,
+                    status: 'pre_instalacao' // Always start as pre to trigger default items
+                }).select('id').single();
+                
+                if (!error && newElevator) {
+                    count++;
+                    const { data: syncRes } = await supabase.rpc('sync_elevator_phase_from_import', { p_elevator_id: newElevator.id, p_new_status: parsedStatus, p_user_id: user.user.id });
+                    if(syncRes === 'MOVED_MONTAGEM') stats.movedMontagem++;
+                    else if(syncRes === 'MOVED_AJUSTE') stats.movedAjuste++;
+                    else if(syncRes === 'MOVED_ENTREGUE') stats.movedEntregue++;
+                    else stats.kept++;
+                } else console.error("Erro ao inserir:", error);
             }
         }
     }
     setLoading(false);
     setImportProgress({ current: 0, total: 0 });
-    alert(`${count} obras importadas com sucesso!`);
     setImportModal(false);
+    setImportReport({ count, stats });
     fetchElevators();
   } catch (err: any) {
     setLoading(false);
@@ -1060,6 +1075,38 @@ export default function ElevatorsList() {
               <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setEditModal(null)}>Cancelar</button>
               <button className="btn-glow" style={{ flex: 1 }} onClick={saveEdit}>Salvar</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {importReport && (
+        <div className="modal-overlay" onClick={() => setImportReport(null)}>
+          <div className="modal-content glass-panel" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px', textAlign: 'center' }}>
+            <h2>✅ Sincronização Concluída!</h2>
+            <p style={{ color: 'var(--text-secondary)' }}>Obras processadas: {importReport.count}</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '24px', textAlign: 'left' }}>
+              <div className="neon-card" style={{ padding: '16px', background: 'rgba(255,255,255,0.05)' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: '#a78bfa' }}>Mantidas / Pré-Inst.</h4>
+                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>{importReport.stats.kept}</p>
+              </div>
+              <div className="neon-card border-cyan" style={{ padding: '16px', background: 'rgba(0,255,255,0.05)' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-cyan)' }}>Movidas p/ Montagem</h4>
+                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>{importReport.stats.movedMontagem}</p>
+              </div>
+              <div className="neon-card border-yellow" style={{ padding: '16px', background: 'rgba(250, 204, 21, 0.05)' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: '#facc15' }}>Movidas p/ Ajuste</h4>
+                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>{importReport.stats.movedAjuste}</p>
+              </div>
+              <div className="neon-card border-green" style={{ padding: '16px', background: 'rgba(52, 211, 153, 0.05)' }}>
+                <h4 style={{ margin: '0 0 8px 0', color: '#34d399' }}>Movidas p/ Entregues</h4>
+                <p style={{ margin: 0, fontSize: '1.5rem', fontWeight: 'bold' }}>{importReport.stats.movedEntregue}</p>
+              </div>
+            </div>
+
+            <button className="btn-glow" style={{ marginTop: '24px', width: '100%' }} onClick={() => setImportReport(null)}>
+              Fechar Relatório
+            </button>
           </div>
         </div>
       )}
