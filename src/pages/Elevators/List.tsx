@@ -650,31 +650,41 @@ export default function ElevatorsList() {
         const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast', 'expedid. prevista', 'expedid prevista']);
         const idxFase = findCol(['fase', 'status', 'etapa', 'fase inst.']);
 
+        const parseAnyDate = (val: any) => {
+            if (!val) return null;
+            const str = String(val).trim();
+            if (/^\d{5}$/.test(str)) {
+                const serial = parseInt(str);
+                const utc_days = Math.floor(serial - 25569);
+                const date_info = new Date(utc_days * 86400 * 1000);
+                return new Date(date_info.getFullYear(), date_info.getMonth(), date_info.getDate() + 1);
+            }
+            const mDate = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
+            if (mDate) return new Date(parseInt(mDate[3]), parseInt(mDate[2]) - 1, parseInt(mDate[1]));
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) return d;
+            return null;
+        };
+
         const parseWeekToDate = (weekStr: string) => {
             if (!weekStr) return null;
             const str = String(weekStr).trim().toUpperCase();
+            
+            const anyDate = parseAnyDate(weekStr);
+            if (anyDate && !str.includes('W') && !str.includes('SEM')) return anyDate;
+
             let year = new Date().getFullYear();
             let week = 0;
-            const m1 = str.match(/(\d{4})[-W\s]+(\d{1,2})/); // 2026-W25, 2026 25
-            const m2 = str.match(/(\d{1,2})\/(\d{4})/); // 25/2026
-            const m3 = str.match(/SEM.*?(\d{1,2})/); // SEM 40, SEMANA 32
-            const m4 = str.match(/^(\d{1,2})$/); // just '25' or '05'
-            
-            const mDate = str.match(/^(\d{2})\/(\d{2})\/(\d{4})/); // 15/06/2026
-            
-            if (mDate) {
-              return new Date(parseInt(mDate[3]), parseInt(mDate[2]) - 1, parseInt(mDate[1]));
-            }
+            const m1 = str.match(/(\d{4})[-W\s]+(\d{1,2})/); 
+            const m2 = str.match(/(\d{1,2})\/(\d{4})/); 
+            const m3 = str.match(/SEM.*?(\d{1,2})/); 
+            const m4 = str.match(/^(\d{1,2})$/); 
             
             if (m1) { year = parseInt(m1[1]); week = parseInt(m1[2]); }
             else if (m2) { week = parseInt(m2[1]); year = parseInt(m2[2]); }
             else if (m3) { week = parseInt(m3[1]); }
             else if (m4) { week = parseInt(m4[1]); }
-            else {
-              const d = new Date(weekStr);
-              if (!isNaN(d.getTime())) return d;
-              return null;
-            }
+            else return null;
             
             const firstDayOfYear = new Date(year, 0, 1);
             const days = (week - 1) * 7;
@@ -704,8 +714,10 @@ export default function ElevatorsList() {
             const passenger_capacity = idxCapacity !== -1 ? String(cols[idxCapacity] || '').trim() : '';
             const speed = idxSpeed !== -1 ? String(cols[idxSpeed] || '').trim() : '';
             const stops = idxStops !== -1 && cols[idxStops] ? parseInt(cols[idxStops]) : null;
-            const start = idxStart !== -1 && cols[idxStart] ? new Date(cols[idxStart]).toISOString() : null;
-            const end = idxEnd !== -1 && cols[idxEnd] ? new Date(cols[idxEnd]).toISOString() : null;
+            const startObj = idxStart !== -1 && cols[idxStart] ? parseAnyDate(cols[idxStart]) : null;
+            const endObj = idxEnd !== -1 && cols[idxEnd] ? parseAnyDate(cols[idxEnd]) : null;
+            const start = startObj ? startObj.toISOString() : null;
+            const end = endObj ? endObj.toISOString() : null;
             const contract = idxContract !== -1 ? String(cols[idxContract] || '').trim() : '';
             const branch = idxBranch !== -1 ? String(cols[idxBranch] || '').trim() : '';
             const country = idxCountry !== -1 ? String(cols[idxCountry] || '').trim() : 'Brasil';
