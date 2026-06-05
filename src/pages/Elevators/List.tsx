@@ -634,6 +634,7 @@ export default function ElevatorsList() {
         const idxCC = findCol(['cc', 'cabina']);
         const idxCM = findCol(['cm', 'contramarco', 'contra marco']);
         const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast']);
+        const idxFase = findCol(['fase', 'status', 'etapa']);
 
         const parseWeekToDate = (weekStr: string) => {
             if (!weekStr) return null;
@@ -722,6 +723,12 @@ export default function ElevatorsList() {
             const cheStr = data_prevista_chegada ? data_prevista_chegada.toISOString().split('T')[0] : null;
             const monStr = data_prevista_montagem ? data_prevista_montagem.toISOString().split('T')[0] : null;
 
+            const rawFase = idxFase !== -1 ? String(cols[idxFase] || '').trim().toLowerCase() : '';
+            let parsedStatus = 'pre_instalacao';
+            if (rawFase.includes('montagem')) parsedStatus = 'montagem';
+            else if (rawFase.includes('ajuste')) parsedStatus = 'ajuste';
+            else if (rawFase.includes('concluido') || rawFase.includes('entregue')) parsedStatus = 'concluido';
+
             const payload = {
                 name: name,
                 project_name: project_name,
@@ -743,7 +750,8 @@ export default function ElevatorsList() {
                 liberacao_montagem,
                 data_prevista_expedicao: expStr,
                 data_prevista_chegada: cheStr,
-                data_prevista_montagem: monStr
+                data_prevista_montagem: monStr,
+                status: parsedStatus
             };
 
             let existing = null;
@@ -776,8 +784,7 @@ export default function ElevatorsList() {
                     ...payload,
                     supervisor_name: supervisor,
                     company_id: profile.company_id,
-                    empresa_contratada_id: null,
-                    status: 'pre_instalacao'
+                    empresa_contratada_id: null
                 });
                 if (!error) count++;
                 else console.error("Erro ao inserir:", error);
