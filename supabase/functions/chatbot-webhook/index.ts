@@ -349,7 +349,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        const elev = Array.isArray(elevator) ? elevator[0] : elevator;
        if (!elev) throw new Error("Elevator missing in state");
        const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
-       const contractNumber = elev.contract_number || '0';
+       const contractNumber = encodeURIComponent(elev.contract_number || '0');
        const link = `${frontendUrl}/mestre/${contractNumber}`;
        const projectName = md.projectName || `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
        const msg = `Obrigado por completar o checklist da obra *${projectName}*!\n🔗 Seu Painel de Obras: ${link}`;
@@ -428,7 +428,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        const elev = Array.isArray(elevator) ? elevator[0] : elevator;
        if (!elev) throw new Error("Elevator missing in state");
        const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
-       const contractNumber = elev.contract_number || '0';
+       const contractNumber = encodeURIComponent(elev.contract_number || '0');
        const link = `${frontendUrl}/mestre/${contractNumber}`;
        const projectName = md.projectName || `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
        const msg = `Obrigado por atualizar a evolução da obra *${projectName}*!\n🔗 Seu Painel de Obras: ${link}`;
