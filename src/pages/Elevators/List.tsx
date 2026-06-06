@@ -244,24 +244,34 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
             Acompanhar Fases &gt;
           </button>
         )}
-        <button className="btn btn-secondary" 
-          style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#60a5fa', background: 'rgba(96, 165, 250, 0.1)', borderColor: 'rgba(96, 165, 250, 0.3)', transition: 'all 0.2s' }} 
-          onMouseOver={e => {e.currentTarget.style.background = 'rgba(96, 165, 250, 0.2)'; e.currentTarget.style.borderColor = 'rgba(96, 165, 250, 0.5)'}}
-          onMouseOut={e => {e.currentTarget.style.background = 'rgba(96, 165, 250, 0.1)'; e.currentTarget.style.borderColor = 'rgba(96, 165, 250, 0.3)'}}
-          onClick={handleTestTelegram}>
-          <Send size={16} /> Testar Robô (Telegram)
-        </button>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn" 
-            style={{ flex: 1, background: 'rgba(255, 255, 255, 0.05)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.2s' }}
-            onMouseOver={e => {e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}}
-            onMouseOut={e => {e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}}
-            onClick={() => onEdit(elevator)}>Editar</button>
-          <button className="btn" 
-            style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', transition: 'all 0.2s' }}
-            onMouseOver={e => {e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)'}}
-            onMouseOut={e => {e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'}}
-            >Excluir</button>
+        {/* Admin Actions (Minimalist) */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '8px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <button 
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '4px', transition: 'color 0.2s' }}
+            onMouseOver={e => e.currentTarget.style.color = '#60a5fa'}
+            onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+            title="Testar Robô (Telegram)"
+            onClick={handleTestTelegram}
+          >
+            <Send size={14} /> Testar
+          </button>
+          
+          <button 
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '4px', transition: 'color 0.2s' }}
+            onMouseOver={e => e.currentTarget.style.color = '#fff'}
+            onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+            onClick={() => onEdit(elevator)}
+          >
+            <Edit size={14} /> Editar
+          </button>
+
+          <button 
+            style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '4px', transition: 'color 0.2s' }}
+            onMouseOver={e => e.currentTarget.style.color = '#ef4444'}
+            onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+          >
+            <Trash2 size={14} /> Excluir
+          </button>
         </div>
       </div>
 
