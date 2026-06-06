@@ -292,6 +292,7 @@ export default function ClientPortal() {
           ].map(phase => {
             const phaseItems = items.filter(i => i.table_name === phase.key);
             if (phaseItems.length === 0) return null;
+            if (isMechanic && phase.key === 'pre_installation_checklists') return null;
             const isExpanded = expandedPhases[phase.key];
             const completedCount = phaseItems.filter(i => i.percentage === 100).length;
 
