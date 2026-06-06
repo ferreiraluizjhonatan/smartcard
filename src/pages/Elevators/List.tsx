@@ -334,7 +334,6 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjust
           <Search size={20} />
         </div>
       </div>
-      </div>
 
       {isOpen && (
         <div style={{
