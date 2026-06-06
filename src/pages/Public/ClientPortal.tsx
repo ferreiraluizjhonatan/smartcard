@@ -43,7 +43,7 @@ export default function ClientPortal() {
       
       setElevator(result.elevator);
       setMechanicNotes(result.elevator?.mechanic_notes || '');
-      setItems(result.items || []);
+      setItems(result.checklists || []);
       if (result.phase_table) {
         setPhaseTable(result.phase_table);
       }
