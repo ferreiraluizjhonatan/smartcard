@@ -261,13 +261,14 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjust
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className={`neon-card ${colorClass}`} style={{ padding: '24px', gridColumn: isOpen ? '1 / -1' : 'auto', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', height: isOpen ? 'auto' : '100%' }}>
-      <div 
-        style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', flex: 1 }} 
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
-          <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
+    <>
+      <div className={`neon-card ${colorClass}`} style={{ padding: '24px', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div 
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', flex: 1 }} 
+          onClick={() => setIsOpen(true)}
+        >
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
             <Building2 size={18} color={accentColor} /> {group.title}
           </div>
           
@@ -327,22 +328,64 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjust
                </button>
              )}
           </div>
+          </div>
         </div>
         <div style={{ color: accentColor, background: 'rgba(255, 255, 255, 0.05)', padding: '8px', borderRadius: '50%' }}>
-          {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          <Search size={20} />
         </div>
+      </div>
       </div>
 
       {isOpen && (
-        <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
-            {group.items.map((el: any) => (
-              <ElevatorCard key={el.id} elevator={el} onEdit={onEdit} onStartAjuste={onStartAjuste} realizedPct={progressMap[el.id] || 0} />
-            ))}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 9999,
+          display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+          padding: '40px 20px',
+          overflowY: 'auto'
+        }} onClick={() => setIsOpen(false)}>
+          <div 
+            className={`neon-card ${colorClass}`} 
+            style={{ 
+              width: '100%', maxWidth: '1400px', 
+              padding: '40px', 
+              background: '#0f172a',
+              position: 'relative',
+              animation: 'fadeInUp 0.3s ease-out'
+            }} 
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setIsOpen(false)}
+              style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
+              onMouseOver={e => e.currentTarget.style.background = 'rgba(255,59,48,0.2)'}
+              onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+            >
+              <XCircle size={28} />
+            </button>
+            
+            <div style={{ marginBottom: '40px', paddingBottom: '24px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <h2 style={{ margin: '0 0 12px 0', color: accentColor, display: 'flex', alignItems: 'center', gap: '12px', fontSize: '2.2rem' }}>
+                <Building2 size={36} /> {group.title}
+              </h2>
+              <div style={{ display: 'flex', gap: '16px', color: 'var(--text-secondary)', fontSize: '1.1rem' }}>
+                <span>{group.address}</span>
+                <span>•</span>
+                <span>Contrato: <strong style={{color: '#fff'}}>{group.contract}</strong></span>
+              </div>
+            </div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
+              {group.items.map((el: any) => (
+                <ElevatorCard key={el.id} elevator={el} onEdit={onEdit} onStartAjuste={onStartAjuste} realizedPct={progressMap[el.id] || 0} />
+              ))}
+            </div>
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 
