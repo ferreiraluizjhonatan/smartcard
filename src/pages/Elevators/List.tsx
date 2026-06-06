@@ -748,15 +748,26 @@ export default function ElevatorsList() {
                 data_prevista_chegada.setDate(data_prevista_chegada.getDate() + 7);
             }
             
+            let final_expedicao = data_prevista_expedicao;
+            let final_chegada = data_prevista_chegada;
+            
             if (explicitPrevMontagem) {
                 data_prevista_montagem = explicitPrevMontagem;
-            } else if (data_prevista_chegada) {
-                data_prevista_montagem = new Date(data_prevista_chegada);
+                if (!final_chegada) {
+                    final_chegada = new Date(explicitPrevMontagem);
+                    final_chegada.setDate(final_chegada.getDate() - 3);
+                }
+                if (!final_expedicao) {
+                    final_expedicao = new Date(final_chegada);
+                    final_expedicao.setDate(final_expedicao.getDate() - 7);
+                }
+            } else if (final_chegada) {
+                data_prevista_montagem = new Date(final_chegada);
                 data_prevista_montagem.setDate(data_prevista_montagem.getDate() + 3);
             }
             
-            const expStr = data_prevista_expedicao ? data_prevista_expedicao.toISOString().split('T')[0] : null;
-            const cheStr = data_prevista_chegada ? data_prevista_chegada.toISOString().split('T')[0] : null;
+            const expStr = final_expedicao ? final_expedicao.toISOString().split('T')[0] : null;
+            const cheStr = final_chegada ? final_chegada.toISOString().split('T')[0] : null;
             const monStr = data_prevista_montagem ? data_prevista_montagem.toISOString().split('T')[0] : null;
 
             const rawFase = idxFase !== -1 ? String(cols[idxFase] || '').trim().toLowerCase() : '';
