@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 export default function ClientPortal() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const isMechanic = searchParams.get('role') === 'mechanic';
   const [elevator, setElevator] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [phaseTable, setPhaseTable] = useState<string>('pre_installation_checklists');
@@ -126,6 +128,35 @@ export default function ClientPortal() {
     } finally {
       setUploadingItemId(null);
       if (e.target) e.target.value = ''; // Reset input
+    }
+  };
+
+  const handleUpdateProgress = async (itemId: string, tableName: string, newPercentage: number, notes?: string) => {
+    // Optimistic UI Update
+    setItems(items.map(it => {
+      if (it.id === itemId) {
+        return { ...it, percentage: newPercentage, notes: notes !== undefined ? notes : it.notes };
+      }
+      return it;
+    }));
+
+    try {
+      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'update_progress',
+          payload: {
+            phase_table: tableName,
+            item_id: itemId,
+            percentage: newPercentage,
+            notes: notes
+          }
+        }
+      });
+
+      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+    } catch (err) {
+      console.error("Failed to update progress", err);
+      // Revert on error could be implemented here if needed
     }
   };
 
@@ -317,6 +348,53 @@ export default function ClientPortal() {
                                <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploadingItemId === item.id} onChange={(e) => handleUploadPhoto(e, item.id, item.table_name)} />
                             </label>
                           </div>
+                          
+                          {/* Mechanic Controls */}
+                          {isMechanic && (
+                            <div style={{ width: '100%', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                              <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginRight: '8px' }}>Progresso:</span>
+                                {[0, 25, 50, 75, 100].map(pct => (
+                                  <button
+                                    key={pct}
+                                    onClick={() => handleUpdateProgress(item.id, item.table_name, pct)}
+                                    style={{
+                                      padding: '6px 12px',
+                                      borderRadius: '4px',
+                                      border: `1px solid ${item.percentage === pct ? 'var(--accent-cyan)' : 'rgba(255,255,255,0.2)'}`,
+                                      background: item.percentage === pct ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+                                      color: item.percentage === pct ? 'var(--accent-cyan)' : 'var(--text-secondary)',
+                                      cursor: 'pointer',
+                                      fontWeight: item.percentage === pct ? 'bold' : 'normal',
+                                      transition: 'all 0.2s'
+                                    }}
+                                  >
+                                    {pct}%
+                                  </button>
+                                ))}
+                              </div>
+                              <textarea
+                                value={item.notes || ''}
+                                onChange={(e) => {
+                                  // Optimistic local update only for typing smoothness
+                                  setItems(items.map(it => it.id === item.id ? { ...it, notes: e.target.value } : it));
+                                }}
+                                onBlur={(e) => handleUpdateProgress(item.id, item.table_name, item.percentage || 0, e.target.value)}
+                                placeholder="Adicionar anotação ou lembrete do dia..."
+                                style={{
+                                  width: '100%',
+                                  background: 'rgba(0,0,0,0.2)',
+                                  border: '1px solid rgba(255,255,255,0.1)',
+                                  borderRadius: '4px',
+                                  padding: '8px 12px',
+                                  color: 'white',
+                                  resize: 'vertical',
+                                  minHeight: '60px',
+                                  fontSize: '0.9rem'
+                                }}
+                              />
+                            </div>
+                          )}
                         </div>
                       );
                     })}

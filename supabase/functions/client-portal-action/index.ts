@@ -72,6 +72,28 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    if (action === 'update_progress') {
+      const { phase_table, item_id, percentage, notes } = payload;
+      
+      if (!phase_table || !item_id || percentage === undefined) {
+        return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const updateData: any = { percentage, updated_at: new Date().toISOString() };
+      if (notes !== undefined) {
+        updateData.notes = notes;
+      }
+
+      const { error: updateError } = await supabase
+        .from(phase_table)
+        .update(updateData)
+        .eq('id', item_id);
+
+      if (updateError) throw updateError;
+
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid action" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {

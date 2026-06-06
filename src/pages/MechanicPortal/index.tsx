@@ -94,7 +94,7 @@ export default function MechanicPortal() {
                 cursor: 'pointer',
                 transition: 'all 0.3s'
               }}
-              onClick={() => navigate(`/tracking/${elev.id}`)}
+              onClick={() => navigate(`/tracking/${elev.id}?role=mechanic`)}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
