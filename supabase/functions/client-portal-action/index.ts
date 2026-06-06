@@ -94,6 +94,23 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    if (action === 'save_mechanic_notes') {
+      const { elevator_id, mechanic_notes } = payload;
+      
+      if (!elevator_id) {
+        return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const { error: updateError } = await supabase
+        .from('elevators')
+        .update({ mechanic_notes })
+        .eq('id', elevator_id);
+
+      if (updateError) throw updateError;
+
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid action" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {

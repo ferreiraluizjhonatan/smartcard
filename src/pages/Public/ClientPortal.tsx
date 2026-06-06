@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2 } from 'lucide-react';
+import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 export default function ClientPortal() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const isMechanic = searchParams.get('role') === 'mechanic';
+  const [isMechanic, setIsMechanic] = useState(searchParams.get('role') === 'mechanic');
   const [elevator, setElevator] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
   const [phaseTable, setPhaseTable] = useState<string>('pre_installation_checklists');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [sendingMsg, setSendingMsg] = useState(false);
+  const [mechanicNotes, setMechanicNotes] = useState('');
+  const [savingNotes, setSavingNotes] = useState(false);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({
     'pre_installation_checklists': true,
@@ -40,7 +42,8 @@ export default function ClientPortal() {
       if (result.error) throw new Error(result.error);
       
       setElevator(result.elevator);
-      setItems(result.checklists);
+      setMechanicNotes(result.elevator?.mechanic_notes || '');
+      setItems(result.items || []);
       if (result.phase_table) {
         setPhaseTable(result.phase_table);
       }
@@ -157,6 +160,28 @@ export default function ClientPortal() {
     } catch (err) {
       console.error("Failed to update progress", err);
       // Revert on error could be implemented here if needed
+    }
+  };
+
+  const handleUpdateMechanicNotes = async () => {
+    setSavingNotes(true);
+    try {
+      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'save_mechanic_notes',
+          payload: {
+            elevator_id: id,
+            mechanic_notes: mechanicNotes
+          }
+        }
+      });
+      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+      alert('Anotações salvas com sucesso!');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao salvar anotações.');
+    } finally {
+      setSavingNotes(false);
     }
   };
 
@@ -434,6 +459,49 @@ export default function ClientPortal() {
            </button>
         </div>
       </div>
+      
+      {/* Global Mechanic Notes Panel */}
+      {isMechanic && (
+        <div className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px', border: '1px solid var(--accent-purple)' }}>
+          <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-purple)' }}>
+            <FileText size={20} /> Tarefas e Lembretes da Obra
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
+            Bloco de notas geral para o seu controle. O que você anotar aqui ficará salvo para você e o supervisor lerem.
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+             <textarea
+               value={mechanicNotes}
+               onChange={(e) => setMechanicNotes(e.target.value)}
+               className="input-field"
+               rows={6}
+               placeholder="Ex: Falta trazer a furadeira especial amanhã. Verificar alinhamento da guia 3..."
+               style={{ resize: 'vertical', background: 'rgba(0,0,0,0.3)' }}
+             />
+             <button 
+               onClick={handleUpdateMechanicNotes} 
+               disabled={savingNotes}
+               className="btn-glow border-purple" 
+               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: savingNotes ? 0.5 : 1 }}
+             >
+               {savingNotes ? 'Salvando...' : 'Salvar Anotações'}
+             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Footer Mechanic Toggle */}
+      {!isMechanic && (
+        <div style={{ textAlign: 'center', marginTop: '40px', marginBottom: '20px' }}>
+          <button 
+            onClick={() => setIsMechanic(true)}
+            style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.2)', cursor: 'pointer', fontSize: '0.8rem' }}
+          >
+            🛠️ Acesso Técnico
+          </button>
+        </div>
+      )}
       
       {/* Print styles inserted directly to hide elements when generating PDF */}
       <style>
