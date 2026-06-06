@@ -251,7 +251,7 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
             onMouseOver={e => e.currentTarget.style.color = '#60a5fa'}
             onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
             title="Testar Robô (Telegram)"
-            onClick={handleTestTelegram}
+            onClick={(e) => { e.stopPropagation(); handleTestTelegram(); }}
           >
             <Send size={14} /> Testar
           </button>
@@ -260,7 +260,7 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
             style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '4px', transition: 'color 0.2s' }}
             onMouseOver={e => e.currentTarget.style.color = '#fff'}
             onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
-            onClick={() => onEdit(elevator)}
+            onClick={(e) => { e.stopPropagation(); onEdit(elevator); }}
           >
             <Edit size={14} /> Editar
           </button>
@@ -269,6 +269,7 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
             style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '4px', transition: 'color 0.2s' }}
             onMouseOver={e => e.currentTarget.style.color = '#ef4444'}
             onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
+            onClick={(e) => { e.stopPropagation(); /* TODO: Implement delete logic */ }}
           >
             <Trash2 size={14} /> Excluir
           </button>
@@ -1011,7 +1012,7 @@ export default function ElevatorsList() {
       {editModal && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0,0,0,0.8)', zIndex: 1000,
+          background: 'rgba(0,0,0,0.8)', zIndex: 10000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
           <div className="neon-card border-cyan" style={{ width: '500px', padding: '24px', maxHeight: '90vh', overflowY: 'auto' }}>
