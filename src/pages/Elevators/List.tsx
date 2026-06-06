@@ -244,12 +244,24 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
             Acompanhar Fases &gt;
           </button>
         )}
-        <button className="btn btn-secondary" style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)' }} onClick={handleTestTelegram}>
+        <button className="btn btn-secondary" 
+          style={{ width: '100%', padding: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: '#60a5fa', background: 'rgba(96, 165, 250, 0.1)', borderColor: 'rgba(96, 165, 250, 0.3)', transition: 'all 0.2s' }} 
+          onMouseOver={e => {e.currentTarget.style.background = 'rgba(96, 165, 250, 0.2)'; e.currentTarget.style.borderColor = 'rgba(96, 165, 250, 0.5)'}}
+          onMouseOut={e => {e.currentTarget.style.background = 'rgba(96, 165, 250, 0.1)'; e.currentTarget.style.borderColor = 'rgba(96, 165, 250, 0.3)'}}
+          onClick={handleTestTelegram}>
           <Send size={16} /> Testar Robô (Telegram)
         </button>
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button className="btn btn-secondary" style={{ flex: 1 }} onClick={() => onEdit(elevator)}>Editar</button>
-          <button className="btn btn-danger" style={{ flex: 1, background: 'var(--accent-red)', color: 'white', border: 'none' }}>Excluir</button>
+          <button className="btn" 
+            style={{ flex: 1, background: 'rgba(255, 255, 255, 0.05)', color: '#fff', border: '1px solid rgba(255, 255, 255, 0.1)', transition: 'all 0.2s' }}
+            onMouseOver={e => {e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)'}}
+            onMouseOut={e => {e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)'}}
+            onClick={() => onEdit(elevator)}>Editar</button>
+          <button className="btn" 
+            style={{ flex: 1, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', transition: 'all 0.2s' }}
+            onMouseOver={e => {e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.5)'}}
+            onMouseOut={e => {e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.3)'}}
+            >Excluir</button>
         </div>
       </div>
 
