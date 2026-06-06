@@ -5,7 +5,7 @@ import { Plus, Building2, Users, Wrench, Bell, CheckCircle2, TrendingUp, Edit, T
 import * as XLSX from 'xlsx';
 
 // Subcomponent for each Elevator Card
-const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { elevator: any, onEdit: (el: any) => void, onStartAjuste?: (el: any) => void, realizedPct?: number }) => {
+const ElevatorCard = ({ elevator, onEdit, onDelete, onStartAjuste, realizedPct = 0 }: { elevator: any, onEdit: (el: any) => void, onDelete: (el: any) => void, onStartAjuste?: (el: any) => void, realizedPct?: number }) => {
   const navigate = useNavigate();
   const [realizado, setRealizado] = useState(realizedPct);
 
@@ -269,7 +269,7 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
             style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', padding: '4px', transition: 'color 0.2s' }}
             onMouseOver={e => e.currentTarget.style.color = '#ef4444'}
             onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'}
-            onClick={(e) => { e.stopPropagation(); /* TODO: Implement delete logic */ }}
+            onClick={(e) => { e.stopPropagation(); onDelete(elevator); }}
           >
             <Trash2 size={14} /> Excluir
           </button>
@@ -280,7 +280,7 @@ const ElevatorCard = ({ elevator, onEdit, onStartAjuste, realizedPct = 0 }: { el
   );
 };
 
-const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjuste, progressMap }: { group: any, colorClass: string, accentColor: string, onEdit: (el: any) => void, onStartAjuste?: (el: any) => void, progressMap: Record<string, number> }) => {
+const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onDelete, onStartAjuste, progressMap }: { group: any, colorClass: string, accentColor: string, onEdit: (el: any) => void, onDelete: (el: any) => void, onStartAjuste?: (el: any) => void, progressMap: Record<string, number> }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -401,7 +401,7 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onStartAjust
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))', gap: '24px' }}>
               {group.items.map((el: any) => (
-                <ElevatorCard key={el.id} elevator={el} onEdit={onEdit} onStartAjuste={onStartAjuste} realizedPct={progressMap[el.id] || 0} />
+                <ElevatorCard key={el.id} elevator={el} onEdit={onEdit} onDelete={onDelete} onStartAjuste={onStartAjuste} realizedPct={progressMap[el.id] || 0} />
               ))}
             </div>
           </div>
@@ -565,8 +565,10 @@ export default function ElevatorsList() {
     if(user.user) {
        const { data: profile } = await supabase.from('user_profiles').select('company_id').eq('id', user.user.id).single();
        if(profile) {
+           const randId = Math.floor(Math.random() * 1000);
            const { error } = await supabase.from('elevators').insert({
-               name: 'Elevador Obra #' + Math.floor(Math.random() * 1000),
+               name: 'Elevador Obra #' + randId,
+               project_name: 'Obra de Teste #' + randId,
                company_id: profile.company_id,
                status: 'pre_instalacao'
            });
@@ -575,6 +577,21 @@ export default function ElevatorsList() {
        }
     }
     setLoading(false);
+  };
+
+  const handleDelete = async (elevator: any) => {
+    if (confirm(`Tem certeza que deseja excluir "${elevator.name}"? Esta ação não pode ser desfeita.`)) {
+      setLoading(true);
+      const { error } = await supabase.from('elevators').delete().eq('id', elevator.id);
+      setLoading(false);
+      
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        alert('Obra excluída com sucesso.');
+        fetchElevators();
+      }
+    }
   };
 
   const handleStartAjuste = async (el: any) => {
@@ -997,7 +1014,7 @@ export default function ElevatorsList() {
           ];
           const style = styles[idx % styles.length];
           return (
-            <ProjectGroupCard key={idx} group={group} colorClass={style.border} accentColor={style.accent} onEdit={setEditModal} onStartAjuste={handleStartAjuste} progressMap={progressMap} />
+            <ProjectGroupCard key={idx} group={group} colorClass={style.border} accentColor={style.accent} onEdit={setEditModal} onDelete={handleDelete} onStartAjuste={handleStartAjuste} progressMap={progressMap} />
           );
         })}
       </div>

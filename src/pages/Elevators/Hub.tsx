@@ -95,106 +95,52 @@ export default function ElevatorHub() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                 <button 
-                   className="btn-glow border-cyan" 
-                   onClick={() => {
-                     const url = `${window.location.origin}/tracking/${id}`;
-                     navigator.clipboard.writeText(url);
-                     alert('Link Público do Cliente copiado para a área de transferência!');
-                   }}
-                   style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}
-                 >
-                   <LinkIcon size={14}/> Copiar Link do Cliente
-                 </button>
-              </div>
-              <div 
-                style={{ 
-                  display: 'flex', 
-                  gap: '16px', 
-                  background: 'rgba(255, 255, 255, 0.05)', 
-                  padding: '12px 16px', 
-                  borderRadius: '8px',
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '24px', alignItems: 'center', flex: 1, justifyContent: 'flex-end' }}>
+            
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+              <button 
+                className="btn-glow border-cyan" 
+                onClick={() => {
+                  const url = `${window.location.origin}/tracking/${id}`;
+                  navigator.clipboard.writeText(url);
+                  alert('Link Público do Cliente copiado para a área de transferência!');
                 }}
-                title="Insira os dados para gerar cronograma"
+                style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', height: 'fit-content', whiteSpace: 'nowrap' }}
               >
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Data de Início</label>
-                  <input 
-                    type="date" 
+                <LinkIcon size={16}/> Copiar Link do Cliente
+              </button>
+
+              <div className="input-group" style={{ marginBottom: 0, minWidth: '250px', flex: 1 }}>
+                 <label style={{ fontSize: '0.85rem', color: 'var(--accent-yellow)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                   <AlertTriangle size={14} /> Aviso Cliente (Atrasos/Paralisações)
+                 </label>
+                 <input 
+                    type="text"
                     className="input-field" 
-                    value={elevator?.start_date || ''} 
+                    value={elevator?.supervisor_notes || ''} 
+                    placeholder="Escreva um motivo de atraso..."
                     onChange={async (e) => {
                       const val = e.target.value;
-                      setElevator({...elevator, start_date: val});
-                      await supabase.from('elevators').update({ start_date: val }).eq('id', id);
+                      setElevator({...elevator, supervisor_notes: val});
+                      await supabase.from('elevators').update({ supervisor_notes: val }).eq('id', id);
                     }}
-                    style={{ background: 'rgba(0,0,0,0.5)', padding: '8px', border: 'none' }} 
-                  />
-                </div>
-
-                <div className="input-group" style={{ marginBottom: 0 }}>
-                  <label style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Prazo Final</label>
-                  <input 
-                    type="date" 
-                    className="input-field" 
-                    value={elevator?.expected_end_date || ''} 
-                    onChange={async (e) => {
-                      const val = e.target.value;
-                      setElevator({...elevator, expected_end_date: val});
-                      await supabase.from('elevators').update({ expected_end_date: val }).eq('id', id);
-                    }}
-                    style={{ background: 'rgba(0,0,0,0.5)', padding: '8px', border: 'none' }} 
-                  />
-                </div>
-              </div>
-
-              <div className="input-group" style={{ marginBottom: 0 }}>
-                <label style={{ fontSize: '0.8rem', whiteSpace: 'nowrap' }}>Conclusão Pré-Instalação</label>
-                <input 
-                  type="date" 
-                  className="input-field" 
-                  value={elevator?.pre_install_end_date || ''} 
-                  onChange={async (e) => {
-                    const val = e.target.value;
-                    setElevator({...elevator, pre_install_end_date: val});
-                    await supabase.from('elevators').update({ pre_install_end_date: val }).eq('id', id);
-                  }}
-                  style={{ background: 'rgba(0,0,0,0.5)', padding: '8px' }} 
-                />
+                    style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', width: '100%' }} 
+                 />
               </div>
             </div>
 
-            <div className="input-group" style={{ marginBottom: 0, flex: 1, maxWidth: '400px' }}>
-               <label style={{ fontSize: '0.8rem', color: 'var(--accent-yellow)' }}>Aviso para o Cliente (Explicar Atrasos/Paralisações)</label>
-               <textarea 
-                  className="input-field" 
-                  value={elevator?.supervisor_notes || ''} 
-                  placeholder="Escreva aqui se houver um motivo de atraso para a construtora ver no Link Mágico..."
-                  onChange={async (e) => {
-                    const val = e.target.value;
-                    setElevator({...elevator, supervisor_notes: val});
-                    await supabase.from('elevators').update({ supervisor_notes: val }).eq('id', id);
-                  }}
-                  style={{ background: 'rgba(0,0,0,0.5)', padding: '8px', height: '36px', minHeight: '36px' }} 
-               />
-            </div>
-
-            <div style={{ display: 'flex', gap: '24px', textAlign: 'center' }}>
-              <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--accent-cyan)', lineHeight: 1 }}>{stats.percentage}%</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Realizado</div>
+            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+              <div style={{ background: 'rgba(0, 255, 255, 0.05)', padding: '12px 20px', borderRadius: '12px', border: '1px solid rgba(0, 255, 255, 0.2)', textAlign: 'center', minWidth: '110px' }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--accent-cyan)', lineHeight: 1, marginBottom: '4px' }}>{stats.percentage}%</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', textTransform: 'uppercase', letterSpacing: '1px' }}>Realizado</div>
               </div>
-              <div>
-                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--accent-yellow)', lineHeight: 1 }}>{expected}%</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Esperado Linear</div>
+              <div style={{ background: 'rgba(255, 170, 0, 0.05)', padding: '12px 20px', borderRadius: '12px', border: '1px solid rgba(255, 170, 0, 0.2)', textAlign: 'center', minWidth: '110px' }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'var(--accent-yellow)', lineHeight: 1, marginBottom: '4px' }}>{expected}%</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-yellow)', textTransform: 'uppercase', letterSpacing: '1px' }}>Esperado</div>
               </div>
-              <div>
-                <div style={{ fontSize: '1.5rem', fontWeight: 'bold', lineHeight: 1, marginTop: '8px' }}>{decorridos}d</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Decorridos</div>
+              <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '12px 20px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', textAlign: 'center', minWidth: '110px' }}>
+                <div style={{ fontSize: '1.8rem', fontWeight: 'bold', color: 'white', lineHeight: 1, marginBottom: '4px' }}>{decorridos}d</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Decorridos</div>
               </div>
             </div>
           </div>
@@ -205,22 +151,72 @@ export default function ElevatorHub() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
         
         <div className="neon-card border-cyan" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }} onClick={() => navigate(`/elevators/${id}/checklist`)}>
-          <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Activity size={24} color="var(--accent-cyan)"/> Fases da Obra
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Concluídas:</p>
-          <div style={{ fontSize: '3rem', fontWeight: 'bold', lineHeight: 1, marginTop: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Activity size={24} color="var(--accent-cyan)"/> Fases da Obra
+            </h3>
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Pré-Instalação (Conclusão)</label>
+              <input 
+                type="date" 
+                value={elevator?.pre_install_end_date || ''} 
+                onChange={async (e) => {
+                  const val = e.target.value;
+                  setElevator({...elevator, pre_install_end_date: val});
+                  await supabase.from('elevators').update({ pre_install_end_date: val }).eq('id', id);
+                }}
+                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.85rem' }} 
+              />
+            </div>
+          </div>
+
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '8px', marginTop: 'auto' }}>Concluídas:</p>
+          <div style={{ fontSize: '3rem', fontWeight: 'bold', lineHeight: 1 }}>
             {stats.completed} <span style={{ fontSize: '1.5rem', color: 'var(--text-secondary)' }}>/ {stats.total}</span>
           </div>
         </div>
 
         <div className="neon-card border-purple" style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }} onClick={() => navigate(`/elevators/${id}/schedule`)}>
-          <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Calendar size={24} color="var(--accent-purple)"/> Cronograma (Gantt)
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Visualizar cascata de datas:</p>
-          <div style={{ fontSize: '1.2rem', color: 'var(--accent-purple)', marginTop: '24px' }}>
-             Ver Planejamento Temporal &gt;
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+            <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <Calendar size={24} color="var(--accent-purple)"/> Cronograma (Gantt)
+            </h3>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '12px', marginBottom: '16px' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Data de Início</label>
+              <input 
+                type="date" 
+                value={elevator?.start_date || ''} 
+                onChange={async (e) => {
+                  const val = e.target.value;
+                  setElevator({...elevator, start_date: val});
+                  await supabase.from('elevators').update({ start_date: val }).eq('id', id);
+                }}
+                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.85rem' }} 
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Prazo Final</label>
+              <input 
+                type="date" 
+                value={elevator?.expected_end_date || ''} 
+                onChange={async (e) => {
+                  const val = e.target.value;
+                  setElevator({...elevator, expected_end_date: val});
+                  await supabase.from('elevators').update({ expected_end_date: val }).eq('id', id);
+                }}
+                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', padding: '8px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: '0.85rem' }} 
+              />
+            </div>
+          </div>
+
+          <div style={{ fontSize: '1.1rem', color: 'var(--accent-purple)', marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '8px' }}>
+             Ver Planejamento Temporal <ArrowLeft size={16} style={{ transform: 'rotate(180deg)' }} />
           </div>
         </div>
 

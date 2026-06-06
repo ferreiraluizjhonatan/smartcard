@@ -47,11 +47,28 @@ export default function Checklist() {
     if (!elevator) return;
     
     // Optimistic UI update
-    setItems(items.map(i => i.id === itemId ? { ...i, [field]: value } : i));
+    const updatedItems = items.map(i => i.id === itemId ? { ...i, [field]: value } : i);
+    setItems(updatedItems);
     
     const tableName = getTableName(elevator.status);
     await supabase.from(tableName).update({ [field]: value }).eq('id', itemId);
     
+    // Auto-fill pre_install_end_date if overall reached 100%
+    if (elevator.status === 'pre_instalacao') {
+       let totalScore = 0;
+       updatedItems.forEach(item => {
+         const weight = getWeightForPreInstall(item.item_name);
+         totalScore += (item.percentage / 100) * weight;
+       });
+       const newOverall = Math.min(100, Math.round(totalScore));
+       
+       if (newOverall === 100 && !elevator.pre_install_end_date) {
+           const today = new Date().toISOString().split('T')[0];
+           await supabase.from('elevators').update({ pre_install_end_date: today }).eq('id', id);
+           setElevator((prev: any) => ({ ...prev, pre_install_end_date: today }));
+       }
+    }
+
     // Check if it moved automatically (only applies to pre_instalacao and montagem)
     if (field === 'percentage' && value === 100 && elevator.status !== 'ajuste') {
       const { data: el } = await supabase.from('elevators').select('status').eq('id', id).single();

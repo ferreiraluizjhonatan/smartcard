@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Wand2, Calendar as CalIcon, Save, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Wand2, Calendar as CalIcon, Save, RefreshCw, Printer } from 'lucide-react';
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -11,6 +11,11 @@ export default function Schedule() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  
+  // Signature States
+  const [engineerName, setEngineerName] = useState('');
+  const [engineerDoc, setEngineerDoc] = useState('');
+  const [companyName, setCompanyName] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -109,10 +114,44 @@ export default function Schedule() {
   if (loading) return <div style={{ padding: '24px' }}>Carregando Cronograma...</div>;
 
   const hasDates = items.some(i => i.planned_start_date || i.planned_end_date);
+  
+  const validItems = items.filter(i => i.planned_start_date && i.planned_end_date);
+  const minDateStr = validItems.length > 0 ? new Date(Math.min(...validItems.map(i => new Date(i.planned_start_date).getTime()))).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '---';
+  const maxDateStr = validItems.length > 0 ? new Date(Math.max(...validItems.map(i => new Date(i.planned_end_date).getTime()))).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '---';
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+    <div className="print-container">
+      <style>
+        {`
+          @media screen {
+            .print-only { display: none !important; }
+          }
+          @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            .print-container { padding: 0 !important; background: white !important; zoom: 0.9; }
+            .print-text { color: black !important; }
+            .print-border { border-bottom: 1px solid #ccc !important; }
+            .neon-card, .glass-panel { border: none !important; box-shadow: none !important; background: white !important; }
+            @page { size: landscape; margin: 8mm; }
+          }
+        `}
+      </style>
+      
+      {/* Print Header */}
+      <div className="print-only" style={{ marginBottom: '12px', textAlign: 'center' }}>
+        <h1 style={{ color: 'black', margin: '0 0 4px 0', fontSize: '20px' }}>Cronograma de Obras</h1>
+        <h2 style={{ color: '#444', margin: 0, fontSize: '16px' }}>Empreendimento: {elevator?.project_name || elevator?.name}</h2>
+        {elevator?.address && <p style={{ color: '#666', margin: '4px 0 0 0', fontSize: '12px' }}>{elevator.address}</p>}
+        {validItems.length > 0 && (
+          <p style={{ color: '#222', margin: '8px 0 0 0', fontSize: '14px', fontWeight: 'bold' }}>
+            Período da Obra: {minDateStr} a {maxDateStr}
+          </p>
+        )}
+      </div>
+
+      <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <button className="btn btn-secondary" onClick={() => navigate(`/elevators/${id}/hub`)} style={{ padding: '8px' }}>
             <ArrowLeft size={20} />
@@ -124,15 +163,46 @@ export default function Schedule() {
             <p style={{ color: 'var(--text-secondary)' }}>Planejamento de Cascata - Obra: {elevator?.name}</p>
           </div>
         </div>
-        <button 
-          className="btn-glow border-purple" 
-          onClick={generatePredictiveSchedule} 
-          disabled={generating}
-          style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {generating ? <RefreshCw className="spin" size={18} /> : <Wand2 size={18} />}
-          {hasDates ? 'Recalcular Automaticamente' : 'Gerar Cronograma Inteligente'}
-        </button>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {items.length > 0 && (
+            <button 
+              className="btn btn-secondary no-print" 
+              onClick={() => window.print()} 
+              style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Printer size={18} />
+              Imprimir / PDF
+            </button>
+          )}
+          <button 
+            className="btn-glow border-purple no-print" 
+            onClick={generatePredictiveSchedule} 
+            disabled={generating}
+            style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {generating ? <RefreshCw className="spin" size={18} /> : <Wand2 size={18} />}
+            {hasDates ? 'Recalcular' : 'Cronograma Inteligente'}
+          </button>
+        </div>
       </div>
+
+      {hasDates && (
+        <div className="no-print neon-card border-purple" style={{ marginBottom: '24px', padding: '16px' }}>
+          <h3 style={{ margin: '0 0 12px 0', fontSize: '1.1rem' }}>Assinatura Eletrônica (Sairá no PDF)</h3>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Engenheiro / Responsável</label>
+              <input type="text" className="input-field" value={engineerName} onChange={(e) => setEngineerName(e.target.value)} placeholder="Ex: Eng. João Silva" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Documento (CREA/CAU)</label>
+              <input type="text" className="input-field" value={engineerDoc} onChange={(e) => setEngineerDoc(e.target.value)} placeholder="Ex: CREA 123456-7" />
+            </div>
+            <div style={{ flex: 1 }}>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Empresa / Filial</label>
+              <input type="text" className="input-field" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Ex: Elevadores Smart LTDA" />
+            </div>
+          </div>
+        </div>
+      )}
 
       {!hasDates && (
         <div className="neon-card border-purple" style={{ textAlign: 'center', padding: '40px', marginBottom: '24px' }}>
@@ -146,47 +216,185 @@ export default function Schedule() {
 
       {items.length > 0 && (
         <div className="glass-panel" style={{ padding: '24px', display: 'grid', gap: '12px' }}>
-          {/* Header Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '16px', color: 'var(--text-secondary)', fontWeight: 'bold', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
-            <div>Fase da Obra</div>
-            <div>Início Previsto</div>
-            <div>Término Previsto</div>
-          </div>
-          
-          {items.map((item, index) => (
-            <div key={item.id} style={{ 
-              display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '16px', alignItems: 'center',
-              padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ 
-                  background: 'rgba(255,255,255,0.1)', width: '28px', height: '28px', 
-                  borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem'
-                }}>{index + 1}</span>
-                {item.item_name}
-              </div>
-              <div>
-                <input 
-                  type="date" 
-                  className="input-field" 
-                  style={{ padding: '8px' }}
-                  value={item.planned_start_date || ''}
-                  onChange={(e) => updateItemDate(item.id, 'planned_start_date', e.target.value)}
-                />
-              </div>
-              <div>
-                <input 
-                  type="date" 
-                  className="input-field" 
-                  style={{ padding: '8px' }}
-                  value={item.planned_end_date || ''}
-                  onChange={(e) => updateItemDate(item.id, 'planned_end_date', e.target.value)}
-                />
-              </div>
+          <div className="no-print">
+            {/* Header Row */}
+            <div style={{ display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '16px', color: 'var(--text-secondary)', fontWeight: 'bold', paddingBottom: '12px', borderBottom: '1px solid var(--border-color)' }}>
+              <div>Fase da Obra</div>
+              <div>Início Previsto</div>
+              <div>Término Previsto</div>
             </div>
-          ))}
+            
+            {items.map((item, index) => (
+              <div key={item.id} style={{ 
+                display: 'grid', gridTemplateColumns: '3fr 1fr 1fr', gap: '16px', alignItems: 'center',
+                padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '500' }}>
+                  <span style={{ 
+                    background: 'rgba(255,255,255,0.1)', width: '28px', height: '28px', 
+                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem'
+                  }}>{index + 1}</span>
+                  {item.item_name}
+                </div>
+                <div>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    style={{ padding: '8px' }}
+                    value={item.planned_start_date || ''}
+                    onChange={(e) => updateItemDate(item.id, 'planned_start_date', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <input 
+                    type="date" 
+                    className="input-field" 
+                    style={{ padding: '8px' }}
+                    value={item.planned_end_date || ''}
+                    onChange={(e) => updateItemDate(item.id, 'planned_end_date', e.target.value)}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Graphical Gantt Chart for Print */}
+          {(() => {
+            const validItems = items.filter(i => i.planned_start_date && i.planned_end_date);
+            if (validItems.length === 0) return null;
+            
+            const minDate = new Date(Math.min(...validItems.map(i => new Date(i.planned_start_date).getTime())));
+            const maxDate = new Date(Math.max(...validItems.map(i => new Date(i.planned_end_date).getTime())));
+            const totalDuration = Math.max(1, maxDate.getTime() - minDate.getTime());
+
+            return (
+              <div className="print-only" style={{ marginTop: '0', width: '100%', position: 'relative' }}>
+                {(() => {
+                  const startMonth = new Date(minDate.getFullYear(), minDate.getMonth(), 1);
+                  const endMonth = new Date(maxDate.getFullYear(), maxDate.getMonth() + 1, 0);
+                  const months = [];
+                  let curr = new Date(startMonth);
+                  while (curr <= endMonth) {
+                    months.push(new Date(curr));
+                    curr.setMonth(curr.getMonth() + 1);
+                  }
+
+                  return (
+                    <div style={{ display: 'flex', borderBottom: '2px solid black', marginBottom: '8px', paddingBottom: '4px', height: '24px' }}>
+                      <div style={{ width: '25%', fontWeight: 'bold', fontSize: '11px', display: 'flex', alignItems: 'flex-end' }}>Fases da Obra</div>
+                      <div style={{ width: '75%', position: 'relative' }}>
+                        {months.map((m, i) => {
+                           const mStart = Math.max(minDate.getTime(), m.getTime());
+                           const mEndRaw = new Date(m.getFullYear(), m.getMonth() + 1, 0, 23, 59, 59).getTime();
+                           const mEnd = Math.min(maxDate.getTime(), mEndRaw);
+                           if (mStart > mEnd && i !== 0 && i !== months.length - 1) return null;
+                           const lPct = Math.max(0, ((mStart - minDate.getTime()) / totalDuration) * 100);
+                           let wPct = ((mEnd - mStart) / totalDuration) * 100;
+                           if (wPct < 0) wPct = 0;
+                           return (
+                             <div key={i} style={{ 
+                               position: 'absolute', left: `${lPct}%`, width: `${wPct}%`, 
+                               borderLeft: '2px solid #888', paddingLeft: '4px', fontSize: '10px', 
+                               fontWeight: 'bold', color: '#555', height: '100%', display: 'flex', alignItems: 'flex-end' 
+                             }}>
+                               {m.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }).toUpperCase()}
+                             </div>
+                           );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })()}
+                
+                <div style={{ position: 'relative', width: '100%' }}>
+                  {/* Grid Lines Layer */}
+                  {(() => {
+                    const weeks = [];
+                    let currWeek = new Date(minDate);
+                    currWeek.setHours(0,0,0,0);
+                    const day = currWeek.getDay();
+                    currWeek.setDate(currWeek.getDate() - day + (day === 0 ? -6 : 1)); // Align to nearest Monday
+                    
+                    while (currWeek.getTime() <= maxDate.getTime()) {
+                      if (currWeek.getTime() > minDate.getTime() && currWeek.getTime() < maxDate.getTime()) {
+                        weeks.push(currWeek.getTime());
+                      }
+                      currWeek.setDate(currWeek.getDate() + 7);
+                    }
+
+                    return (
+                      <div style={{ position: 'absolute', top: 0, bottom: 0, left: '25%', width: '75%', background: '#f9f9f9', borderLeft: '1px solid #ccc', borderRight: '1px solid #ccc', zIndex: 0 }}>
+                        {weeks.map((w, i) => {
+                           const pct = ((w - minDate.getTime()) / totalDuration) * 100;
+                           return <div key={`w-${i}`} style={{ position: 'absolute', left: `${pct}%`, top: 0, bottom: 0, borderLeft: '2px dashed #9ca3af' }} />
+                        })}
+                      </div>
+                    );
+                  })()}
+
+                  {/* Rows */}
+                  {validItems.map((item, index) => {
+                     const start = new Date(item.planned_start_date).getTime();
+                     const end = new Date(item.planned_end_date).getTime();
+                     const leftPct = Math.max(0, ((start - minDate.getTime()) / totalDuration) * 100);
+                     const widthPct = Math.max(0.5, ((end - start) / totalDuration) * 100);
+                     const days = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)));
+
+                     return (
+                       <div key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1px', height: '18px', pageBreakInside: 'avoid', position: 'relative', zIndex: 1 }}>
+                         <div style={{ width: '25%', fontWeight: 'bold', fontSize: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '8px', color: 'black', background: 'white' }}>
+                           {index + 1}. {item.item_name}
+                         </div>
+                         <div style={{ width: '75%', position: 'relative', height: '100%' }}>
+                           {/* Waterfall Bar */}
+                           <div style={{ 
+                             position: 'absolute', 
+                             left: `${leftPct}%`, 
+                             width: `${widthPct}%`, 
+                             height: '100%', 
+                             background: '#d1d5db', 
+                             border: '1px solid #9ca3af',
+                             borderRadius: '4px',
+                             zIndex: 1,
+                             display: 'flex',
+                             alignItems: 'center',
+                             justifyContent: 'center',
+                             color: 'black',
+                             fontWeight: 'bold',
+                             fontSize: '10px',
+                             whiteSpace: 'nowrap'
+                           }}>
+                              {days} {days === 1 ? 'dia' : 'dias'}
+                           </div>
+                         </div>
+                       </div>
+                     );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
+
+      {/* Signature Block for Print */}
+      {(engineerName || engineerDoc || companyName) && (
+        <div className="print-only" style={{ marginTop: '16px', textAlign: 'center', pageBreakInside: 'avoid', paddingBottom: '10px' }}>
+          <div style={{ width: '300px', borderTop: '1px solid black', margin: '0 auto', paddingTop: '4px' }}>
+            {engineerName && <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: 'black', fontSize: '14px' }}>{engineerName}</p>}
+            {engineerDoc && <p style={{ margin: '0 0 4px 0', color: '#444', fontSize: '12px' }}>{engineerDoc}</p>}
+            {companyName && <p style={{ margin: '0 0 4px 0', color: '#444', fontSize: '12px' }}>{companyName}</p>}
+          </div>
+          <p style={{ margin: '16px 0 0 0', color: '#666', fontSize: '10px' }}>
+             Documento gerado eletronicamente em {new Date().toLocaleDateString('pt-BR')}
+          </p>
+        </div>
+      )}
+
+      {/* Official Page Footer */}
+      <div className="print-only" style={{ position: 'fixed', bottom: 0, left: 0, width: '100%', borderTop: '1px solid black', paddingTop: '6px', paddingBottom: '10px', textAlign: 'center', fontSize: '11px', color: '#0056b3', background: 'white', zIndex: 100 }}>
+        Smart Card - Gestão Inteligente de Instalação de Elevadores
+      </div>
     </div>
   );
 }
