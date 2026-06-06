@@ -649,7 +649,12 @@ export default function ElevatorsList() {
         const idxPrevMontagem = findCol(['cc+cm', 'cc + cm', 'previsao montagem', 'previsão montagem', 'prev montagem', 'previsao de montagem']);
         const idxCC = findColExact(['cc', 'cabina', 'cc ']); // exact to avoid matching cc+cm
         const idxCM = findColExact(['cm', 'contramarco', 'contra marco', 'cm ']);
-        const idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast', 'expedid. prevista', 'expedid prevista', 'exped. prevista']);
+        
+        let idxExpedicao = findCol(['expedid. prevista', 'exped. prevista', 'expedid prevista', 'expedicao prevista', 'expedição prevista']);
+        if (idxExpedicao === -1) {
+            idxExpedicao = findCol(['expedição', 'expedicao', 'semana', 'forecast']);
+        }
+        
         const idxFase = findCol(['fase', 'status', 'etapa', 'fase inst.']);
 
         const parseAnyDate = (val: any) => {
