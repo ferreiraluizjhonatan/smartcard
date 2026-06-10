@@ -203,7 +203,8 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
         empresasFound: empCount,
         tecnicosFound: tecCount,
         duplicates: dupCount,
-        errors: errCount
+        errors: errCount,
+        errorDetails: []
       });
       setStage('preview');
 
@@ -222,6 +223,7 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
     let atualizados = 0;
     let ignorados = 0;
     let erros = 0;
+    const executionErrors: string[] = [];
 
     // Cache CNPJ -> ID mapping to link technicians
     const empresaIdMap: Record<string, string> = {};
@@ -269,8 +271,9 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
           if (data) empresaIdMap[cnpj] = data.id;
           empOk++;
         }
-      } catch (err) {
+      } catch (err: any) {
         erros++;
+        executionErrors.push(`Erro Empresa ${cnpj}: ${err.message}`);
       }
     }
 
@@ -500,12 +503,21 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
                     <span style={{ color: 'var(--accent-yellow)' }}>Registros Ignorados</span>
                     <span style={{ fontWeight: 'bold' }}>{report.ignorados}</span>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '8px' }}>
-                    <span style={{ color: 'var(--accent-red)' }}>Erros Lógicos</span>
-                    <span style={{ fontWeight: 'bold' }}>{report.erros}</span>
-                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>Erros Lógicos</span>
+                  <span style={{ fontWeight: 'bold', color: stats.errors > 0 ? 'var(--accent-red)' : '#fff' }}>{stats.errors}</span>
                 </div>
               </div>
+              
+              {stats.errorDetails && stats.errorDetails.length > 0 && (
+                <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+                  <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-red)', fontSize: '0.9rem' }}>Detalhes dos Erros:</h4>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--accent-red)', fontSize: '0.85rem' }}>
+                    {stats.errorDetails.map((err: string, i: number) => <li key={i}>{err}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
 
               <button onClick={handleClose} className="btn btn-primary" style={{ width: '100%' }}>
                 Finalizar e Voltar para Lista
