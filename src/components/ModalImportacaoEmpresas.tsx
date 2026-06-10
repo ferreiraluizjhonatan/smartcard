@@ -334,8 +334,9 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
         const { error } = await supabase.from('tecnicos_empresas').insert(chunk);
         if (error) throw error;
         tecOk += chunk.length;
-      } catch (err) {
+      } catch (err: any) {
         erros += chunk.length;
+        executionErrors.push(`Erro Técnicos: ${err.message}`);
       }
     }
 
