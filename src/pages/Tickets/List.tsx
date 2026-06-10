@@ -135,7 +135,7 @@ export default function TicketsList() {
                   <h3 style={{ margin: '0 0 8px 0' }}>{selectedTicket.title}</h3>
                   <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Obra: {selectedTicket.elevators?.name}</p>
                 </div>
-                {selectedTicket.status === 'aberto' && (
+                {selectedTicket.status !== 'fechado' && (
                   <button className="btn-glow border-green" onClick={handleCloseTicket} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
                     <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '4px' }}/> Resolver / Fechar
                   </button>
