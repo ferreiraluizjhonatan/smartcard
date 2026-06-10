@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Activity, Calendar, Flag, Clock, BrainCircuit, CalendarDays } from 'lucide-react';
+import { Activity, Calendar, Flag, Clock, BrainCircuit, CalendarDays, AlertTriangle } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 export default function ClientWeeklyReport() {
@@ -104,6 +104,26 @@ export default function ClientWeeklyReport() {
           <CalendarDays size={20} />
           Gerar Cronograma Inteligente
         </button>
+
+        {/* Aviso Cliente */}
+        {elevator.supervisor_notes && (
+          <div style={{
+            background: 'rgba(245, 158, 11, 0.1)',
+            border: '1px solid rgba(245, 158, 11, 0.3)',
+            borderRadius: '8px',
+            padding: '16px',
+            color: '#f59e0b',
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '12px'
+          }}>
+            <AlertTriangle size={20} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div>
+              <h4 style={{ margin: '0 0 4px 0', fontSize: '1rem', fontWeight: 'bold' }}>Aviso ao Cliente</h4>
+              <p style={{ margin: 0, fontSize: '0.9rem', lineHeight: '1.5', color: '#fcd34d' }}>{elevator.supervisor_notes}</p>
+            </div>
+          </div>
+        )}
 
         {/* Cards de Avanço e Fases */}
         <div style={{ 
