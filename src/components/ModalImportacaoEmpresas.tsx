@@ -57,7 +57,7 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
     nome_tecnico: ['nome', 'técnico', 'tecnico', 'funcionário', 'funcionario', 'colaborador'],
     matricula: ['matrícula', 'matricula', 'registro', 'código', 'codigo'],
     rg: ['rg', 'identidade'],
-    cpf: ['cpf'],
+    cpf: ['cpf', 'c.p.f.', 'c.p.f', 'cpf.'],
     data_nascimento: ['nascimento', 'dt de nascimento', 'data de nascimento', 'nasc', 'dt nasc', 'dt. nascimento'],
     data_admissao: ['admissão', 'admissao', 'dt admissao', 'data de admissão', 'admitido', 'dt. admissão', 'dt. admissao'],
     funcao: ['função', 'funcao', 'cargo'],
@@ -67,13 +67,17 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
   const parseDateString = (dStr: any) => {
     if (!dStr) return null;
     const str = String(dStr).trim();
-    if (str.includes('-') && str.length === 10) return str;
+    if (str.includes('-') && str.length >= 10) return str.substring(0, 10);
     const parts = str.split('/');
     if (parts.length === 3) {
-      // Assuming DD/MM/YYYY
       let year = parts[2];
-      if (year.length === 2) year = `19${year}`; // Naive assumption for Excel 2-digit years
+      if (year.length === 2) year = `20${year}`; 
       return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    const num = Number(str);
+    if (!isNaN(num) && num > 10000) {
+      const date = new Date(Math.round((num - 25569) * 86400 * 1000));
+      return date.toISOString().split('T')[0];
     }
     return null;
   };
