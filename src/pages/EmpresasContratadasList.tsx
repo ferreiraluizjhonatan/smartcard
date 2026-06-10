@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building, Plus, Search, Filter, Users, UploadCloud } from 'lucide-react';
+import { Building, Plus, Search, Filter, Users, UploadCloud, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ModalNovaEmpresa } from '../components/ModalNovaEmpresa';
 import { ModalImportacaoEmpresas } from '../components/ModalImportacaoEmpresas';
+import { ModalHistoricoImportacoes } from '../components/ModalHistoricoImportacoes';
 
 export function EmpresasContratadasList() {
   const [empresas, setEmpresas] = useState<any[]>([]);
@@ -14,6 +15,7 @@ export function EmpresasContratadasList() {
   const [filiais, setFiliais] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalImportOpen, setIsModalImportOpen] = useState(false);
+  const [isModalHistoryOpen, setIsModalHistoryOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [canRegisterUsers, setCanRegisterUsers] = useState(false);
   const navigate = useNavigate();
@@ -74,9 +76,14 @@ export function EmpresasContratadasList() {
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           {canImport && (
-            <button onClick={() => setIsModalImportOpen(true)} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <UploadCloud size={18} /> Importar Planilha
-            </button>
+            <>
+              <button onClick={() => setIsModalHistoryOpen(true)} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Clock size={18} /> Histórico
+              </button>
+              <button onClick={() => setIsModalImportOpen(true)} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <UploadCloud size={18} /> Importar Planilha
+              </button>
+            </>
           )}
           <button onClick={() => setIsModalOpen(true)} className="btn-glow" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={18} /> Nova Empresa
@@ -193,6 +200,10 @@ export function EmpresasContratadasList() {
         onClose={() => setIsModalImportOpen(false)}
         onSuccess={fetchEmpresas}
       />
+
+      {isModalHistoryOpen && (
+        <ModalHistoricoImportacoes onClose={() => setIsModalHistoryOpen(false)} />
+      )}
     </div>
   );
 }
