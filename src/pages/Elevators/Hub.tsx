@@ -59,7 +59,7 @@ export default function ElevatorHub() {
          
       if (lastLog) {
          setLastUpdate(lastLog.created_at);
-         setLastUpdateUser(lastLog.user_profiles?.full_name || null);
+         setLastUpdateUser((lastLog.user_profiles as any)?.full_name || null);
       }
     }
     setLoading(false);

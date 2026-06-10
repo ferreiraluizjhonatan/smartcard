@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Building, MapPin, Phone, Mail, ArrowLeft, Users, UserPlus, FileEdit, Trash2, ShieldAlert } from 'lucide-react';
+import { Building, MapPin, Phone, Mail, ArrowLeft, Users, UserPlus, FileEdit, Trash2, ShieldAlert, Edit } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { ModalNovoTecnico } from '../components/ModalNovoTecnico';
+import { ModalNovaEmpresa } from '../components/ModalNovaEmpresa';
 
 export function EmpresaDetail() {
   const { id } = useParams<{ id: string }>();
@@ -13,6 +14,7 @@ export function EmpresaDetail() {
   const [activeTab, setActiveTab] = useState<'dados' | 'tecnicos'>('dados');
   const [isModalTecnicoOpen, setIsModalTecnicoOpen] = useState(false);
   const [tecnicoToEdit, setTecnicoToEdit] = useState<any>(null);
+  const [isEditCompanyModalOpen, setIsEditCompanyModalOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -69,6 +71,21 @@ export function EmpresaDetail() {
     }
   };
 
+  const deleteEmpresa = async () => {
+    if (!window.confirm(`Tem certeza que deseja excluir a empresa ${empresa.nome_fantasia}? Esta ação não pode ser desfeita e excluirá todos os técnicos vinculados.`)) return;
+    
+    const { error } = await supabase
+      .from('empresas_contratadas')
+      .delete()
+      .eq('id', empresa.id);
+      
+    if (!error) {
+      navigate('/empresas-contratadas');
+    } else {
+      alert('Erro ao excluir empresa: ' + error.message);
+    }
+  };
+
   if (loading) return <div style={{ textAlign: 'center', padding: '60px', color: 'var(--text-secondary)' }}>Carregando detalhes...</div>;
   if (!empresa) return <div style={{ textAlign: 'center', padding: '60px', color: 'var(--accent-red)' }}>Empresa não encontrada.</div>;
 
@@ -90,6 +107,25 @@ export function EmpresaDetail() {
             </span>
           </div>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>CNPJ: {empresa.cnpj}</p>
+        </div>
+        
+        <div style={{ marginLeft: 'auto', display: 'flex', gap: '12px' }}>
+          <button 
+            onClick={() => setIsEditCompanyModalOpen(true)} 
+            className="btn btn-secondary"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Edit size={18} />
+            Editar Empresa
+          </button>
+          <button 
+            onClick={deleteEmpresa} 
+            className="btn btn-danger"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-red)', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+          >
+            <Trash2 size={18} />
+            Excluir
+          </button>
         </div>
       </div>
 
@@ -280,6 +316,16 @@ export function EmpresaDetail() {
         onSuccess={fetchData}
         empresaId={id as string}
         tecnicoToEdit={tecnicoToEdit}
+      />
+      
+      <ModalNovaEmpresa
+        isOpen={isEditCompanyModalOpen}
+        onClose={() => setIsEditCompanyModalOpen(false)}
+        onSuccess={() => {
+          setIsEditCompanyModalOpen(false);
+          fetchData();
+        }}
+        empresaToEdit={empresa}
       />
     </div>
   );

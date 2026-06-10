@@ -6,9 +6,10 @@ interface ModalNovaEmpresaProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  empresaToEdit?: any;
 }
 
-export function ModalNovaEmpresa({ isOpen, onClose, onSuccess }: ModalNovaEmpresaProps) {
+export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: ModalNovaEmpresaProps) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     razao_social: '',
@@ -23,6 +24,36 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess }: ModalNovaEmpres
     observacoes: ''
   });
   
+  React.useEffect(() => {
+    if (empresaToEdit && isOpen) {
+      setFormData({
+        razao_social: empresaToEdit.razao_social || '',
+        nome_fantasia: empresaToEdit.nome_fantasia || '',
+        cnpj: empresaToEdit.cnpj || '',
+        responsavel: empresaToEdit.responsavel || '',
+        telefone: empresaToEdit.telefone || '',
+        email: empresaToEdit.email || '',
+        endereco: empresaToEdit.endereco || '',
+        cidade: empresaToEdit.cidade || '',
+        estado: empresaToEdit.estado || '',
+        observacoes: empresaToEdit.observacoes || ''
+      });
+    } else if (isOpen) {
+      setFormData({
+        razao_social: '',
+        nome_fantasia: '',
+        cnpj: '',
+        responsavel: '',
+        telefone: '',
+        email: '',
+        endereco: '',
+        cidade: '',
+        estado: '',
+        observacoes: ''
+      });
+    }
+  }, [empresaToEdit, isOpen]);
+  
   const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
@@ -33,14 +64,25 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess }: ModalNovaEmpres
     setError(null);
 
     try {
-      const { error: submitError } = await supabase
-        .from('empresas_contratadas')
-        .insert([{
-          ...formData,
-          status: 'Ativa'
-        }]);
+      if (empresaToEdit) {
+        const { error: submitError } = await supabase
+          .from('empresas_contratadas')
+          .update({
+            ...formData
+          })
+          .eq('id', empresaToEdit.id);
 
-      if (submitError) throw submitError;
+        if (submitError) throw submitError;
+      } else {
+        const { error: submitError } = await supabase
+          .from('empresas_contratadas')
+          .insert([{
+            ...formData,
+            status: 'Ativa'
+          }]);
+
+        if (submitError) throw submitError;
+      }
       
       onSuccess();
       onClose();
@@ -74,8 +116,10 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess }: ModalNovaEmpres
               <Building color="var(--accent-cyan)" size={24} />
             </div>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Nova Empresa</h3>
-              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Cadastro de Terceirizada</p>
+              <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{empresaToEdit ? 'Editar Empresa' : 'Nova Empresa'}</h3>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                {empresaToEdit ? 'Atualizar dados da Terceirizada' : 'Cadastro de Terceirizada'}
+              </p>
             </div>
           </div>
           <button onClick={onClose} style={{
@@ -167,7 +211,7 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess }: ModalNovaEmpres
           </button>
           <button form="empresa-form" type="submit" disabled={loading} className="btn btn-primary" style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             {loading ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-            Salvar Empresa
+            {empresaToEdit ? 'Salvar Alterações' : 'Salvar Empresa'}
           </button>
         </div>
 

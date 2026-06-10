@@ -27,12 +27,20 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
 
   // Preview Data
   const [mappedRows, setMappedRows] = useState<MappedData[]>([]);
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    totalRows: number;
+    empresasFound: number;
+    tecnicosFound: number;
+    duplicates: number;
+    errors: number;
+    errorDetails?: string[];
+  }>({
     totalRows: 0,
     empresasFound: 0,
     tecnicosFound: 0,
     duplicates: 0,
-    errors: 0
+    errors: 0,
+    errorDetails: []
   });
 
   // Strategy Option
