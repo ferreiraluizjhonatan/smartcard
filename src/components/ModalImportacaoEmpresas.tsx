@@ -65,6 +65,7 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
     atualizados: 0,
     ignorados: 0,
     erros: 0,
+    importErrors: [] as string[],
     timeMs: 0
   });
 
@@ -348,14 +349,15 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       status: erros === 0 ? 'Concluído' : 'Parcial'
     }]);
 
-    setReport({
-      empresasImportadas: empOk,
-      tecnicosImportados: tecOk,
-      atualizados,
-      ignorados,
-      erros,
-      timeMs
-    });
+      setReport({
+        empresasImportadas: empOk,
+        tecnicosImportados: tecOk,
+        atualizados,
+        ignorados,
+        erros,
+        importErrors: executionErrors,
+        timeMs: Date.now() - startTime
+      });
     setStage('report');
   };
 
@@ -541,10 +543,21 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                   <span style={{ color: 'var(--text-secondary)' }}>Erros Lógicos</span>
-                  <span style={{ fontWeight: 'bold', color: stats.errors > 0 ? 'var(--accent-red)' : '#fff' }}>{stats.errors}</span>
+                  <span style={{ fontWeight: 'bold', color: report.erros > 0 ? 'var(--accent-red)' : '#fff' }}>{report.erros}</span>
                 </div>
               </div>
               
+              {report.importErrors && report.importErrors.length > 0 && (
+                <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+                  <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-red)', fontSize: '0.9rem', textAlign: 'left' }}>Detalhes dos Erros:</h4>
+                  <ul style={{ margin: 0, paddingLeft: '20px', color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'left' }}>
+                    {report.importErrors.map((err, i) => (
+                      <li key={i} style={{ marginBottom: '4px' }}>{err}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {stats.errorDetails && stats.errorDetails.length > 0 && (
                 <div style={{ marginTop: '16px', padding: '16px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto' }}>
                   <h4 style={{ margin: '0 0 8px 0', color: 'var(--accent-red)', fontSize: '0.9rem' }}>Detalhes dos Erros:</h4>
