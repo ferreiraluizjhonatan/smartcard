@@ -495,7 +495,7 @@ export default function ElevatorsList() {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
     
-    const { data: profile } = await supabase.from('user_profiles').select('company_id, role, branch_name').eq('id', user.user.id).single();
+    const { data: profile } = await supabase.from('user_profiles').select('company_id, role, branch_name, can_register_users').eq('id', user.user.id).single();
     if (!profile) return;
     
     let query = supabase.from('elevators').select('*').order('created_at', { ascending: false });
@@ -505,7 +505,7 @@ export default function ElevatorsList() {
       query = query.eq('company_id', profile.company_id);
     }
 
-    if (['supervisor', 'ajustador', 'pre_instalador'].includes(profile.role)) {
+    if (!profile.can_register_users && ['supervisor', 'ajustador', 'pre_instalador'].includes(profile.role)) {
       if (profile.branch_name && profile.branch_name.trim() !== '') {
         const branches = profile.branch_name.split(',').map((b: string) => b.trim()).filter(Boolean);
         if (branches.length > 1) {
