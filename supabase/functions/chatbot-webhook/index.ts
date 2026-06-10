@@ -191,7 +191,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
       }
 
       const firstItem = chosenTask.checklists[chosenTask.firstPendingIndex];
-      const questionMsg = `Excelente escolha! 👍\n\n🏢 Obra: *${chosenTask.projectDisplayName}*\n📌 Fase ${chosenTask.firstPendingIndex + 1}/${chosenTask.checklists.length} – *${firstItem.item_name}*\n\nA atividade foi executada?`;
+      const questionMsg = `Excelente escolha! 👍\n\n🏢 Obra: *${chosenTask.projectDisplayName}*\n📌 Fase ${chosenTask.firstPendingIndex + 1}/${chosenTask.checklists.length} – *${firstItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
       
       if (platform === 'telegram') {
         const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -288,7 +288,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
            }).eq('id', state.id);
 
            const nextItem = items[currentIndex];
-           const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name}*\n\nA atividade foi executada?`;
+           const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
            
            if (platform === 'telegram') {
              const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -316,7 +316,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
             current_step: 'asking_checklist_percentage'
          }).eq('id', state.id);
 
-         const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${currentItem.item_name}*\n\nEscolha a evolução da atividade:`;
+         const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${currentItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nEscolha a evolução da atividade:`;
          
          if (platform === 'telegram') {
            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
@@ -401,7 +401,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
          }).eq('id', state.id);
 
          const nextItem = items[currentIndex];
-         const msg = `Anotado! 📝\n\n🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name}*\n\nA atividade foi executada?`;
+         const msg = `Anotado! 📝\n\n🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
          
          if (platform === 'telegram') {
            const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
