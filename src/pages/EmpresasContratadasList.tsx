@@ -19,7 +19,7 @@ export function EmpresasContratadasList() {
   const navigate = useNavigate();
 
   const fetchFiliais = async () => {
-    const { data } = await supabase.from('companies').select('id, name').order('name');
+    const { data } = await supabase.from('companies').select('id, name, branch').order('name');
     if (data) setFiliais(data);
   };
 
@@ -28,7 +28,7 @@ export function EmpresasContratadasList() {
     
     const { data: empresasData, error } = await supabase
       .from('empresas_contratadas')
-      .select('*, tecnicos_empresas(count), companies(name)')
+      .select('*, tecnicos_empresas(count), companies(name, branch)')
       .order('created_at', { ascending: false });
 
     if (!error && empresasData) {
@@ -120,7 +120,9 @@ export function EmpresasContratadasList() {
           >
             <option value="Todas">Todas as Filiais</option>
             {filiais.map(f => (
-              <option key={f.id} value={f.id}>{f.name}</option>
+              <option key={f.id} value={f.id}>
+                {f.name} {f.branch ? `- ${f.branch}` : ''}
+              </option>
             ))}
           </select>
         </div>
@@ -156,7 +158,7 @@ export function EmpresasContratadasList() {
                 <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: '0 0 8px 0' }}>{empresa.cnpj}</p>
                 {empresa.companies?.name && (
                   <span style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', color: 'var(--text-secondary)' }}>
-                    Filial: {empresa.companies.name}
+                    Filial: {empresa.companies.name} {empresa.companies.branch ? `- ${empresa.companies.branch}` : ''}
                   </span>
                 )}
               </div>

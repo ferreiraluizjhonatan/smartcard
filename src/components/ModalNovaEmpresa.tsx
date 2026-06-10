@@ -29,7 +29,7 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: 
 
   React.useEffect(() => {
     const fetchFiliais = async () => {
-      const { data } = await supabase.from('companies').select('id, name').order('name');
+      const { data } = await supabase.from('companies').select('id, name, branch').order('name');
       if (data) setFiliais(data);
     };
     fetchFiliais();
@@ -175,7 +175,9 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: 
                 <select name="company_id" value={formData.company_id} onChange={handleChange as any} className="input-field" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
                   <option value="">Selecione a Filial...</option>
                   {filiais.map(f => (
-                    <option key={f.id} value={f.id}>{f.name}</option>
+                    <option key={f.id} value={f.id}>
+                      {f.name} {f.branch ? `- ${f.branch}` : ''}
+                    </option>
                   ))}
                 </select>
               </div>

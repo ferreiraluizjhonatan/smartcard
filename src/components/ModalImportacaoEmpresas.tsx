@@ -52,7 +52,7 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
 
   React.useEffect(() => {
     const fetchFiliais = async () => {
-      const { data } = await supabase.from('companies').select('id, name').order('name');
+      const { data } = await supabase.from('companies').select('id, name, branch').order('name');
       if (data) setFiliais(data);
     };
     fetchFiliais();
@@ -473,7 +473,9 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
                   >
                     <option value="">Não vincular a nenhuma filial</option>
                     {filiais.map(f => (
-                      <option key={f.id} value={f.id}>{f.name}</option>
+                      <option key={f.id} value={f.id}>
+                        {f.name} {f.branch ? `- ${f.branch}` : ''}
+                      </option>
                     ))}
                   </select>
                 </div>

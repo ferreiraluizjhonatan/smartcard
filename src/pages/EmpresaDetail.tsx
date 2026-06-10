@@ -22,7 +22,7 @@ export function EmpresaDetail() {
 
     const { data: empData, error } = await supabase
       .from('empresas_contratadas')
-      .select('*, companies(name)')
+      .select('*, companies(name, branch)')
       .eq('id', id)
       .single();
 
@@ -107,7 +107,7 @@ export function EmpresaDetail() {
             </span>
             {empresa.companies?.name && (
               <span className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-secondary)' }}>
-                Filial: {empresa.companies.name}
+                Filial: {empresa.companies.name} {empresa.companies.branch ? `- ${empresa.companies.branch}` : ''}
               </span>
             )}
           </div>
