@@ -73,12 +73,8 @@ export default function Checklist() {
     
     // Auto-fill pre_install_end_date if overall reached 100%
     if (elevator.status === 'pre_instalacao') {
-       let totalScore = 0;
-       updatedItems.forEach(item => {
-         const weight = getWeightForPreInstall(item.item_name);
-         totalScore += (item.percentage / 100) * weight;
-       });
-       const newOverall = Math.min(100, Math.round(totalScore));
+       const sum = updatedItems.reduce((acc, curr) => acc + curr.percentage, 0);
+       const newOverall = Math.round(sum / updatedItems.length);
        
        if (newOverall === 100 && !elevator.pre_install_end_date) {
            const today = new Date().toISOString().split('T')[0];
@@ -160,38 +156,14 @@ export default function Checklist() {
     }
   };
 
-  const getWeightForPreInstall = (itemName: string) => {
-    const lower = itemName.toLowerCase();
-    if (lower.includes('caixa de corrida')) return 20;
-    if (lower.includes('material em campo')) return 20;
-    if (lower.includes('segurança')) return 15;
-    if (lower.includes('energia')) return 15;
-    return 5;
-  };
-
   const checkGoldenRule = () => {
     if (elevator?.status !== 'pre_instalacao') return true;
-    const mandatoryKeywords = ['caixa de corrida', 'material em campo', 'segurança', 'energia', 'liberação para montagem'];
-    for (const keyword of mandatoryKeywords) {
-      const item = items.find(i => i.item_name.toLowerCase().includes(keyword));
-      // Se achar o item e ele não estiver 100%, bloqueia a regra de ouro.
-      if (item && item.percentage < 100) return false;
-    }
-    return true;
+    // Com a padronização das 10 etapas, a Regra de Ouro agora exige 100% em todas elas para avançar.
+    return items.every(item => item.percentage === 100);
   };
 
   const calculateOverallProgress = () => {
      if(items.length === 0) return 0;
-     
-     if (elevator?.status === 'pre_instalacao') {
-       let totalScore = 0;
-       items.forEach(item => {
-         const weight = getWeightForPreInstall(item.item_name);
-         totalScore += (item.percentage / 100) * weight;
-       });
-       return Math.min(100, Math.round(totalScore));
-     }
-
      const sum = items.reduce((acc, curr) => acc + curr.percentage, 0);
      return Math.round(sum / items.length);
   };

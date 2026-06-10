@@ -14,14 +14,17 @@ export default function MestrePortal() {
   const [ticketHistory, setTicketHistory] = useState<any[]>([]);
   const [sendingMsg, setSendingMsg] = useState(false);
 
-  // Default civil phases
   const civilPhases = [
-    { id: 'iluminacao', name: 'Iluminação do Poço (Provisória/Definitiva)' },
-    { id: 'prumo', name: 'Esquadro e Prumo' },
-    { id: 'impermeabilizacao', name: 'Impermeabilização do Poço' },
-    { id: 'andaime', name: 'Andaime Instalado' },
-    { id: 'limpeza', name: 'Limpeza do Poço' },
-    { id: 'energia', name: 'Energia Trifásica (Caixa de Força)' },
+    { id: 'dimensoes_caixa', name: '1. Dimensões da Caixa Conferidas' },
+    { id: 'poco_executado', name: '2. Poço Executado e Limpo' },
+    { id: 'sobrecurso_concluido', name: '3. Sobrecurso Concluído' },
+    { id: 'vaos_porta', name: '4. Vãos de Porta Finalizados' },
+    { id: 'gancho_icamento', name: '5. Gancho de Içamento Instalado' },
+    { id: 'energia_provisoria', name: '6. Energia Provisória Disponível' },
+    { id: 'iluminacao_caixa', name: '7. Iluminação da Caixa Instalada' },
+    { id: 'caixa_livre', name: '8. Caixa Livre de Interferências' },
+    { id: 'tapumes_protecoes', name: '9. Tapumes e Proteções Instalados' },
+    { id: 'almoxarifado_obra', name: '10. Almoxarifado da Obra Disponível' },
   ];
 
   useEffect(() => {
