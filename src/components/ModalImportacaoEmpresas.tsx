@@ -97,7 +97,9 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       const datePart = dateStr.split(' ')[0];
       const parts = datePart.split('/');
       if (parts.length === 3) {
-        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        let year = parts[2];
+        if (year.length === 2) year = `20${year}`;
+        return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
       }
       // try YYYY-MM-DD
       if (datePart.includes('-')) {
