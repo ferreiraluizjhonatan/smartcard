@@ -115,7 +115,8 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       }
       // try YYYY-MM-DD
       if (datePart.includes('-')) {
-          return datePart;
+          if (datePart.length >= 8) return datePart;
+          return null;
       }
     }
     return null;
