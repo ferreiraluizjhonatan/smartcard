@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Activity, FileText, Calendar, Clock, AlertTriangle, Link as LinkIcon, Bot } from 'lucide-react';
 import { AIChatModal } from '../../components/AIChatModal';
+import { LogsModal } from '../../components/LogsModal';
 
 export default function ElevatorHub() {
   const navigate = useNavigate();
@@ -13,6 +14,8 @@ export default function ElevatorHub() {
   const [stats, setStats] = useState({ total: 0, completed: 0, percentage: 0 });
   const [openTickets, setOpenTickets] = useState(0);
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<any>(null);
 
   useEffect(() => {
     fetchData();
@@ -43,6 +46,19 @@ export default function ElevatorHub() {
          .eq('elevator_id', id)
          .eq('status', 'aberto');
       setOpenTickets(count || 0);
+
+      // Buscar último log para o card
+      const { data: lastLog } = await supabase
+         .from('checklist_progress_log')
+         .select('created_at')
+         .eq('elevator_id', id)
+         .order('created_at', { ascending: false })
+         .limit(1)
+         .single();
+         
+      if (lastLog) {
+         setLastUpdate(lastLog.created_at);
+      }
     }
     setLoading(false);
   };
@@ -242,13 +258,13 @@ export default function ElevatorHub() {
           </div>
         </div>
 
-        <div className="neon-card border-yellow" style={{ cursor: 'pointer' }}>
+        <div className="neon-card border-yellow" style={{ cursor: 'pointer' }} onClick={() => setIsLogsModalOpen(true)}>
           <h3 style={{ margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Clock size={24} color="var(--accent-yellow)"/> Histórico & Logs
           </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Mudanças de fase:</p>
-          <div style={{ fontSize: '1.2rem', color: 'var(--accent-yellow)', marginTop: '24px' }}>
-             Ver logs do banco de dados
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Rastreamento de Atividades:</p>
+          <div style={{ fontSize: '0.95rem', color: 'var(--accent-yellow)', marginTop: '24px' }}>
+             {lastUpdate ? `Última att: ${new Date(lastUpdate).toLocaleString('pt-BR')} por ${elevator?.mechanic_name || 'Mecânico'}` : 'Ver logs do banco de dados'}
           </div>
         </div>
 
@@ -289,6 +305,13 @@ export default function ElevatorHub() {
            days_elapsed: decorridos,
            open_tickets: openTickets
         }}
+      />
+
+      <LogsModal 
+        isOpen={isLogsModalOpen} 
+        onClose={() => setIsLogsModalOpen(false)} 
+        elevatorId={id || ''}
+        mechanicName={elevator?.mechanic_name}
       />
     </div>
   );
