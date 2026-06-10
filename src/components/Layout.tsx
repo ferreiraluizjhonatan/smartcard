@@ -80,6 +80,9 @@ export default function Layout() {
                 <NavLink to="/users" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                   Usuários
                 </NavLink>
+                <NavLink to="/companies" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+                  Filiais
+                </NavLink>
                 <NavLink to="/empresas-contratadas" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                   Empresas Parceiras
                 </NavLink>
