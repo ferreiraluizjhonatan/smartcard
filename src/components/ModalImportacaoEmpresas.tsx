@@ -49,15 +49,33 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
   });
 
   const DICTIONARY = {
-    razao_social: ['empresa', 'razão social', 'razao social', 'nome empresa', 'fornecedor', 'terceirizada'],
+    razao_social: ['empresa', 'razão social', 'razao social', 'nome fantasia', 'fornecedor', 'terceirizada'],
     cnpj: ['cnpj', 'documento', 'cadastro'],
     responsavel: ['responsável', 'responsavel', 'contato', 'gestor'],
     telefone: ['telefone', 'celular', 'whatsapp', 'fone'],
     email: ['email', 'e-mail', 'correio eletrônico', 'correio eletronico', 'correio'],
-    nome_tecnico: ['técnico', 'tecnico', 'funcionário', 'funcionario', 'colaborador', 'nome'],
+    nome_tecnico: ['nome', 'técnico', 'tecnico', 'funcionário', 'funcionario', 'colaborador'],
     matricula: ['matrícula', 'matricula', 'registro', 'código', 'codigo'],
+    rg: ['rg', 'identidade'],
+    cpf: ['cpf'],
+    data_nascimento: ['nascimento', 'dt de nascimento', 'data de nascimento', 'nasc', 'dt nasc'],
+    data_admissao: ['admissão', 'admissao', 'dt admissao', 'data de admissão', 'admitido'],
     funcao: ['função', 'funcao', 'cargo'],
     telegram_id: ['telegram', 'telegram id', 'chat id']
+  };
+
+  const parseDateString = (dStr: any) => {
+    if (!dStr) return null;
+    const str = String(dStr).trim();
+    if (str.includes('-') && str.length === 10) return str;
+    const parts = str.split('/');
+    if (parts.length === 3) {
+      // Assuming DD/MM/YYYY
+      let year = parts[2];
+      if (year.length === 2) year = `19${year}`; // Naive assumption for Excel 2-digit years
+      return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+    }
+    return null;
   };
 
   const getMappedKey = (header: string) => {
@@ -84,7 +102,7 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       const workbook = XLSX.read(data);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const json = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+      const json = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false, dateNF: 'dd/mm/yyyy' });
 
       if (json.length === 0) throw new Error("Planilha vazia");
 
@@ -135,7 +153,10 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
         const tecnico: any = hasTecnico ? {
           nome: mappedData.nome_tecnico,
           matricula: mappedData.matricula || `MAT-${Date.now()}-${Math.floor(Math.random()*1000)}`,
-          cpf: mappedData.cnpj ? `N/A-${Math.floor(Math.random()*1000)}` : '', // Simulating CPF if missing
+          cpf: mappedData.cpf || (mappedData.cnpj ? `N/A-${Math.floor(Math.random()*1000)}` : ''),
+          rg: mappedData.rg || null,
+          data_nascimento: parseDateString(mappedData.data_nascimento),
+          data_admissao: parseDateString(mappedData.data_admissao),
           telefone: mappedData.telefone || '',
           email: mappedData.email || '',
           telegram_id: mappedData.telegram_id || '',
