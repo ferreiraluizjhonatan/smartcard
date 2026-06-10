@@ -58,8 +58,8 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
     matricula: ['matrícula', 'matricula', 'registro', 'código', 'codigo'],
     rg: ['rg', 'identidade'],
     cpf: ['cpf'],
-    data_nascimento: ['nascimento', 'dt de nascimento', 'data de nascimento', 'nasc', 'dt nasc'],
-    data_admissao: ['admissão', 'admissao', 'dt admissao', 'data de admissão', 'admitido'],
+    data_nascimento: ['nascimento', 'dt de nascimento', 'data de nascimento', 'nasc', 'dt nasc', 'dt. nascimento'],
+    data_admissao: ['admissão', 'admissao', 'dt admissao', 'data de admissão', 'admitido', 'dt. admissão', 'dt. admissao'],
     funcao: ['função', 'funcao', 'cargo'],
     telegram_id: ['telegram', 'telegram id', 'chat id']
   };
