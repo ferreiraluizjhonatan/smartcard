@@ -42,14 +42,20 @@ serve(async (req) => {
 
     let checklists: any[] = [];
     
+    const sortByNumber = (list: any[]) => list.sort((a, b) => {
+      const numA = parseInt(a.item_name.match(/\d+/)?.[0] || '0');
+      const numB = parseInt(b.item_name.match(/\d+/)?.[0] || '0');
+      return numA - numB;
+    });
+
     if (preInst.data) {
-       checklists = checklists.concat(preInst.data.map(i => ({...i, item_name: `[Pré-Instalação] ${i.item_name}`, table_name: 'pre_installation_checklists'})));
+       checklists = checklists.concat(sortByNumber(preInst.data).map(i => ({...i, item_name: `[Pré-Instalação] ${i.item_name}`, table_name: 'pre_installation_checklists'})));
     }
     if (assem.data) {
-       checklists = checklists.concat(assem.data.map(i => ({...i, item_name: `[Montagem] ${i.item_name}`, table_name: 'assembly_checklists'})));
+       checklists = checklists.concat(sortByNumber(assem.data).map(i => ({...i, item_name: `[Montagem] ${i.item_name}`, table_name: 'assembly_checklists'})));
     }
     if (adjust.data) {
-       checklists = checklists.concat(adjust.data.map(i => ({...i, item_name: `[Ajuste] ${i.item_name}`, table_name: 'adjustment_checklists'})));
+       checklists = checklists.concat(sortByNumber(adjust.data).map(i => ({...i, item_name: `[Ajuste] ${i.item_name}`, table_name: 'adjustment_checklists'})));
     }
 
     return new Response(JSON.stringify({ elevator, checklists }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

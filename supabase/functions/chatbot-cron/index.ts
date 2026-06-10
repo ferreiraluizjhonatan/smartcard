@@ -128,12 +128,18 @@ serve(async (req) => {
 
       const contactId = hasTelegram ? targetUser.telegram_id : targetUser.whatsapp_number;
 
-      const { data: checklists } = await supabase.from(tableName)
+      const { data: checklistsRaw } = await supabase.from(tableName)
         .select('*')
         .eq('elevator_id', elevator.id)
         .order('id', { ascending: true });
         
-      if (!checklists || checklists.length === 0) continue;
+      if (!checklistsRaw || checklistsRaw.length === 0) continue;
+
+      const checklists = checklistsRaw.sort((a: any, b: any) => {
+        const numA = parseInt(a.item_name.match(/\d+/)?.[0] || '0');
+        const numB = parseInt(b.item_name.match(/\d+/)?.[0] || '0');
+        return numA - numB;
+      });
 
       const firstPendingIndex = checklists.findIndex((c: any) => c.percentage !== 100);
       if (firstPendingIndex === -1) continue; // All done

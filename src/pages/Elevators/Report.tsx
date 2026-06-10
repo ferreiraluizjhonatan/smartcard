@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Printer, FileText, CheckCircle2, AlertTriangle, Camera } from 'lucide-react';
+import { renderItemName } from './Checklist';
 
 export default function ElevatorReport() {
   const navigate = useNavigate();
@@ -35,10 +36,15 @@ export default function ElevatorReport() {
       supabase.from('adjustment_checklists').select('*').eq('elevator_id', id).order('id'),
       supabase.from('tickets').select('*').eq('elevator_id', id).order('created_at', { ascending: true })
     ]);
+    const sortByNumber = (list: any[]) => list.sort((a, b) => {
+      const numA = parseInt(a.item_name.match(/\d+/)?.[0] || '0');
+      const numB = parseInt(b.item_name.match(/\d+/)?.[0] || '0');
+      return numA - numB;
+    });
 
-    if (preRes.data) setPreItems(preRes.data);
-    if (asmRes.data) setAssemblyItems(asmRes.data);
-    if (adjRes.data) setAdjustmentItems(adjRes.data);
+    if (preRes.data) setPreItems(sortByNumber(preRes.data));
+    if (asmRes.data) setAssemblyItems(sortByNumber(asmRes.data));
+    if (adjRes.data) setAdjustmentItems(sortByNumber(adjRes.data));
     if (tckRes.data) setTickets(tckRes.data);
 
     setLoading(false);
@@ -72,7 +78,7 @@ export default function ElevatorReport() {
           <div key={idx} style={{ marginBottom: '24px', padding: '16px', border: '1px solid #eee', borderRadius: '8px', background: '#fafafa' }}>
             <h4 style={{ margin: '0 0 12px 0', color: '#444' }}>
               {item.percentage === 100 ? <CheckCircle2 size={16} color="green" style={{ display: 'inline', marginRight: '4px' }}/> : null}
-              {item.item_name} <span style={{ fontWeight: 'normal', color: '#666', fontSize: '0.9em' }}>({item.percentage}%)</span>
+              {renderItemName(item.item_name)} <span style={{ fontWeight: 'normal', color: '#666', fontSize: '0.9em' }}>({item.percentage}%)</span>
             </h4>
 
             {reportType === 'completo' && item.notes && (

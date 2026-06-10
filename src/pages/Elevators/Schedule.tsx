@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Wand2, Calendar as CalIcon, Save, RefreshCw, Printer } from 'lucide-react';
+import { renderItemName } from './Checklist';
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -34,7 +35,14 @@ export default function Schedule() {
       setElevator(el);
       const tableName = getTableName(el.status);
       const { data: chk } = await supabase.from(tableName).select('*').eq('elevator_id', id).order('id');
-      if (chk) setItems(chk);
+      if (chk) {
+        chk.sort((a, b) => {
+          const numA = parseInt(a.item_name.match(/\d+/)?.[0] || '0');
+          const numB = parseInt(b.item_name.match(/\d+/)?.[0] || '0');
+          return numA - numB;
+        });
+        setItems(chk);
+      }
     }
     setLoading(false);
   };
@@ -234,7 +242,7 @@ export default function Schedule() {
                     background: 'rgba(255,255,255,0.1)', width: '28px', height: '28px', 
                     borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem'
                   }}>{index + 1}</span>
-                  {item.item_name}
+                  {renderItemName(item.item_name.replace(/^\d+\.\s*/, ''))}
                 </div>
                 <div>
                   <input 
@@ -343,7 +351,7 @@ export default function Schedule() {
                      return (
                        <div key={item.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '1px', height: '18px', pageBreakInside: 'avoid', position: 'relative', zIndex: 1 }}>
                          <div style={{ width: '25%', fontWeight: 'bold', fontSize: '10px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: '8px', color: 'black', background: 'white' }}>
-                           {index + 1}. {item.item_name}
+                           {index + 1}. {item.item_name.replace(/^\d+\.\s*/, '')}
                          </div>
                          <div style={{ width: '75%', position: 'relative', height: '100%' }}>
                            {/* Waterfall Bar */}

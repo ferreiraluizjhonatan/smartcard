@@ -3,6 +3,17 @@ import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, MessageSquare, AlertTriangle, Clock, Camera, Edit2, Award } from 'lucide-react';
 
+export const renderItemName = (name: string) => {
+  if (!name) return name;
+  const parts = name.split(/(\([^)]+\))/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('(') && part.endsWith(')')) {
+      return <span key={i} style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 'normal', marginLeft: '4px' }}>{part}</span>;
+    }
+    return <span key={i}>{part}</span>;
+  });
+};
+
 export default function Checklist() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -38,7 +49,14 @@ export default function Checklist() {
       setElevator(el);
       const tableName = getTableName(el.status);
       const { data: chk } = await supabase.from(tableName).select('*').eq('elevator_id', id).order('id');
-      if (chk) setItems(chk);
+      if (chk) {
+        chk.sort((a, b) => {
+          const numA = parseInt(a.item_name.match(/\d+/)?.[0] || '0');
+          const numB = parseInt(b.item_name.match(/\d+/)?.[0] || '0');
+          return numA - numB;
+        });
+        setItems(chk);
+      }
     }
     setLoading(false);
   };
@@ -331,7 +349,7 @@ export default function Checklist() {
                 ) : (
                   <h4 style={{ fontSize: '1.1rem', margin: '0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {item.percentage === 100 && item.is_started && <CheckCircle2 size={18} color="var(--accent-green)" />}
-                    {item.item_name}
+                    {renderItemName(item.item_name)}
                     <button style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px' }}
                       onClick={() => { setEditingItemId(item.id); setEditingName(item.item_name); }}>
                       <Edit2 size={14} />

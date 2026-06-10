@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText } from 'lucide-react';
+import { renderItemName } from '../Elevators/Checklist';
+import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 export default function ClientPortal() {
@@ -331,8 +332,8 @@ export default function ClientPortal() {
                       const isDone = item.percentage === 100;
                       const hasPhotos = item.photos_urls && item.photos_urls.length > 0;
                       
-                      // Strip prefix for cleaner mobile look
-                      const cleanItemName = item.item_name.replace(/^\[.*?\]\s*/, '');
+                      // Strip prefix for cleaner mobile look and also strip leading numbers
+                      const cleanItemName = item.item_name.replace(/^\[.*?\]\s*/, '').replace(/^\d+\.\s*/, '');
                       
                       return (
                         <div key={item.id} style={{ 
@@ -350,7 +351,7 @@ export default function ClientPortal() {
                               {isDone ? <CheckCircle2 size={18} /> : index + 1}
                             </div>
                             <div>
-                              <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', wordBreak: 'break-word' }}>{cleanItemName}</h4>
+                              <h4 style={{ margin: '0 0 4px 0', fontSize: '1.05rem', wordBreak: 'break-word' }}>{renderItemName(cleanItemName)}</h4>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                 {item.planned_start_date ? new Date(item.planned_start_date).toLocaleDateString('pt-BR') : 'Sem data'} 
                                 {' - '} 
