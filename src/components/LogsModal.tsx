@@ -25,7 +25,7 @@ export function LogsModal({ isOpen, onClose, elevatorId, mechanicName }: LogsMod
     // Buscar log de checklists (progresso)
     const { data: checklistLogs } = await supabase
       .from('checklist_progress_log')
-      .select('*')
+      .select('*, user_profiles(full_name)')
       .eq('elevator_id', elevatorId)
       .order('created_at', { ascending: false })
       .limit(50);
@@ -50,11 +50,14 @@ export function LogsModal({ isOpen, onClose, elevatorId, mechanicName }: LogsMod
          acao = `Marcou a atividade com ${log.percentage}%`;
       }
 
+      // Se houver um usuário atrelado ao log (admin), usamos o nome dele. Senão, é o mecânico.
+      const userName = log.user_profiles?.full_name || mechanicName || 'Mecânico';
+
       return {
         id: log.id,
         date: new Date(log.created_at),
         type: 'checklist',
-        user: mechanicName || 'Mecânico',
+        user: userName,
         description: `Na fase de ${fase}: ${acao}`,
         icon: <Activity size={18} className="text-cyan" />,
         color: 'var(--accent-cyan)'
