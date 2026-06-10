@@ -19,6 +19,9 @@ export function ModalNovoTecnico({ isOpen, onClose, onSuccess, empresaId, tecnic
     telefone: '',
     email: '',
     telegram_id: '',
+    rg: '',
+    data_nascimento: '',
+    data_admissao: '',
     funcao: 'Montador',
     status: 'Ativo'
   });
@@ -34,6 +37,9 @@ export function ModalNovoTecnico({ isOpen, onClose, onSuccess, empresaId, tecnic
         telefone: tecnicoToEdit.telefone || '',
         email: tecnicoToEdit.email || '',
         telegram_id: tecnicoToEdit.telegram_id || '',
+        rg: tecnicoToEdit.rg || '',
+        data_nascimento: tecnicoToEdit.data_nascimento || '',
+        data_admissao: tecnicoToEdit.data_admissao || '',
         funcao: tecnicoToEdit.funcao || 'Montador',
         status: tecnicoToEdit.status || 'Ativo'
       });
@@ -45,6 +51,9 @@ export function ModalNovoTecnico({ isOpen, onClose, onSuccess, empresaId, tecnic
         telefone: '',
         email: '',
         telegram_id: '',
+        rg: '',
+        data_nascimento: '',
+        data_admissao: '',
         funcao: 'Montador',
         status: 'Ativo'
       });
@@ -164,9 +173,27 @@ export function ModalNovoTecnico({ isOpen, onClose, onSuccess, empresaId, tecnic
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div className="input-group" style={{ marginBottom: 0 }}>
+                <label>RG</label>
+                <input name="rg" value={formData.rg} onChange={handleChange} className="input-field" placeholder="00.000.000-0" />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label>Data de Nascimento</label>
+                <input type="date" name="data_nascimento" value={formData.data_nascimento} onChange={handleChange} className="input-field" />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+              <div className="input-group" style={{ marginBottom: 0 }}>
                 <label>E-mail *</label>
                 <input required type="email" name="email" value={formData.email} onChange={handleChange} className="input-field" placeholder="email@exemplo.com" />
               </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
+                <label>Data de Admissão</label>
+                <input type="date" name="data_admissao" value={formData.data_admissao} onChange={handleChange} className="input-field" />
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div className="input-group" style={{ marginBottom: 0 }}>
                 <label>Telegram ID (Opcional)</label>
                 <input name="telegram_id" value={formData.telegram_id} onChange={handleChange} className="input-field" placeholder="@usuario" />

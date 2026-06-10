@@ -227,6 +227,9 @@ export function EmpresaDetail() {
                       <td style={{ padding: '20px 24px' }}>
                         <div style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '4px' }}>{tec.nome}</div>
                         <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Matrícula: {tec.matricula}</div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                           CPF: {tec.cpf || '-'} | RG: {tec.rg || '-'}
+                        </div>
                       </td>
                       <td style={{ padding: '20px 24px' }}>
                         <span style={{ padding: '6px 12px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', fontSize: '0.85rem' }}>
