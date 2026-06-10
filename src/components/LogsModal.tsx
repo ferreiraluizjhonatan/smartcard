@@ -30,6 +30,14 @@ export function LogsModal({ isOpen, onClose, elevatorId, mechanicName }: LogsMod
       .order('created_at', { ascending: false })
       .limit(50);
 
+    // Buscar histórico de mudança de fase
+    const { data: historyLogs } = await supabase
+      .from('elevator_history')
+      .select('*, user_profiles(full_name)')
+      .eq('elevator_id', elevatorId)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
     // Formatar os logs
     const formattedLogs = (checklistLogs || []).map(log => {
       let fase = 'Atividade';
@@ -51,6 +59,20 @@ export function LogsModal({ isOpen, onClose, elevatorId, mechanicName }: LogsMod
         icon: <Activity size={18} className="text-cyan" />,
         color: 'var(--accent-cyan)'
       };
+    });
+
+    // Adicionar logs de history
+    (historyLogs || []).forEach(log => {
+       const userName = log.user_profiles?.full_name || 'Admin';
+       formattedLogs.push({
+         id: log.id,
+         date: new Date(log.created_at),
+         type: 'phase',
+         user: userName,
+         description: `Mudança de fase: de ${log.old_status} para ${log.new_status}. ${log.notes || ''}`,
+         icon: <Clock size={18} className="text-yellow-500" />,
+         color: 'var(--accent-yellow)'
+       });
     });
 
     // Ordenar do mais recente pro mais antigo
