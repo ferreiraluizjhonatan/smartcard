@@ -84,20 +84,25 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
     telegram_id: ['telegram', 'telegram id', 'chat id']
   };
 
-  const parseDateString = (dStr: any) => {
-    if (!dStr) return null;
-    const str = String(dStr).trim();
-    if (str.includes('-') && str.length >= 10) return str.substring(0, 10);
-    const parts = str.split('/');
-    if (parts.length === 3) {
-      let year = parts[2];
-      if (year.length === 2) year = `20${year}`; 
-      return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+  const parseDateString = (dateStr: any) => {
+    if (!dateStr) return null;
+    if (typeof dateStr === 'number' || (typeof dateStr === 'string' && !isNaN(Number(dateStr)))) {
+      const excelEpoch = new Date(1899, 11, 30);
+      const parsedDate = new Date(excelEpoch.getTime() + Number(dateStr) * 86400000);
+      return parsedDate.toISOString().split('T')[0];
     }
-    const num = Number(str);
-    if (!isNaN(num) && num > 10000) {
-      const date = new Date(Math.round((num - 25569) * 86400 * 1000));
-      return date.toISOString().split('T')[0];
+    
+    if (typeof dateStr === 'string') {
+      // extract just the date part if there is time
+      const datePart = dateStr.split(' ')[0];
+      const parts = datePart.split('/');
+      if (parts.length === 3) {
+        return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+      }
+      // try YYYY-MM-DD
+      if (datePart.includes('-')) {
+          return datePart;
+      }
     }
     return null;
   };
