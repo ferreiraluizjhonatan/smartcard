@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { Camera, CheckCircle2, AlertCircle, ArrowLeft, Clock, Upload, Send } from 'lucide-react';
+import { Camera, CheckCircle2, AlertCircle, ArrowLeft, Clock, Upload, Send, MessageSquare } from 'lucide-react';
 
 export default function MestrePortal() {
   const { contract } = useParams<{ contract: string }>();
@@ -10,6 +10,9 @@ export default function MestrePortal() {
   const [loading, setLoading] = useState(true);
   const [selectedElevator, setSelectedElevator] = useState<any | null>(null);
   const [progressData, setProgressData] = useState<any[]>([]);
+  const [message, setMessage] = useState('');
+  const [ticketHistory, setTicketHistory] = useState<any[]>([]);
+  const [sendingMsg, setSendingMsg] = useState(false);
 
   // Default civil phases
   const civilPhases = [
@@ -51,6 +54,44 @@ export default function MestrePortal() {
       .eq('elevator_id', elevatorId);
     if (data) {
       setProgressData(data);
+    }
+    
+    const { data: ticketsData } = await supabase
+      .from('tickets')
+      .select('*, ticket_comments(*)')
+      .eq('elevator_id', elevatorId)
+      .eq('title', 'Mensagem do Mestre (Link Público)')
+      .order('created_at', { ascending: false });
+    
+    if (ticketsData) setTicketHistory(ticketsData);
+  };
+
+  const requestVisit = async () => {
+    if (!message.trim() || !selectedElevator) {
+       alert("Por favor, digite sua mensagem ou solicitação.");
+       return;
+    }
+    setSendingMsg(true);
+    try {
+      const { data: result, error } = await supabase.functions.invoke('client-portal-action', {
+        body: { 
+          action: 'send_message', 
+          payload: { 
+            elevator_id: selectedElevator.id, 
+            message: message, 
+            company_id: selectedElevator.company_id 
+          }
+        }
+      });
+      if (error || (result && result.error)) throw error || new Error(result.error);
+      alert('Mensagem enviada com sucesso! A equipe SmartCard entrará em contato em breve.');
+      setMessage('');
+      fetchProgress(selectedElevator.id);
+    } catch(err) {
+      console.error(err);
+      alert('Erro ao enviar mensagem.');
+    } finally {
+      setSendingMsg(false);
     }
   };
 
@@ -244,6 +285,71 @@ export default function MestrePortal() {
             </div>
           );
         })}
+
+        {/* Contact Team Section */}
+        <div className="neon-card border-cyan" style={{ padding: '24px', marginTop: '16px' }}>
+          <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <MessageSquare size={20} color="var(--accent-cyan)"/> Enviar Mensagem ou Solicitação
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
+            Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Envie uma mensagem direta para nossa equipe técnica.
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+             <textarea
+               value={message}
+               onChange={(e) => setMessage(e.target.value)}
+               className="input-field"
+               rows={4}
+               placeholder="Digite sua solicitação aqui... ex: A obra está liberada para instalação do poço amanhã."
+               style={{ resize: 'vertical' }}
+             />
+             <button 
+               onClick={requestVisit} 
+               disabled={sendingMsg}
+               className="btn-glow border-cyan" 
+               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
+             >
+               <Send size={18} />
+               {sendingMsg ? 'Enviando Mensagem...' : 'Enviar Mensagem'}
+             </button>
+          </div>
+
+          {/* Ticket History */}
+          {ticketHistory.length > 0 && (
+            <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+              <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)' }}>Histórico de Comunicação</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {ticketHistory.map(ticket => (
+                  <div key={ticket.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontWeight: 'bold', color: 'var(--accent-cyan)' }}>Sua Mensagem</span>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{new Date(ticket.created_at).toLocaleString('pt-BR')}</span>
+                    </div>
+                    <p style={{ margin: '0 0 12px 0', fontSize: '0.95rem' }}>{ticket.description}</p>
+                    
+                    {ticket.ticket_comments && ticket.ticket_comments.length > 0 && (
+                      <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {ticket.ticket_comments.map((comment: any) => (
+                          <div key={comment.id} style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', marginLeft: '16px', borderLeft: '2px solid var(--accent-green)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                              <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: 'var(--accent-green)' }}>Resposta da Equipe</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(comment.created_at).toLocaleString('pt-BR')}</span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: '0.9rem' }}>{comment.comment}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {(!ticket.ticket_comments || ticket.ticket_comments.length === 0) && (
+                      <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Aguardando resposta da equipe...</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
