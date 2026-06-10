@@ -350,8 +350,8 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        if (!elev) throw new Error("Elevator missing in state");
        const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
        let link = `${frontendUrl}/tracking/${elev.id}`;
-       if (elev.status === 'pre_instalacao' && elev.contract_number && String(elev.contract_number).trim() !== '') {
-           link = `${frontendUrl}/mestre/${encodeURIComponent(String(elev.contract_number).trim())}`;
+       if (elev.status === 'pre_instalacao' && elev.project_name && String(elev.project_name).trim() !== '') {
+           link = `${frontendUrl}/mestre/${encodeURIComponent(String(elev.project_name).trim())}`;
        } else if (elev.status === 'montagem') {
            link = `${frontendUrl}/mecanico/${senderId}`;
        }
@@ -433,8 +433,8 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        if (!elev) throw new Error("Elevator missing in state");
        const frontendUrl = Deno.env.get('FRONTEND_URL') || 'https://smartcard-git-main-ferreiraluizjhonatans-projects.vercel.app';
        let link = `${frontendUrl}/tracking/${elev.id}`;
-       if (elev.status === 'pre_instalacao' && elev.contract_number && String(elev.contract_number).trim() !== '') {
-           link = `${frontendUrl}/mestre/${encodeURIComponent(String(elev.contract_number).trim())}`;
+       if (elev.status === 'pre_instalacao' && elev.project_name && String(elev.project_name).trim() !== '') {
+           link = `${frontendUrl}/mestre/${encodeURIComponent(String(elev.project_name).trim())}`;
        } else if (elev.status === 'montagem') {
            link = `${frontendUrl}/mecanico/${senderId}`;
        }

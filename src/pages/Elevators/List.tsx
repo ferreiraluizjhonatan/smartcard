@@ -336,13 +336,13 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onDelete, on
                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Total de equipamentos:</div>
                <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1', color: '#fff' }}>{group.items.length}</div>
              </div>
-             {group.contract && group.contract !== 'Sem Contrato' && (
+             {group.title && group.title !== 'Obra sem Empreendimento' && (
                <button 
                  className="btn btn-secondary"
                  style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#60a5fa', borderColor: 'rgba(96, 165, 250, 0.3)', padding: '8px 16px', fontSize: '0.9rem' }}
                  onClick={(e) => {
                    e.stopPropagation();
-                   const link = `${window.location.origin}/mestre/${encodeURIComponent(group.contract)}`;
+                   const link = `${window.location.origin}/mestre/${encodeURIComponent(group.title)}`;
                    navigator.clipboard.writeText(link);
                    alert('Link do Portal do Mestre copiado para a área de transferência:\n\n' + link);
                  }}

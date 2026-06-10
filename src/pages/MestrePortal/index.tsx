@@ -4,7 +4,7 @@ import { supabase } from '../../lib/supabase';
 import { Camera, CheckCircle2, AlertCircle, ArrowLeft, Clock, Upload, Send, MessageSquare } from 'lucide-react';
 
 export default function MestrePortal() {
-  const { contract } = useParams<{ contract: string }>();
+  const { projectName } = useParams<{ projectName: string }>();
   const navigate = useNavigate();
   const [elevators, setElevators] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,18 +25,19 @@ export default function MestrePortal() {
   ];
 
   useEffect(() => {
-    if (contract) {
+    if (projectName) {
       fetchElevators();
     }
-  }, [contract]);
+  }, [projectName]);
 
   const fetchElevators = async () => {
     setLoading(true);
-    // Find elevators belonging to this contract
+    // Find elevators belonging to this project
+    const decodedProject = decodeURIComponent(projectName || '');
     const { data, error } = await supabase
       .from('elevators')
       .select('*')
-      .eq('contract_number', contract)
+      .eq('project_name', decodedProject)
       .order('name');
       
     if (data && data.length > 0) {
@@ -166,7 +167,7 @@ export default function MestrePortal() {
     return (
       <div style={{ padding: '24px', color: '#fff', textAlign: 'center' }}>
         <h2>Link Inválido</h2>
-        <p>Não encontramos nenhum elevador associado a este contrato ({contract}).</p>
+        <p>Não encontramos nenhum elevador em fase de pré-instalação para a obra: {projectName}.</p>
       </div>
     );
   }
@@ -176,7 +177,7 @@ export default function MestrePortal() {
       <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto', color: '#fff' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h2 style={{ color: 'var(--accent-cyan)', margin: '0 0 8px 0' }}>Portal da Obra</h2>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Contrato: {contract}</p>
+          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Obra: {decodeURIComponent(projectName || '')}</p>
           <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>{elevators[0].customer_company}</p>
         </div>
 

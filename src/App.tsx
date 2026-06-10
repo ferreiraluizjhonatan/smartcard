@@ -54,7 +54,7 @@ function App() {
         <Route path="/login" element={!session ? <Auth /> : <Navigate to="/" />} />
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/tracking/:id" element={<ClientPortal />} />
-        <Route path="/mestre/:contract" element={<MestrePortal />} />
+        <Route path="/mestre/:projectName" element={<MestrePortal />} />
         <Route path="/mecanico/:telegramId" element={<MechanicPortal />} />
         <Route path="/" element={session ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
