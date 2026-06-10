@@ -126,17 +126,17 @@ export default function ElevatorHub() {
                  <label style={{ fontSize: '0.85rem', color: 'var(--accent-yellow)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                    <AlertTriangle size={14} /> Aviso Cliente (Atrasos/Paralisações)
                  </label>
-                 <input 
-                    type="text"
+                 <textarea 
                     className="input-field" 
                     value={elevator?.supervisor_notes || ''} 
-                    placeholder="Escreva um motivo de atraso..."
+                    placeholder="Escreva um recado, aviso ou atualização para o cliente..."
                     onChange={async (e) => {
                       const val = e.target.value;
                       setElevator({...elevator, supervisor_notes: val});
                       await supabase.from('elevators').update({ supervisor_notes: val }).eq('id', id);
                     }}
-                    style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', width: '100%' }} 
+                    style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', color: 'white', width: '100%', minHeight: '40px', resize: 'vertical' }} 
+                    rows={2}
                  />
               </div>
             </div>
