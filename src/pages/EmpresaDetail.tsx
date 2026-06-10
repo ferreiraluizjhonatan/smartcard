@@ -20,9 +20,9 @@ export function EmpresaDetail() {
     setLoading(true);
     if (!id) return;
 
-    const { data: empData } = await supabase
+    const { data: empData, error } = await supabase
       .from('empresas_contratadas')
-      .select('*')
+      .select('*, companies(name)')
       .eq('id', id)
       .single();
 
@@ -105,6 +105,11 @@ export function EmpresaDetail() {
             <span className={empresa.status === 'Ativa' ? 'badge badge-green' : 'badge badge-red'}>
               {empresa.status}
             </span>
+            {empresa.companies?.name && (
+              <span className="badge" style={{ background: 'rgba(255,255,255,0.1)', color: 'var(--text-secondary)' }}>
+                Filial: {empresa.companies.name}
+              </span>
+            )}
           </div>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>CNPJ: {empresa.cnpj}</p>
         </div>

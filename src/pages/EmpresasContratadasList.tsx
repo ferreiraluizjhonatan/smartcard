@@ -10,18 +10,25 @@ export function EmpresasContratadasList() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Todas');
+  const [filialFilter, setFilialFilter] = useState('Todas');
+  const [filiais, setFiliais] = useState<any[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isModalImportOpen, setIsModalImportOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [canRegisterUsers, setCanRegisterUsers] = useState(false);
   const navigate = useNavigate();
 
+  const fetchFiliais = async () => {
+    const { data } = await supabase.from('companies').select('id, name').order('name');
+    if (data) setFiliais(data);
+  };
+
   const fetchEmpresas = async () => {
     setLoading(true);
     
     const { data: empresasData, error } = await supabase
       .from('empresas_contratadas')
-      .select('*, tecnicos_empresas(count)')
+      .select('*, tecnicos_empresas(count), companies(name)')
       .order('created_at', { ascending: false });
 
     if (!error && empresasData) {
@@ -42,6 +49,7 @@ export function EmpresasContratadasList() {
   };
 
   useEffect(() => {
+    fetchFiliais();
     fetchEmpresas();
     fetchUserRole();
   }, []);
@@ -53,7 +61,8 @@ export function EmpresasContratadasList() {
     const matchesSearch = emp.razao_social.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           emp.cnpj.includes(searchTerm);
     const matchesStatus = statusFilter === 'Todas' || emp.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesFilial = filialFilter === 'Todas' || emp.company_id === filialFilter;
+    return matchesSearch && matchesStatus && matchesFilial;
   });
 
   return (
@@ -102,6 +111,18 @@ export function EmpresasContratadasList() {
             <option value="Ativa">Ativa</option>
             <option value="Inativa">Inativa</option>
           </select>
+
+          <select
+            value={filialFilter}
+            onChange={(e) => setFilialFilter(e.target.value)}
+            className="select-field"
+            style={{ width: '180px' }}
+          >
+            <option value="Todas">Todas as Filiais</option>
+            {filiais.map(f => (
+              <option key={f.id} value={f.id}>{f.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -132,7 +153,12 @@ export function EmpresasContratadasList() {
                 <h3 style={{ fontSize: '1.25rem', marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {empresa.nome_fantasia}
                 </h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: 0 }}>{empresa.cnpj}</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', margin: '0 0 8px 0' }}>{empresa.cnpj}</p>
+                {empresa.companies?.name && (
+                  <span style={{ fontSize: '0.8rem', padding: '4px 8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', color: 'var(--text-secondary)' }}>
+                    Filial: {empresa.companies.name}
+                  </span>
+                )}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>

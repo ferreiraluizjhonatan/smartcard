@@ -21,8 +21,19 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: 
     endereco: '',
     cidade: '',
     estado: '',
-    observacoes: ''
+    observacoes: '',
+    company_id: ''
   });
+  
+  const [filiais, setFiliais] = useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchFiliais = async () => {
+      const { data } = await supabase.from('companies').select('id, name').order('name');
+      if (data) setFiliais(data);
+    };
+    fetchFiliais();
+  }, []);
   
   React.useEffect(() => {
     if (empresaToEdit && isOpen) {
@@ -36,7 +47,8 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: 
         endereco: empresaToEdit.endereco || '',
         cidade: empresaToEdit.cidade || '',
         estado: empresaToEdit.estado || '',
-        observacoes: empresaToEdit.observacoes || ''
+        observacoes: empresaToEdit.observacoes || '',
+        company_id: empresaToEdit.company_id || ''
       });
     } else if (isOpen) {
       setFormData({
@@ -49,7 +61,8 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: 
         endereco: '',
         cidade: '',
         estado: '',
-        observacoes: ''
+        observacoes: '',
+        company_id: ''
       });
     }
   }, [empresaToEdit, isOpen]);
@@ -158,20 +171,30 @@ export function ModalNovaEmpresa({ isOpen, onClose, onSuccess, empresaToEdit }: 
                 <input required name="cnpj" value={formData.cnpj} onChange={handleChange} className="input-field" placeholder="00.000.000/0000-00" />
               </div>
               <div className="input-group" style={{ marginBottom: 0 }}>
-                <label>Responsável *</label>
-                <input required name="responsavel" value={formData.responsavel} onChange={handleChange} className="input-field" placeholder="Nome do Responsável" />
+                <label>Filial Vinculada</label>
+                <select name="company_id" value={formData.company_id} onChange={handleChange as any} className="input-field" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                  <option value="">Selecione a Filial...</option>
+                  {filiais.map(f => (
+                    <option key={f.id} value={f.id}>{f.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
               <div className="input-group" style={{ marginBottom: 0 }}>
+                <label>Responsável *</label>
+                <input required name="responsavel" value={formData.responsavel} onChange={handleChange} className="input-field" placeholder="Nome do Responsável" />
+              </div>
+              <div className="input-group" style={{ marginBottom: 0 }}>
                 <label>Telefone *</label>
                 <input required name="telefone" value={formData.telefone} onChange={handleChange} className="input-field" placeholder="(00) 00000-0000" />
               </div>
-              <div className="input-group" style={{ marginBottom: 0 }}>
-                <label>E-mail *</label>
-                <input required type="email" name="email" value={formData.email} onChange={handleChange} className="input-field" placeholder="contato@empresa.com" />
-              </div>
+            </div>
+
+            <div className="input-group" style={{ marginBottom: '16px' }}>
+              <label>E-mail *</label>
+              <input required type="email" name="email" value={formData.email} onChange={handleChange} className="input-field" placeholder="contato@empresa.com" />
             </div>
 
             <div style={{ margin: '24px 0', borderTop: '1px solid var(--border-color)', paddingTop: '24px' }}>

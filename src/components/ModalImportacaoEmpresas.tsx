@@ -46,6 +46,18 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
   // Strategy Option
   const [conflictStrategy, setConflictStrategy] = useState<'ignore' | 'update' | 'update_link'>('ignore');
 
+  // Filiais
+  const [filiais, setFiliais] = useState<any[]>([]);
+  const [selectedFilial, setSelectedFilial] = useState<string>('');
+
+  React.useEffect(() => {
+    const fetchFiliais = async () => {
+      const { data } = await supabase.from('companies').select('id, name').order('name');
+      if (data) setFiliais(data);
+    };
+    fetchFiliais();
+  }, []);
+
   // Report Data
   const [report, setReport] = useState({
     empresasImportadas: 0,
@@ -261,10 +273,12 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
             if (data) empresaIdMap[cnpj] = data.id;
             continue;
           } else {
-            // Update
+            const updatePayload = { ...row.empresa };
+            if (selectedFilial) updatePayload.company_id = selectedFilial;
+            
             const { data, error } = await supabase
               .from('empresas_contratadas')
-              .update(row.empresa)
+              .update(updatePayload)
               .eq('cnpj', cnpj)
               .select('id')
               .single();
@@ -273,10 +287,12 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
             atualizados++;
           }
         } else {
-          // Insert new
+          const insertPayload = { ...row.empresa };
+          if (selectedFilial) insertPayload.company_id = selectedFilial;
+
           const { data, error } = await supabase
             .from('empresas_contratadas')
-            .insert([row.empresa])
+            .insert([insertPayload])
             .select('id')
             .single();
           if (error) throw error;
@@ -289,12 +305,10 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       }
     }
 
-    // Process technicians
     const techniciansToInsert = [];
     for (const row of mappedRows) {
       if (row.hasTecnico && row.empresa.cnpj) {
         const empId = empresaIdMap[row.empresa.cnpj];
-        // Only insert if empId exists AND (it's a new company OR strategy allows linking)
         if (empId && (row.status === 'valid' || row.status === 'internal_duplicate' || conflictStrategy === 'update_link')) {
            techniciansToInsert.push({
              ...row.tecnico,
@@ -304,7 +318,6 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       }
     }
 
-    // Batch insert technicians (chunks of 100)
     const chunkSize = 100;
     for (let i = 0; i < techniciansToInsert.length; i += chunkSize) {
       const chunk = techniciansToInsert.slice(i, i + chunkSize);
@@ -319,7 +332,6 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
 
     const timeMs = Date.now() - startTime;
 
-    // Log to DB
     await supabase.from('importacoes_empresas').insert([{
       arquivo: file?.name || 'desconhecido',
       empresas_importadas: empOk,
@@ -359,7 +371,6 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
         margin: '16px', overflow: 'hidden', padding: 0
       }}>
         
-        {/* Header */}
         <div style={{
           display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
           padding: '20px 24px', borderBottom: '1px solid var(--border-color)', backgroundColor: 'rgba(255,255,255,0.02)'
@@ -380,7 +391,6 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
           </button>
         </div>
 
-        {/* Content */}
         <div style={{ padding: '32px', minHeight: '300px' }}>
           
           {stage === 'upload' && (
@@ -439,28 +449,33 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
 
               <div style={{ marginBottom: '24px' }}>
                 <h4 style={{ marginBottom: '12px', fontSize: '1rem' }}>Estratégia para registros duplicados:</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                    <input type="radio" name="strategy" checked={conflictStrategy === 'ignore'} onChange={() => setConflictStrategy('ignore')} />
-                    <div>
-                      <div style={{ fontWeight: 500 }}>Ignorar Existentes</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Pula CNPJs que já constam no banco de dados.</div>
-                    </div>
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-                    <input type="radio" name="strategy" checked={conflictStrategy === 'update'} onChange={() => setConflictStrategy('update')} />
-                    <div>
-                      <div style={{ fontWeight: 500 }}>Atualizar Cadastro</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Sobrescreve os dados da empresa existente com os da planilha.</div>
-                    </div>
-                  </label>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', padding: '12px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid var(--accent-cyan)' }}>
-                    <input type="radio" name="strategy" checked={conflictStrategy === 'update_link'} onChange={() => setConflictStrategy('update_link')} />
-                    <div>
-                      <div style={{ fontWeight: 500, color: 'var(--accent-cyan)' }}>Atualizar e Vincular Novos Técnicos (Recomendado)</div>
-                      <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Atualiza a empresa e atrela os novos técnicos listados na planilha a ela.</div>
-                    </div>
-                  </label>
+                <div className="input-group">
+                  <label>Comportamento para Empresas já Cadastradas (CNPJ igual)</label>
+                  <select 
+                    value={conflictStrategy} 
+                    onChange={(e) => setConflictStrategy(e.target.value as any)}
+                    className="input-field"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                  >
+                    <option value="ignore">Ignorar Empresa (só importar se for nova)</option>
+                    <option value="update">Atualizar dados da Empresa com os da planilha</option>
+                    <option value="update_link">Atualizar dados da Empresa E adicionar o Técnico a ela</option>
+                  </select>
+                </div>
+
+                <div className="input-group" style={{ marginTop: '16px' }}>
+                  <label>Vincular Empresas Importadas a qual Filial? (Opcional)</label>
+                  <select 
+                    value={selectedFilial} 
+                    onChange={(e) => setSelectedFilial(e.target.value)}
+                    className="input-field"
+                    style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}
+                  >
+                    <option value="">Não vincular a nenhuma filial</option>
+                    {filiais.map(f => (
+                      <option key={f.id} value={f.id}>{f.name}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
