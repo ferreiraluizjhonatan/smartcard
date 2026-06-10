@@ -17,15 +17,33 @@ export default function Dashboard() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [empresasStats, setEmpresasStats] = useState({ total: 0, ativas: 0, inativas: 0, tecnicos: 0 });
   
-  // Filter States
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
-  const [fCountry, setFCountry] = useState('Brasil');
-  const [fRegion, setFRegion] = useState('');
-  const [fBranch, setFBranch] = useState('');
-  const [fSupervisor, setFSupervisor] = useState('');
-  const [fTeam, setFTeam] = useState('');
+  // Filter States (Persist in localStorage)
+  const [isFiltersOpen, setIsFiltersOpen] = useState(localStorage.getItem('dash_isFiltersOpen') === 'true');
+  const [fCountry, setFCountry] = useState(localStorage.getItem('dash_fCountry') || 'Brasil');
+  const [fRegion, setFRegion] = useState(localStorage.getItem('dash_fRegion') || '');
+  const [fBranch, setFBranch] = useState(localStorage.getItem('dash_fBranch') || '');
+  const [fSupervisor, setFSupervisor] = useState(localStorage.getItem('dash_fSupervisor') || '');
+  const [fTeam, setFTeam] = useState(localStorage.getItem('dash_fTeam') || '');
   
   const [isForecastOpen, setIsForecastOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('dash_isFiltersOpen', isFiltersOpen.toString());
+    localStorage.setItem('dash_fCountry', fCountry);
+    localStorage.setItem('dash_fRegion', fRegion);
+    localStorage.setItem('dash_fBranch', fBranch);
+    localStorage.setItem('dash_fSupervisor', fSupervisor);
+    localStorage.setItem('dash_fTeam', fTeam);
+  }, [isFiltersOpen, fCountry, fRegion, fBranch, fSupervisor, fTeam]);
+
+  const clearFilters = () => {
+    setFCountry('Brasil');
+    setFRegion('');
+    setFBranch('');
+    setFSupervisor('');
+    setFTeam('');
+  };
+
 
   useEffect(() => {
     fetchStats();
@@ -443,8 +461,16 @@ export default function Dashboard() {
       {/* Advanced Filters */}
       {isFiltersOpen && (
         <div className="glass-panel" style={{ padding: '20px', marginBottom: '32px', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center', borderTop: '2px solid var(--accent-cyan)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)', fontWeight: 'bold', marginRight: '16px' }}>
-            Refinar Resultados:
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)', fontWeight: 'bold', marginRight: '16px', flex: '1 1 100%' }}>
+            <span>Refinar Resultados:</span>
+            {(fCountry !== 'Brasil' || fRegion || fBranch || fSupervisor || fTeam) && (
+              <button 
+                onClick={clearFilters}
+                style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', cursor: 'pointer', marginLeft: 'auto' }}
+              >
+                Limpar Filtros
+              </button>
+            )}
           </div>
           
           <div className="input-group" style={{ marginBottom: 0, flex: '1 1 150px' }}>
