@@ -16,6 +16,7 @@ export default function ElevatorHub() {
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
   const [isLogsModalOpen, setIsLogsModalOpen] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<any>(null);
+  const [lastUpdateUser, setLastUpdateUser] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -50,7 +51,7 @@ export default function ElevatorHub() {
       // Buscar último log para o card
       const { data: lastLog } = await supabase
          .from('checklist_progress_log')
-         .select('created_at')
+         .select('created_at, user_profiles(full_name)')
          .eq('elevator_id', id)
          .order('created_at', { ascending: false })
          .limit(1)
@@ -58,6 +59,7 @@ export default function ElevatorHub() {
          
       if (lastLog) {
          setLastUpdate(lastLog.created_at);
+         setLastUpdateUser(lastLog.user_profiles?.full_name || null);
       }
     }
     setLoading(false);
@@ -264,7 +266,7 @@ export default function ElevatorHub() {
           </h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Rastreamento de Atividades:</p>
           <div style={{ fontSize: '0.95rem', color: 'var(--accent-yellow)', marginTop: '24px' }}>
-             {lastUpdate ? `Última att: ${new Date(lastUpdate).toLocaleString('pt-BR')} por ${elevator?.mechanic_name || 'Mecânico'}` : 'Ver logs do banco de dados'}
+             {lastUpdate ? `Última att: ${new Date(lastUpdate).toLocaleString('pt-BR')} por ${lastUpdateUser || elevator?.mechanic_name || 'Mecânico'}` : 'Ver logs do banco de dados'}
           </div>
         </div>
 
