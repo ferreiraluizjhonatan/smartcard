@@ -7,15 +7,30 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-async function sendTelegramMessage(chatId: string, text: string) {
+async function sendTelegramMessage(chatId: string, text: string, reply_markup?: any) {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+  const body: any = { chat_id: chatId, text, parse_mode: 'Markdown' };
+  if (reply_markup) body.reply_markup = reply_markup;
+
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text }),
+    body: JSON.stringify(body),
   });
   const json = await res.json();
-  console.log('Telegram response:', json);
+  
+  if (!json.ok) {
+     console.error("Telegram Error with Markdown:", json);
+     // Fallback without Markdown
+     delete body.parse_mode;
+     const resFallback = await fetch(url, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(body),
+     });
+     const jsonFb = await resFallback.json();
+     if (!jsonFb.ok) console.error("Telegram Error Fallback:", jsonFb);
+  }
 }
 
 const corsHeaders = {
@@ -186,17 +201,12 @@ serve(async (req) => {
         const msg = `Fala, ${roleGreeting}! Tudo bem? 👷‍♂️\n\nEstou passando pra gente dar aquela atualizada rápida na obra *${task.projectDisplayName}* (Fase: ${phase}).`;
         
         if (hasTelegram) {
-          const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-          await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: user.telegram_id, text: msg }) });
+          await sendTelegramMessage(user.telegram_id, msg);
           
           const firstItem = task.checklists[task.firstPendingIndex];
-          const questionMsg = `🏢 Obra: *${task.projectDisplayName}*\n📌 Fase ${task.firstPendingIndex + 1}/${task.checklists.length} – *${firstItem.item_name}*\n\nA atividade foi executada?`;
-          await fetch(url, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              chat_id: user.telegram_id, text: questionMsg, parse_mode: 'Markdown',
-              reply_markup: { inline_keyboard: [[{ text: 'SIM', callback_data: 'YES' }], [{ text: 'NÃO', callback_data: 'NO' }]] }
-            }),
+          const questionMsg = `🏢 Obra: *${task.projectDisplayName}*\n📌 Fase ${task.firstPendingIndex + 1}/${task.checklists.length} – *${firstItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
+          await sendTelegramMessage(user.telegram_id, questionMsg, {
+            inline_keyboard: [[{ text: 'SIM', callback_data: 'YES' }], [{ text: 'NÃO', callback_data: 'NO' }]]
           });
           messagesSent++;
         }
@@ -217,13 +227,8 @@ serve(async (req) => {
              return [{ text: task.projectDisplayName, callback_data: `CHOOSE_ELEV_${index}` }];
           });
 
-          const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-          await fetch(url, {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              chat_id: user.telegram_id, text: msg, parse_mode: 'Markdown',
-              reply_markup: { inline_keyboard: buttons }
-            }),
+          await sendTelegramMessage(user.telegram_id, msg, {
+            inline_keyboard: buttons
           });
           messagesSent++;
         }

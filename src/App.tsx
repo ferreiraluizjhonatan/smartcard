@@ -23,6 +23,7 @@ import { EmpresasContratadasList } from './pages/EmpresasContratadasList';
 import { EmpresaDetail } from './pages/EmpresaDetail';
 import MestrePortal from './pages/MestrePortal';
 import MechanicPortal from './pages/MechanicPortal';
+import ClientWeeklyReport from './pages/Public/ClientWeeklyReport';
 import './App.css';
 
 function App() {
@@ -54,6 +55,7 @@ function App() {
         <Route path="/login" element={!session ? <Auth /> : <Navigate to="/" />} />
         <Route path="/update-password" element={<UpdatePassword />} />
         <Route path="/tracking/:id" element={<ClientPortal />} />
+        <Route path="/client-report/:id" element={<ClientWeeklyReport />} />
         <Route path="/mestre/:projectName" element={<MestrePortal />} />
         <Route path="/mecanico/:telegramId" element={<MechanicPortal />} />
         <Route path="/" element={session ? <Layout /> : <Navigate to="/login" />}>

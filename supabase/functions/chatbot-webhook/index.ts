@@ -7,13 +7,30 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-async function sendTelegramMessage(chatId: string, text: string) {
+async function sendTelegramMessage(chatId: string, text: string, reply_markup?: any) {
   const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-  await fetch(url, {
+  const body: any = { chat_id: chatId, text, parse_mode: 'Markdown' };
+  if (reply_markup) body.reply_markup = reply_markup;
+
+  const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text }),
+    body: JSON.stringify(body),
   });
+  const json = await res.json();
+  
+  if (!json.ok) {
+     console.error("Telegram Error with Markdown:", json);
+     // Fallback without Markdown
+     delete body.parse_mode;
+     const resFallback = await fetch(url, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json' },
+       body: JSON.stringify(body),
+     });
+     const jsonFb = await resFallback.json();
+     if (!jsonFb.ok) console.error("Telegram Error Fallback:", jsonFb);
+  }
 }
 
 // Function to handle the state machine logic
@@ -38,19 +55,10 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
   if (!states || states.length === 0) {
     if (platform === 'telegram') {
       const msg = `Olá! Que bom falar com você! 👋\n\nAqui é o assistente virtual da Smart Card, sempre pronto pra te ajudar a manter suas obras organizadas e em dia.\n\nVamos dar uma olhada se temos alguma atualização pra fazer hoje? Só clicar no botão abaixo! 👇`;
-      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-      await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          chat_id: senderId, 
-          text: msg,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '🔄 Sincronizar / Atualizar Obras', callback_data: 'check_updates' }]
-            ]
-          }
-        }),
+      await sendTelegramMessage(senderId, msg, {
+        inline_keyboard: [
+          [{ text: '🔄 Sincronizar / Atualizar Obras', callback_data: 'check_updates' }]
+        ]
       });
     }
     return;
@@ -70,19 +78,10 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
 
     const greeting = `${reason}\n\n👋 Olá! Bem-vindo ao assistente da Smart Card.\n\nPara verificar se há pendências nas suas obras ou iniciar suas atualizações, clique no botão abaixo:`;
     if (platform === 'telegram') {
-      const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-      await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          chat_id: senderId, 
-          text: greeting,
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: '🔄 Sincronizar / Atualizar Obras', callback_data: 'check_updates' }]
-            ]
-          }
-        }),
+      await sendTelegramMessage(senderId, greeting, {
+        inline_keyboard: [
+          [{ text: '🔄 Sincronizar / Atualizar Obras', callback_data: 'check_updates' }]
+        ]
       });
     }
   }
@@ -108,39 +107,23 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
           const phase = nextElevator ? nextElevator.status.replace('_', ' ').toUpperCase() : '';
           const msg = `Excelente! 🛠️\n\nAgora vamos atualizar a obra *${projectName}* (Fase: ${phase}).\n\nQual o progresso atual?`;
           if (platform === 'telegram') {
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                chat_id: senderId, 
-                text: msg,
-                reply_markup: {
-                  inline_keyboard: [
-                    [{ text: '✅ 100% (Concluído)', callback_data: '100' }],
-                    [{ text: '🟦 75% Concluído', callback_data: '75' }],
-                    [{ text: '🟨 50% Concluído', callback_data: '50' }],
-                    [{ text: '🟧 25% Concluído', callback_data: '25' }],
-                    [{ text: '⚪ 0% (Ainda não avancei)', callback_data: '0' }]
-                  ]
-                }
-              })
+            await sendTelegramMessage(senderId, msg, {
+              inline_keyboard: [
+                [{ text: '✅ 100% (Concluído)', callback_data: '100' }],
+                [{ text: '🟦 75% Concluído', callback_data: '75' }],
+                [{ text: '🟨 50% Concluído', callback_data: '50' }],
+                [{ text: '🟧 25% Concluído', callback_data: '25' }],
+                [{ text: '⚪ 0% (Ainda não avancei)', callback_data: '0' }]
+              ]
             });
           }
        } else if (nextState.current_step === 'asking_checklist') {
           const msg = `Tudo certo! 👍\n\nAgora vamos para o checklist de segurança da obra *${projectName}*. Podemos começar?`;
           if (platform === 'telegram') {
-            await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                chat_id: senderId, 
-                text: msg,
-                reply_markup: {
-                  inline_keyboard: [
-                    [{ text: '👍 Sim, começar checklist', callback_data: 'start_checklist' }]
-                  ]
-                }
-              })
+            await sendTelegramMessage(senderId, msg, {
+              inline_keyboard: [
+                [{ text: '👍 Sim, começar checklist', callback_data: 'start_checklist' }]
+              ]
             });
           }
        }
@@ -194,27 +177,9 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
       const questionMsg = `Excelente escolha! 👍\n\n🏢 Obra: *${chosenTask.projectDisplayName}*\n📌 Fase ${chosenTask.firstPendingIndex + 1}/${chosenTask.checklists.length} – *${firstItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
       
       if (platform === 'telegram') {
-        const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-        const res = await fetch(url, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            chat_id: senderId, text: questionMsg, parse_mode: 'Markdown',
-            reply_markup: { inline_keyboard: [[{ text: 'SIM', callback_data: 'YES' }], [{ text: 'NÃO', callback_data: 'NO' }]] }
-          }),
+        await sendTelegramMessage(senderId, questionMsg, {
+          inline_keyboard: [[{ text: 'SIM', callback_data: 'YES' }], [{ text: 'NÃO', callback_data: 'NO' }]]
         });
-        
-        const json = await res.json();
-        if (!json.ok) {
-           console.error("Telegram error:", json);
-           // Fallback without Markdown
-           await fetch(url, {
-             method: 'POST', headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ 
-               chat_id: senderId, text: questionMsg.replace(/\*/g, ''),
-               reply_markup: { inline_keyboard: [[{ text: 'SIM', callback_data: 'YES' }], [{ text: 'NÃO', callback_data: 'NO' }]] }
-             }),
-           });
-        }
       }
     } catch (err: any) {
       console.error(err);
@@ -279,7 +244,10 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        if (t === 'no') {
          // User clicked NO -> Not started, 0%
          await supabase.from(tableName).update({ percentage: 0, is_started: false }).eq('id', currentItem.id);
-         currentIndex++;
+         
+         do {
+           currentIndex++;
+         } while (currentIndex < items.length && items[currentIndex].percentage === 100);
 
          if (currentIndex < items.length) {
            // Move to NEXT item and ask execution
@@ -291,21 +259,11 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
            const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
            
            if (platform === 'telegram') {
-             const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-             await fetch(url, {
-               method: 'POST',
-               headers: { 'Content-Type': 'application/json' },
-               body: JSON.stringify({ 
-                 chat_id: senderId, 
-                 text: msg,
-                 parse_mode: 'Markdown',
-                 reply_markup: {
-                   inline_keyboard: [
-                      [{ text: 'SIM', callback_data: 'YES' }],
-                      [{ text: 'NÃO', callback_data: 'NO' }]
-                   ]
-                 }
-               })
+             await sendTelegramMessage(senderId, msg, {
+               inline_keyboard: [
+                  [{ text: 'SIM', callback_data: 'YES' }],
+                  [{ text: 'NÃO', callback_data: 'NO' }]
+               ]
              });
            }
            return;
@@ -319,23 +277,13 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
          const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${currentItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nEscolha a evolução da atividade:`;
          
          if (platform === 'telegram') {
-           const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-           await fetch(url, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ 
-               chat_id: senderId, 
-               text: msg,
-               parse_mode: 'Markdown',
-               reply_markup: {
-                 inline_keyboard: [
-                    [{ text: '✅ 100% (Concluído)', callback_data: '100' }],
-                    [{ text: '🟦 75% Concluído', callback_data: '75' }],
-                    [{ text: '🟨 50% Concluído', callback_data: '50' }],
-                    [{ text: '🟧 25% Concluído', callback_data: '25' }]
-                 ]
-               }
-             })
+           await sendTelegramMessage(senderId, msg, {
+             inline_keyboard: [
+                [{ text: '✅ 100% (Concluído)', callback_data: '100' }],
+                [{ text: '🟦 75% Concluído', callback_data: '75' }],
+                [{ text: '🟨 50% Concluído', callback_data: '50' }],
+                [{ text: '🟧 25% Concluído', callback_data: '25' }]
+             ]
            });
          }
          return;
@@ -391,7 +339,9 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        // Save percentage
        await supabase.from(tableName).update({ percentage: pct, is_started: true }).eq('id', currentItem.id);
        
-       currentIndex++;
+       do {
+         currentIndex++;
+       } while (currentIndex < items.length && items[currentIndex].percentage === 100);
 
        if (currentIndex < items.length) {
          // Ask execution for the NEXT item
@@ -404,21 +354,11 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
          const msg = `Anotado! 📝\n\n🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
          
          if (platform === 'telegram') {
-           const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
-           await fetch(url, {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({ 
-               chat_id: senderId, 
-               text: msg,
-               parse_mode: 'Markdown',
-               reply_markup: {
-                 inline_keyboard: [
-                    [{ text: 'SIM', callback_data: 'YES' }],
-                    [{ text: 'NÃO', callback_data: 'NO' }]
-                 ]
-               }
-             })
+           await sendTelegramMessage(senderId, msg, {
+             inline_keyboard: [
+                [{ text: 'SIM', callback_data: 'YES' }],
+                [{ text: 'NÃO', callback_data: 'NO' }]
+             ]
            });
          }
          return;

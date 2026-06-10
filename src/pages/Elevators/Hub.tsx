@@ -103,11 +103,23 @@ export default function ElevatorHub() {
                 onClick={() => {
                   const url = `${window.location.origin}/tracking/${id}`;
                   navigator.clipboard.writeText(url);
-                  alert('Link Público do Cliente copiado para a área de transferência!');
+                  alert('Link Público (Visualização de Fotos/Anotações) copiado para a área de transferência!');
                 }}
                 style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', height: 'fit-content', whiteSpace: 'nowrap' }}
               >
-                <LinkIcon size={16}/> Copiar Link do Cliente
+                <LinkIcon size={16}/> Copiar Link Tracking
+              </button>
+              
+              <button 
+                className="btn-glow border-purple" 
+                onClick={() => {
+                  const url = `${window.location.origin}/client-report/${id}`;
+                  navigator.clipboard.writeText(url);
+                  alert('Relatório Restrito de Progresso (V2) copiado! Envie este link para o cliente acompanhar os gráficos e histórico.');
+                }}
+                style={{ padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', height: 'fit-content', whiteSpace: 'nowrap', background: 'rgba(168, 85, 247, 0.1)' }}
+              >
+                <Activity size={16}/> Copiar Relatório Cliente
               </button>
 
               <div className="input-group" style={{ marginBottom: 0, minWidth: '250px', flex: 1 }}>
