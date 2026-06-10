@@ -182,10 +182,11 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
         };
 
         const hasTecnico = !!mappedData.nome_tecnico;
+        const fallbackId = `${Date.now()}-${Math.floor(Math.random()*1000000)}-${empCount}-${tecCount}`;
         const tecnico: any = hasTecnico ? {
           nome: mappedData.nome_tecnico,
-          matricula: mappedData.matricula || `MAT-${Date.now()}-${Math.floor(Math.random()*1000)}`,
-          cpf: mappedData.cpf || (mappedData.cnpj ? `N/A-${Math.floor(Math.random()*1000)}` : ''),
+          matricula: mappedData.matricula || `MAT-${fallbackId}`,
+          cpf: mappedData.cpf || (mappedData.cnpj ? `N/A-${fallbackId}` : ''),
           rg: mappedData.rg || null,
           data_nascimento: parseDateString(mappedData.data_nascimento),
           data_admissao: parseDateString(mappedData.data_admissao),
