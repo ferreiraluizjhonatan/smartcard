@@ -15,7 +15,7 @@ interface MappedData {
   empresa: any;
   tecnico: any;
   hasTecnico: boolean;
-  status: 'valid' | 'duplicate_empresa' | 'duplicate_tecnico' | 'error';
+  status: 'valid' | 'duplicate_empresa' | 'internal_duplicate' | 'duplicate_tecnico' | 'error';
   errorMsg?: string;
 }
 
@@ -171,11 +171,13 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
           status = 'error';
           errorMsg = 'CNPJ não encontrado';
           errCount++;
-        } else if (existingCnpjs.has(empresa.cnpj) || sheetCnpjs.has(empresa.cnpj)) {
+        } else if (existingCnpjs.has(empresa.cnpj)) {
           status = 'duplicate_empresa';
           errorMsg = 'Empresa já existe';
           dupCount++;
-          // Still track it if we want to update/link
+        } else if (sheetCnpjs.has(empresa.cnpj)) {
+          status = 'internal_duplicate';
+          // It's just another technician for a new company we are about to create.
         } else {
           sheetCnpjs.add(empresa.cnpj);
           empCount++;
@@ -225,12 +227,14 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
     const empresaIdMap: Record<string, string> = {};
 
     // Group rows by Empresa to batch inserts
-    const validEmpresas = mappedRows.filter(r => r.status === 'valid' || r.status.startsWith('duplicate'));
+    const validEmpresas = mappedRows.filter(r => r.status === 'valid' || r.status === 'internal_duplicate' || r.status.startsWith('duplicate'));
     
     // Process unique empresas first
     const uniqueEmpresasMap = new Map<string, any>();
     validEmpresas.forEach(r => {
-      if (r.empresa.cnpj) uniqueEmpresasMap.set(r.empresa.cnpj, r);
+      if (r.empresa.cnpj && !uniqueEmpresasMap.has(r.empresa.cnpj)) {
+        uniqueEmpresasMap.set(r.empresa.cnpj, r);
+      }
     });
 
     for (const [cnpj, row] of uniqueEmpresasMap.entries()) {
@@ -276,7 +280,7 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       if (row.hasTecnico && row.empresa.cnpj) {
         const empId = empresaIdMap[row.empresa.cnpj];
         // Only insert if empId exists AND (it's a new company OR strategy allows linking)
-        if (empId && (row.status !== 'duplicate_empresa' || conflictStrategy === 'update_link')) {
+        if (empId && (row.status === 'valid' || row.status === 'internal_duplicate' || conflictStrategy === 'update_link')) {
            techniciansToInsert.push({
              ...row.tecnico,
              empresa_id: empId
