@@ -99,8 +99,19 @@ export function ModalImportacaoEmpresas({ isOpen, onClose, onSuccess }: ModalImp
       const parts = datePart.split('/');
       if (parts.length === 3) {
         let year = parts[2];
-        if (year.length === 2) year = `20${year}`;
-        return `${year}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        if (year.length === 2) {
+          year = parseInt(year, 10) > 50 ? `19${year}` : `20${year}`;
+        }
+        
+        let month = parts[1];
+        let day = parts[0];
+        if (parseInt(month, 10) > 12) {
+          // If month is > 12, it's likely MM/DD/YYYY format from excel
+          month = parts[0];
+          day = parts[1];
+        }
+        
+        return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
       }
       // try YYYY-MM-DD
       if (datePart.includes('-')) {
