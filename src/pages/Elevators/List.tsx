@@ -495,7 +495,7 @@ export default function ElevatorsList() {
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) return;
     
-    const { data: profile } = await supabase.from('user_profiles').select('company_id, role').eq('id', user.user.id).single();
+    const { data: profile } = await supabase.from('user_profiles').select('company_id, role, branch_name').eq('id', user.user.id).single();
     if (!profile) return;
     
     let query = supabase.from('elevators').select('*').order('created_at', { ascending: false });
@@ -504,6 +504,21 @@ export default function ElevatorsList() {
     if (profile.company_id && ['montador', 'ajustador', 'pre_instalador'].includes(profile.role)) {
       query = query.eq('company_id', profile.company_id);
     }
+
+    if (['supervisor', 'ajustador', 'pre_instalador'].includes(profile.role)) {
+      if (profile.branch_name && profile.branch_name.trim() !== '') {
+        const branches = profile.branch_name.split(',').map((b: string) => b.trim()).filter(Boolean);
+        if (branches.length > 1) {
+          query = query.in('branch', branches);
+        } else {
+          query = query.eq('branch', branches[0]);
+        }
+      } else {
+        // Se não tem filial cadastrada, bloqueia tudo para não vazar dados
+        query = query.eq('branch', 'BLOQUEADO_SEM_FILIAL');
+      }
+    }
+
     
     const { data } = await query;
     if (data) {
