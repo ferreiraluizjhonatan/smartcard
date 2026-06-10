@@ -13,6 +13,7 @@ export default function ClientPortal() {
   const [phaseTable, setPhaseTable] = useState<string>('pre_installation_checklists');
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [ticketHistory, setTicketHistory] = useState<any[]>([]);
   const [sendingMsg, setSendingMsg] = useState(false);
   const [mechanicNotes, setMechanicNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
@@ -47,6 +48,16 @@ export default function ClientPortal() {
       if (result.phase_table) {
         setPhaseTable(result.phase_table);
       }
+      
+      // Fetch ticket history for this elevator
+      const { data: ticketsData } = await supabase
+        .from('tickets')
+        .select('*, ticket_comments(*)')
+        .eq('elevator_id', id)
+        .eq('title', 'Mensagem do Mestre (Link Público)')
+        .order('created_at', { ascending: false });
+        
+      if (ticketsData) setTicketHistory(ticketsData);
     } catch (err: any) {
       console.error(err);
       // Fallback message if not found
@@ -74,6 +85,7 @@ export default function ClientPortal() {
       if (error || (result && result.error)) throw error || new Error(result.error);
       alert('Mensagem enviada com sucesso! A equipe SmartCard entrará em contato em breve.');
       setMessage('');
+      fetchData(); // Refresh history
     } catch(err) {
       console.error(err);
       alert('Erro ao enviar mensagem.');
@@ -459,6 +471,41 @@ export default function ClientPortal() {
              {sendingMsg ? 'Enviando Mensagem...' : 'Enviar Mensagem'}
            </button>
         </div>
+
+        {/* Ticket History */}
+        {ticketHistory.length > 0 && (
+          <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
+            <h4 style={{ margin: '0 0 16px 0', color: 'var(--text-primary)' }}>Histórico de Comunicação</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {ticketHistory.map(ticket => (
+                <div key={ticket.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontWeight: 'bold', color: 'var(--accent-cyan)' }}>Sua Mensagem</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{new Date(ticket.created_at).toLocaleString('pt-BR')}</span>
+                  </div>
+                  <p style={{ margin: '0 0 12px 0', fontSize: '0.95rem' }}>{ticket.description}</p>
+                  
+                  {ticket.ticket_comments && ticket.ticket_comments.length > 0 && (
+                    <div style={{ marginTop: '12px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {ticket.ticket_comments.map((comment: any) => (
+                        <div key={comment.id} style={{ background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '6px', marginLeft: '16px', borderLeft: '2px solid var(--accent-green)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                            <span style={{ fontWeight: 'bold', fontSize: '0.85rem', color: 'var(--accent-green)' }}>Resposta da Equipe</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{new Date(comment.created_at).toLocaleString('pt-BR')}</span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.9rem' }}>{comment.comment}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {(!ticket.ticket_comments || ticket.ticket_comments.length === 0) && (
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Aguardando resposta da equipe...</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
       
       {/* Global Mechanic Notes Panel */}
