@@ -389,7 +389,7 @@ export default function Dashboard() {
             <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1', color: 'var(--accent-green)' }}>{stats.concluidos}</div>
           </div>
 
-          <div className="neon-card border-red" style={{ padding: '24px' }}>
+          <div className="neon-card border-red" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => navigate('/forecasts')}>
             <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
               <Target size={18} color="#ef4444" /> Previsões de Entrega
             </div>
