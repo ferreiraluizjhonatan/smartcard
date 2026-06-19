@@ -56,7 +56,8 @@ serve(async (req) => {
         elevators_currently_in_assembly: inAssemblyCount,
         elevators_starting_next_month: nextMonthStarts,
       },
-      mechanics_database: mechanicMetrics // The AI will know every mechanic's profile, total assembled, speed, etc.
+      mechanics_database: mechanicMetrics, // The AI will know every mechanic's profile, total assembled, speed, etc.
+      spreadsheet_data: allElevators // ACESSO TOTAL À PLANILHA DE ELEVADORES IMPORTADA NO SISTEMA
     };
 
     const systemPrompt = `Você é o "Gemini Operacional", um Super Agente Especialista em Engenharia de Elevadores e Análise de Dados de Obras.
@@ -67,18 +68,18 @@ ${JSON.stringify(enrichedContext, null, 2)}
 
 Diretrizes de Especialista e Motor de Cronograma Inteligente:
 1. Você tem total conhecimento do sistema. Conhece o perfil de todos os montadores (na tabela mechanics_database), notas de confiabilidade e histórico de entregas.
-2. Motor de Cronograma Inteligente: Em "historical_schedule_metrics" (se disponível no contexto), você tem a média EXATA de dias que cada fase de "Montagem" e "Ajuste" demora, calculada com base no histórico real da empresa (agrupada por modelo e paradas).
-3. Se o usuário perguntar sobre previsão de tempo, cronograma ou qual fase demora mais, USE ESSES DADOS HISTÓRICOS. Calcule o tempo total estimado somando as médias de Montagem e Ajuste para o modelo específico. Destaque qual fase é o gargalo natural daquele modelo.
+2. Motor de Cronograma Inteligente: Em "historical_schedule_metrics" (se disponível no contexto), você tem a média EXATA de dias que cada fase de "Montagem" e "Ajuste" demora.
+3. Se o usuário perguntar sobre a PLANILHA IMPORTADA ou informações específicas de qualquer elevador (obra, modelo, andamento atual), procure imediatamente na variável "spreadsheet_data". Lá está o banco de dados completo (a planilha importada).
 4. Responda com uma linguagem profissional, direta e consultiva. Use listas e negrito para destacar números e nomes.
-5. NUNCA diga "Com base nos dados fornecidos". Haja como se você VIVESSE o sistema e soubesse de tudo nativamente. "Analisando nossa base atual..." ou "Vejo aqui no histórico de cronogramas que..."`;
+5. NUNCA diga "Com base nos dados fornecidos". Haja como se você VIVESSE o sistema e soubesse de tudo nativamente. "Acessei nossa planilha atualizada e vejo que..." ou "Consultando a base de obras..."`;
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) {
       throw new Error("GEMINI_API_KEY não configurada no servidor.");
     }
 
-    // Mudando para o modelo 1.5 Pro ou Flash (o 3.5 estava dando erro 503 de indisponibilidade)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
+    // Utilizando o gemini-2.5-flash disponível na chave de 2026
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiApiKey}`;
 
     const geminiPayload = {
       contents: [{
@@ -100,7 +101,16 @@ Diretrizes de Especialista e Motor de Cronograma Inteligente:
       
       if (!llmRes.ok) {
         const errorData = await llmRes.text();
-        throw new Error(`Gemini API Error: ${llmRes.status} - ${errorData}`);
+        
+        let availableModels = "";
+        try {
+           const modelsRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${geminiApiKey}`);
+           const modelsData = await modelsRes.json();
+           availableModels = modelsData.models ? modelsData.models.map((m: any) => m.name).join(', ') : "Nenhum modelo listado";
+        } catch(e: any) {
+           availableModels = "Falha ao buscar lista de modelos permitidos";
+        }
+        throw new Error(`Gemini API Error: ${llmRes.status} - ${errorData}. *** MODELOS PERMITIDOS NA SUA CHAVE: ${availableModels} ***`);
       }
       
       const llmData = await llmRes.json();

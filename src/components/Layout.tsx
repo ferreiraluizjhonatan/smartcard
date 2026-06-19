@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LogOut, Bell, Plus } from 'lucide-react';
+import { LogOut, Bell, Plus, Sparkles } from 'lucide-react';
+import AIChatModal from './AIChatModal';
 
 export default function Layout() {
   const [profile, setProfile] = useState<any>(null);
@@ -42,8 +43,11 @@ export default function Layout() {
     };
   }, []);
 
-  const handleLogout = () => {
-    supabase.auth.signOut();
+  const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
   };
 
   const roleNames: Record<string, string> = {
@@ -104,6 +108,16 @@ export default function Layout() {
         </div>
 
         <div className="nav-right">
+          <button 
+            onClick={() => setIsAIModalOpen(true)}
+            className="group relative flex items-center justify-center gap-2 bg-[#0b0f19] border border-cyan/40 text-cyan px-4 py-2 rounded-xl font-bold hover:text-white hover:border-cyan hover:shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all duration-300 overflow-hidden mr-2"
+            title="Assistente IA"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan/20 to-purple-600/20 translate-x-[-100%] group-hover:translate-x-[0%] transition-transform duration-500"></div>
+            <Sparkles size={16} className="relative z-10 animate-pulse" />
+            <span className="relative z-10 text-sm hidden sm:inline">IA</span>
+          </button>
+
           <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
             <div style={{ 
               background: openTicketsCount > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)', 
@@ -140,8 +154,9 @@ export default function Layout() {
             </span>
           </div>
 
-          <button onClick={handleLogout} className="btn btn-secondary" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <LogOut size={16} /> <span className="hide-on-mobile">Sair</span>
+          <button onClick={handleLogout} className="btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}>
+            <LogOut size={16} />
+            <span className="hide-on-mobile">Sair</span>
           </button>
         </div>
       </header>
