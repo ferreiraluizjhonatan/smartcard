@@ -78,7 +78,7 @@ Diretrizes de Especialista e Motor de Cronograma Inteligente:
     }
 
     // Mudando para o modelo 1.5 Pro ou Flash (o 3.5 estava dando erro 503 de indisponibilidade)
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`;
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${geminiApiKey}`;
 
     const geminiPayload = {
       contents: [{
