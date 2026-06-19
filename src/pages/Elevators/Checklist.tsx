@@ -385,8 +385,8 @@ export default function Checklist() {
                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MessageSquare size={14}/> Observações</label>
                    <textarea 
                      className="input-field" style={{ minHeight: '80px', resize: 'vertical' }}
-                     value={item.notes || ''}
-                     onChange={(e) => updateItem(item.id, 'notes', e.target.value)}
+                     defaultValue={item.notes || ''}
+                     onBlur={(e) => updateItem(item.id, 'notes', e.target.value)}
                      placeholder="Anotações técnicas..."
                    />
                  </div>
@@ -395,8 +395,8 @@ export default function Checklist() {
                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-red)' }}><AlertTriangle size={14}/> Pendências</label>
                    <textarea 
                      className="input-field" style={{ minHeight: '80px', resize: 'vertical', borderColor: 'rgba(255, 59, 48, 0.3)' }}
-                     value={item.pending_items || ''}
-                     onChange={(e) => updateItem(item.id, 'pending_items', e.target.value)}
+                     defaultValue={item.pending_items || ''}
+                     onBlur={(e) => updateItem(item.id, 'pending_items', e.target.value)}
                      placeholder="Bloqueios ou materiais faltando..."
                    />
                  </div>
@@ -406,8 +406,8 @@ export default function Checklist() {
                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-yellow)' }}><Clock size={14}/> Lembretes</label>
                      <input 
                        type="text" className="input-field" 
-                       value={item.reminders || ''}
-                       onChange={(e) => updateItem(item.id, 'reminders', e.target.value)}
+                       defaultValue={item.reminders || ''}
+                       onBlur={(e) => updateItem(item.id, 'reminders', e.target.value)}
                        placeholder="Ex: Trazer chave de torque na próxima visita..."
                      />
                    </div>
