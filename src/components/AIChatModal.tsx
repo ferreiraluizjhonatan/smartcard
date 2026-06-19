@@ -83,47 +83,55 @@ export function AIChatModal({ isOpen, onClose, contextData, elevatorId }: AIChat
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 sm:p-6 transition-all duration-500">
-      <div className="relative w-full max-w-3xl flex flex-col h-[75vh] sm:h-[80vh] rounded-[2.5rem] bg-[#0f172a]/40 backdrop-blur-2xl border-[1.5px] border-cyan-400/40 shadow-[0_0_80px_rgba(34,211,238,0.15)] overflow-hidden">
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', padding: '20px' }}>
+      <div className="glass-panel" style={{ position: 'relative', width: '100%', maxWidth: '800px', display: 'flex', flexDirection: 'column', height: '80vh', borderRadius: '32px', overflow: 'hidden', background: 'rgba(15, 23, 42, 0.6)', borderColor: 'rgba(0, 210, 255, 0.4)', boxShadow: '0 0 60px rgba(0, 210, 255, 0.15)' }}>
         
         {/* Glow Effects inside Modal */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/10 blur-[120px] pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-500/10 blur-[120px] pointer-events-none"></div>
+        <div style={{ position: 'absolute', top: 0, right: 0, width: '300px', height: '300px', background: 'rgba(0, 210, 255, 0.15)', filter: 'blur(100px)', pointerEvents: 'none' }}></div>
+        <div style={{ position: 'absolute', bottom: 0, left: 0, width: '300px', height: '300px', background: 'rgba(168, 85, 247, 0.15)', filter: 'blur(100px)', pointerEvents: 'none' }}></div>
 
-        <div className="flex justify-between items-center px-8 py-6 z-10">
-          <div className="flex items-center gap-3">
-            <Sparkles size={20} className="text-cyan-400" />
-            <h3 className="font-bold text-lg tracking-widest text-white/90">GEMINI ASSISTANT</h3>
-            <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,1)] ml-2"></div>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '24px 32px', zIndex: 10, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <Sparkles size={20} style={{ color: '#00d2ff' }} />
+            <h3 style={{ margin: 0, fontWeight: 700, fontSize: '1.1rem', letterSpacing: '2px', color: 'rgba(255,255,255,0.9)' }}>GEMINI ASSISTANT</h3>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00d2ff', boxShadow: '0 0 10px #00d2ff', marginLeft: '8px' }}></div>
           </div>
-          <button onClick={onClose} className="p-2 text-white/50 hover:text-white transition-colors">
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: '8px' }}>
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-8 py-4 space-y-6 z-10 scrollbar-hide">
+        {/* Chat Area */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 32px', display: 'flex', flexDirection: 'column', gap: '24px', zIndex: 10 }}>
           {messages.map(msg => (
-            <div key={msg.id} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className="flex flex-col gap-1 max-w-[85%]">
-                <div className={`p-5 rounded-3xl text-[15px] leading-relaxed shadow-lg backdrop-blur-md ${
-                  msg.role === 'user' 
-                    ? 'bg-[#0f172a]/60 border-[1.5px] border-cyan-400/50 text-cyan-50 rounded-br-sm' 
-                    : 'bg-[#0f172a]/60 border-[1.5px] border-purple-500/40 text-purple-50 rounded-bl-sm'
-                }`}>
+            <div key={msg.id} style={{ display: 'flex', width: '100%', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', maxWidth: '85%' }}>
+                <div style={{ 
+                  padding: '20px', 
+                  fontSize: '15px', 
+                  lineHeight: '1.6', 
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.2)', 
+                  backdropFilter: 'blur(10px)',
+                  background: 'rgba(15, 23, 42, 0.7)',
+                  border: msg.role === 'user' ? '1px solid rgba(0, 210, 255, 0.5)' : '1px solid rgba(168, 85, 247, 0.4)',
+                  color: msg.role === 'user' ? '#e0f7fa' : '#f3e8ff',
+                  borderRadius: msg.role === 'user' ? '24px 24px 4px 24px' : '24px 24px 24px 4px'
+                }}>
                   {msg.role === 'user' ? (
                     msg.content
                   ) : (
-                    <div className="prose-custom">
+                    <div style={{ color: 'rgba(255,255,255,0.9)' }}>
                       <ReactMarkdown
                         components={{
-                          strong: ({node, ...props}) => <strong className="text-white font-bold" {...props} />,
-                          h1: ({node, ...props}) => <h1 className="text-xl font-bold text-white mt-4 mb-2" {...props} />,
-                          h2: ({node, ...props}) => <h2 className="text-lg font-bold text-white mt-3 mb-2" {...props} />,
-                          h3: ({node, ...props}) => <h3 className="text-md font-bold text-cyan-300 mt-2 mb-1" {...props} />,
-                          ul: ({node, ...props}) => <ul className="list-disc pl-5 my-2 space-y-1 text-white/80" {...props} />,
-                          ol: ({node, ...props}) => <ol className="list-decimal pl-5 my-2 space-y-1 text-white/80" {...props} />,
-                          li: ({node, ...props}) => <li className="marker:text-cyan-400" {...props} />,
-                          p: ({node, ...props}) => <p className="mb-2 last:mb-0 text-white/90" {...props} />
+                          strong: ({node, ...props}) => <strong style={{ color: 'white', fontWeight: 'bold' }} {...props} />,
+                          h1: ({node, ...props}) => <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'white', margin: '16px 0 8px 0' }} {...props} />,
+                          h2: ({node, ...props}) => <h2 style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'white', margin: '12px 0 8px 0' }} {...props} />,
+                          h3: ({node, ...props}) => <h3 style={{ fontSize: '1rem', fontWeight: 'bold', color: '#00d2ff', margin: '8px 0 4px 0' }} {...props} />,
+                          ul: ({node, ...props}) => <ul style={{ paddingLeft: '20px', margin: '8px 0', display: 'flex', flexDirection: 'column', gap: '4px', color: 'rgba(255,255,255,0.8)' }} {...props} />,
+                          ol: ({node, ...props}) => <ol style={{ paddingLeft: '20px', margin: '8px 0', display: 'flex', flexDirection: 'column', gap: '4px', color: 'rgba(255,255,255,0.8)' }} {...props} />,
+                          li: ({node, ...props}) => <li style={{ color: 'inherit' }} {...props} />,
+                          p: ({node, ...props}) => <p style={{ margin: '0 0 8px 0' }} {...props} />
                         }}
                       >
                         {msg.content}
@@ -131,7 +139,7 @@ export function AIChatModal({ isOpen, onClose, contextData, elevatorId }: AIChat
                     </div>
                   )}
                 </div>
-                <span className={`text-[11px] text-white/40 font-medium px-2 ${msg.role === 'user' ? 'text-right' : 'text-left'}`}>
+                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', fontWeight: 500, padding: '0 8px', textAlign: msg.role === 'user' ? 'right' : 'left' }}>
                   {msg.role === 'user' ? 'Você' : 'Gemini AI'}
                 </span>
               </div>
@@ -139,35 +147,35 @@ export function AIChatModal({ isOpen, onClose, contextData, elevatorId }: AIChat
           ))}
           
           {loading && (
-            <div className="flex w-full justify-start animate-pulse">
-               <div className="bg-[#0f172a]/60 border-[1.5px] border-purple-500/40 text-purple-300 rounded-3xl rounded-bl-sm p-4 flex items-center gap-3">
-                 <Loader2 className="w-5 h-5 animate-spin" />
-                 <span className="font-medium text-sm">Analisando dados...</span>
+            <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-start' }}>
+               <div style={{ background: 'rgba(15, 23, 42, 0.7)', border: '1px solid rgba(168, 85, 247, 0.4)', color: '#d8b4fe', borderRadius: '24px 24px 24px 4px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                 <Loader2 size={20} className="animate-spin" />
+                 <span style={{ fontWeight: 500, fontSize: '14px' }}>Analisando dados...</span>
                </div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-6 z-10">
-          <form onSubmit={handleSend} className="relative">
-            <div className="relative group rounded-full overflow-hidden p-[2px]">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-purple-600 opacity-60 group-hover:opacity-100 transition-opacity"></div>
+        {/* Input Area */}
+        <div style={{ padding: '24px', zIndex: 10 }}>
+          <form onSubmit={handleSend} style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', borderRadius: '50px', overflow: 'hidden', padding: '2px', background: 'linear-gradient(90deg, #00d2ff, #a855f7)' }}>
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask Gemini about operational data..."
-                className="w-full relative z-10 bg-[#0f172a] rounded-full py-4 pl-6 pr-16 text-white placeholder-white/40 focus:outline-none"
+                style={{ width: '100%', background: '#0f172a', borderRadius: '50px', padding: '16px 64px 16px 24px', color: 'white', border: 'none', outline: 'none', fontSize: '15px' }}
                 disabled={loading}
               />
             </div>
             <button 
               type="submit" 
               disabled={loading || !input.trim()}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-cyan-400 text-[#0f172a] rounded-full hover:bg-cyan-300 hover:shadow-[0_0_15px_rgba(34,211,238,0.8)] transition-all z-20 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#00d2ff', color: '#0f172a', borderRadius: '50%', border: 'none', cursor: loading || !input.trim() ? 'not-allowed' : 'pointer', opacity: loading || !input.trim() ? 0.5 : 1, transition: 'all 0.3s' }}
             >
-              <Send size={18} className="ml-1" />
+              <Send size={18} style={{ marginLeft: '2px' }} />
             </button>
           </form>
         </div>
