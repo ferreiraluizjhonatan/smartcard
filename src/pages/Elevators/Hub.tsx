@@ -95,7 +95,7 @@ export default function ElevatorHub() {
   return (
     <div>
       <div style={{ marginBottom: '24px' }}>
-        <button className="btn btn-secondary" onClick={() => navigate('/elevators')} style={{ padding: '8px', marginBottom: '16px' }}>
+        <button className="btn btn-secondary" onClick={() => navigate(-1)} style={{ padding: '8px', marginBottom: '16px' }}>
           <ArrowLeft size={20} /> Voltar
         </button>
 

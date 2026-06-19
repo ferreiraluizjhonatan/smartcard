@@ -93,7 +93,7 @@ export function EmpresaDetail() {
     <div style={{ padding: '24px', animation: 'slideUp 0.3s ease' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '32px' }}>
-        <button onClick={() => navigate('/empresas-contratadas')} style={{ 
+        <button onClick={() => navigate(-1)} style={{ 
           background: 'rgba(255,255,255,0.05)', border: 'none', color: 'var(--text-primary)',
           padding: '12px', borderRadius: '12px', cursor: 'pointer'
         }}>

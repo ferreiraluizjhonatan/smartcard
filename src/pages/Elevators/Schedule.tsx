@@ -161,7 +161,7 @@ export default function Schedule() {
 
       <div className="no-print" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button className="btn btn-secondary" onClick={() => navigate(`/elevators/${id}/hub`)} style={{ padding: '8px' }}>
+          <button className="btn btn-secondary hide-print" onClick={() => navigate(-1)} style={{ padding: '8px' }}>
             <ArrowLeft size={20} />
           </button>
           <div>

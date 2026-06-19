@@ -254,7 +254,7 @@ export default function Checklist() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'space-between', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-          <button className="btn btn-secondary" onClick={() => navigate('/elevators')} style={{ padding: '8px' }}>
+          <button className="btn btn-secondary" onClick={() => navigate(-1)} style={{ padding: '8px' }}>
             <ArrowLeft size={20} />
           </button>
           <div>

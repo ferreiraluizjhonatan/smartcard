@@ -116,7 +116,7 @@ export default function ElevatorReport() {
       {/* Controles de Filtro (Escondidos na impressão) */}
       <div className="no-print" style={{ background: 'var(--bg-card)', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <button className="btn btn-secondary" onClick={() => navigate(`/elevators/${id}/hub`)} style={{ padding: '8px' }}>
+          <button className="btn btn-secondary hide-print" onClick={() => navigate(-1)} style={{ padding: '8px' }}>
             <ArrowLeft size={20} />
           </button>
           <h3 style={{ margin: 0, color: 'white' }}>Filtros do Relatório</h3>
