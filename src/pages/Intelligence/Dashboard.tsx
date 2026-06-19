@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Bot, TrendingUp, AlertTriangle, CheckCircle, Activity, Award } from 'lucide-react';
+import { Bot, TrendingUp, AlertTriangle, CheckCircle, Activity, Award, Sparkles } from 'lucide-react';
 import { AIChatModal } from '../../components/AIChatModal';
 
 interface MechanicMetrics {
@@ -53,13 +53,13 @@ export default function OperationalIntelligence() {
           <h1 className="text-3xl font-bold text-white mb-2">Inteligência Operacional</h1>
           <p className="text-gray-400">Análise de produtividade e perfis operacionais da equipe</p>
         </div>
-        
         <button 
           onClick={() => setIsAIModalOpen(true)}
-          className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-cyan text-white px-6 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity shadow-[0_0_20px_rgba(0,255,255,0.3)]"
+          className="group relative flex items-center gap-3 bg-[#0b0f19]/80 backdrop-blur-md border border-cyan/30 text-cyan px-6 py-3 rounded-xl font-bold hover:text-white hover:border-cyan hover:shadow-[0_0_30px_rgba(0,255,255,0.3)] transition-all duration-300 overflow-hidden"
         >
-          <Bot size={20} />
-          Solicitar Apoio da IA
+          <div className="absolute inset-0 bg-gradient-to-r from-cyan/20 to-purple-600/20 translate-x-[-100%] group-hover:translate-x-[0%] transition-transform duration-500"></div>
+          <Sparkles size={20} className="relative z-10 animate-pulse" />
+          <span className="relative z-10">Gemini Operacional</span>
         </button>
       </div>
 

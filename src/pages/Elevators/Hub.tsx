@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Activity, FileText, Calendar, Clock, AlertTriangle, Link as LinkIcon, Bot } from 'lucide-react';
+import { ArrowLeft, Activity, FileText, Calendar, Clock, AlertTriangle, Link as LinkIcon, Bot, Sparkles } from 'lucide-react';
 import { AIChatModal } from '../../components/AIChatModal';
 import { LogsModal } from '../../components/LogsModal';
 
@@ -282,14 +282,15 @@ export default function ElevatorHub() {
 
       </div>
 
-      {/* Botão Flutuante de Apoio da IA */}
-      <div style={{ position: 'fixed', bottom: '24px', right: '24px', zIndex: 90 }}>
+      {/* Botão Flutuante de Apoio da IA (Modernizado) */}
+      <div style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 90 }} className="group">
+         {/* Efeito de brilho giratório atrás do botão */}
+         <div className="absolute -inset-1 bg-gradient-to-r from-cyan to-purple-600 rounded-full blur opacity-40 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
          <button 
            onClick={() => setIsAIModalOpen(true)}
-           className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-cyan text-white px-6 py-4 rounded-full font-bold shadow-[0_0_20px_rgba(0,255,255,0.3)] hover:scale-105 transition-transform"
+           className="relative flex items-center justify-center bg-[#0b0f19]/90 backdrop-blur-xl border border-white/10 text-cyan w-16 h-16 rounded-full shadow-[0_0_30px_rgba(0,255,255,0.2)] hover:shadow-[0_0_40px_rgba(168,85,247,0.4)] hover:scale-110 hover:text-white transition-all duration-300"
          >
-           <Bot size={24} />
-           Apoio da IA
+           <Sparkles size={28} className="animate-pulse" />
          </button>
       </div>
 
