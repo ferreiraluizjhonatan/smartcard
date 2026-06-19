@@ -281,14 +281,24 @@ const ElevatorCard = ({ elevator, onEdit, onDelete, onStartAjuste, realizedPct =
 };
 
 const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onDelete, onStartAjuste, progressMap }: { group: any, colorClass: string, accentColor: string, onEdit: (el: any) => void, onDelete: (el: any) => void, onStartAjuste?: (el: any) => void, progressMap: Record<string, number> }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(() => sessionStorage.getItem('last_opened_group') === group.title);
+
+  const handleOpen = () => {
+    setIsOpen(true);
+    sessionStorage.setItem('last_opened_group', group.title);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    sessionStorage.removeItem('last_opened_group');
+  };
 
   return (
     <>
       <div className={`neon-card ${colorClass}`} style={{ padding: '24px', transition: 'all 0.3s ease', display: 'flex', flexDirection: 'column', height: '100%' }}>
         <div 
           style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', cursor: 'pointer', flex: 1 }} 
-          onClick={() => setIsOpen(true)}
+          onClick={handleOpen}
         >
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
@@ -367,7 +377,7 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onDelete, on
           display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
           padding: '40px 20px',
           overflowY: 'auto'
-        }} onClick={() => setIsOpen(false)}>
+        }} onClick={handleClose}>
           <div 
             className={`neon-card ${colorClass}`} 
             style={{ 
@@ -380,7 +390,7 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onDelete, on
             onClick={e => e.stopPropagation()}
           >
             <button 
-              onClick={() => setIsOpen(false)}
+              onClick={handleClose}
               style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', cursor: 'pointer', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
               onMouseOver={e => e.currentTarget.style.background = 'rgba(255,59,48,0.2)'}
               onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
