@@ -90,12 +90,13 @@ export default function Layout() {
                 <NavLink to="/empresas-contratadas" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                   Empresas Parceiras
                 </NavLink>
-                <NavLink 
-                  to="/intelligence" 
-                  className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                <button 
+                  onClick={() => setIsAIModalOpen(true)}
+                  className="nav-link"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit' }}
                 >
                   Inteligência
-                </NavLink>
+                </button>
               </>
             )}
             <NavLink to="/elevators" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
@@ -108,16 +109,6 @@ export default function Layout() {
         </div>
 
         <div className="nav-right">
-          <button 
-            onClick={() => setIsAIModalOpen(true)}
-            className="group relative flex items-center justify-center gap-2 bg-[#0b0f19] border border-cyan/40 text-cyan px-4 py-2 rounded-xl font-bold hover:text-white hover:border-cyan hover:shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all duration-300 overflow-hidden mr-2"
-            title="Assistente IA"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan/20 to-purple-600/20 translate-x-[-100%] group-hover:translate-x-[0%] transition-transform duration-500"></div>
-            <Sparkles size={16} className="relative z-10 animate-pulse" />
-            <span className="relative z-10 text-sm hidden sm:inline">IA</span>
-          </button>
-
           <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
             <div style={{ 
               background: openTicketsCount > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)', 
