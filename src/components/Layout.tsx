@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { LogOut, Bell, Plus, Sparkles } from 'lucide-react';
-import AIChatModal from './AIChatModal';
+import { AIChatModal } from './AIChatModal';
 
 export default function Layout() {
   const [profile, setProfile] = useState<any>(null);
