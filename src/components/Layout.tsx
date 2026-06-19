@@ -157,6 +157,15 @@ export default function Layout() {
           <Outlet />
         </div>
       </main>
+
+      <AIChatModal 
+        isOpen={isAIModalOpen} 
+        onClose={() => setIsAIModalOpen(false)}
+        contextData={{
+           view: 'Global Layout',
+           user: profile?.full_name
+        }}
+      />
     </div>
   );
 }
