@@ -408,19 +408,6 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="neon-card border-purple" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
-            <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
-              <Bell size={18} color="var(--accent-purple)" /> Chamados / Mensagens
-            </div>
-            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ocorrências pendentes:</div>
-            <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1', color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-purple)', marginBottom: '16px' }}>{ticketsCount}</div>
-            
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-              Status Global: <span style={{ color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-green)', fontWeight: 'bold' }}>
-                {ticketsCount > 0 ? 'Exige Atenção' : 'Caixa Vazia'}
-              </span>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -618,21 +605,6 @@ export default function Dashboard() {
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Confiança Média:</span>
             <span style={{ fontWeight: 'bold', color: 'var(--accent-cyan)', fontSize: '1.2rem' }}>{forecastSummary.avgConfidence}%</span>
-          </div>
-        </div>
-
-        {/* Card 5.5: Chamados / Mensagens */}
-        <div className="neon-card border-purple" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
-          <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
-            <Bell size={18} color="var(--accent-purple)" /> Chamados / Mensagens
-          </div>
-          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ocorrências pendentes:</div>
-          <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1', color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-purple)', marginBottom: '16px' }}>{ticketsCount}</div>
-          
-          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-            Status Global: <span style={{ color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-green)', fontWeight: 'bold' }}>
-              {ticketsCount > 0 ? 'Exige Atenção' : 'Caixa Vazia'}
-            </span>
           </div>
         </div>
 

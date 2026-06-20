@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LogOut, Bell, Plus, Sparkles } from 'lucide-react';
+import { LogOut, Bell, Plus, Sparkles, MessageSquare } from 'lucide-react';
 import { AIChatModal } from './AIChatModal';
 
 export default function Layout() {
   const [profile, setProfile] = useState<any>(null);
   const [openTicketsCount, setOpenTicketsCount] = useState(0);
+  const [openMessagesCount, setOpenMessagesCount] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,8 +22,15 @@ export default function Layout() {
                 const fetchCount = () => {
                   supabase.from('tickets').select('id', { count: 'exact' })
                     .eq('company_id', data.company_id)
+                    .neq('title', 'Mensagem do Mestre (Link Público)')
                     .neq('status', 'fechado')
                     .then(({ count }) => setOpenTicketsCount(count || 0));
+                  
+                  supabase.from('tickets').select('id', { count: 'exact' })
+                    .eq('company_id', data.company_id)
+                    .eq('title', 'Mensagem do Mestre (Link Público)')
+                    .neq('status', 'fechado')
+                    .then(({ count }) => setOpenMessagesCount(count || 0));
                 };
                 
                 fetchCount();
@@ -109,6 +117,30 @@ export default function Layout() {
           </nav>
 
         <div className="nav-right">
+          <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
+            <div style={{ 
+              background: openMessagesCount > 0 ? 'rgba(6, 182, 212, 0.1)' : 'rgba(255,255,255,0.05)', 
+              color: openMessagesCount > 0 ? 'var(--accent-cyan)' : 'var(--text-secondary)', 
+              padding: '8px', 
+              borderRadius: '50%',
+              border: openMessagesCount > 0 ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid var(--border-color)',
+              transition: 'all 0.3s',
+              marginRight: '8px'
+            }}>
+              <MessageSquare size={18} />
+            </div>
+            {openMessagesCount > 0 && (
+              <span style={{ 
+                position: 'absolute', top: '-4px', right: '4px', 
+                background: 'var(--accent-cyan)', color: '#000', 
+                fontSize: '0.65rem', fontWeight: 'bold', 
+                width: '16px', height: '16px', 
+                display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                borderRadius: '50%' 
+              }}>{openMessagesCount}</span>
+            )}
+          </div>
+
           <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
             <div style={{ 
               background: openTicketsCount > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(255,255,255,0.05)', 
