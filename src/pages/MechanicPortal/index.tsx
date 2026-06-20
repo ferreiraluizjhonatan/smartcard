@@ -19,28 +19,15 @@ export default function MechanicPortal() {
     try {
       if (!telegramId) return;
 
-      // First, try to find the mechanic in user_profiles
-      let mName = '';
-      const { data: profile } = await supabase.from('user_profiles').select('full_name').eq('telegram_id', telegramId).single();
-      if (profile) {
-        mName = profile.full_name;
-      } else {
-        // Fallback: try tecnicos_empresas
-        const { data: tech } = await supabase.from('tecnicos_empresas').select('nome').eq('telegram_id', telegramId).single();
-        if (tech) mName = tech.nome;
-      }
+      const { data, error } = await supabase.functions.invoke('get-mechanic-data', {
+        body: { telegramId }
+      });
 
-      setMechanicName(mName);
+      if (error) throw error;
 
-      if (mName) {
-        // Fetch elevators assigned to this mechanic in "montagem"
-        const { data: elevs } = await supabase.from('elevators')
-          .select('*')
-          .eq('mechanic_name', mName)
-          .eq('status', 'montagem')
-          .order('expected_end_date', { ascending: true });
-        
-        if (elevs) setElevators(elevs);
+      if (data) {
+        setMechanicName(data.mechanicName || '');
+        setElevators(data.elevators || []);
       }
     } catch (err) {
       console.error(err);

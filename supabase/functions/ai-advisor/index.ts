@@ -49,6 +49,14 @@ serve(async (req) => {
       }
     });
 
+    // Otimizando o tamanho dos dados para não estourar o limite da API Gratuita
+    const optimizedElevators = allElevators?.map(e => ({
+      id: e.id,
+      modelo: e.modelo,
+      paradas: e.paradas,
+      status: e.status
+    })) || [];
+
     const enrichedContext = {
       ...contextData,
       system_overview: {
@@ -57,7 +65,7 @@ serve(async (req) => {
         elevators_starting_next_month: nextMonthStarts,
       },
       mechanics_database: mechanicMetrics, // The AI will know every mechanic's profile, total assembled, speed, etc.
-      spreadsheet_data: allElevators // ACESSO TOTAL À PLANILHA DE ELEVADORES IMPORTADA NO SISTEMA
+      spreadsheet_data: optimizedElevators // ACESSO OTIMIZADO À PLANILHA
     };
 
     const systemPrompt = `Você é o "Gemini Operacional", um Super Agente Especialista em Engenharia de Elevadores e Análise de Dados de Obras.
