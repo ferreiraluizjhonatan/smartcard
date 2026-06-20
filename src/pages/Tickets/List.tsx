@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertCircle, MessageSquare, CheckCircle2, Clock, Plus, Send, ArrowLeft } from 'lucide-react';
+import { AlertCircle, MessageSquare, CheckCircle2, Clock, Plus, Send, ArrowLeft, Trash2 } from 'lucide-react';
 
 export default function TicketsList() {
   const [searchParams] = useSearchParams();
@@ -12,6 +12,7 @@ export default function TicketsList() {
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [filter, setFilter] = useState<'all' | 'aberto' | 'fechado'>('all');
 
   useEffect(() => {
     fetchTickets();
@@ -81,23 +82,58 @@ export default function TicketsList() {
     }
   };
 
+  const handleDeleteTicket = async (id: string) => {
+    if (!window.confirm('Tem certeza que deseja excluir este chamado permanentemente?')) return;
+    
+    // Remove os comentários e o chamado (se o bd não tiver on delete cascade)
+    await supabase.from('ticket_comments').delete().eq('ticket_id', id);
+    const { error } = await supabase.from('tickets').delete().eq('id', id);
+    
+    if (!error) {
+      if (selectedTicket?.id === id) setSelectedTicket(null);
+      fetchTickets();
+    } else {
+      alert('Erro ao excluir chamado.');
+    }
+  };
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', height: 'calc(100vh - 100px)' }}>
       
       {/* Left Panel: List of Tickets */}
       <div className="glass-panel" style={{ overflowY: 'auto', padding: '24px' }}>
-        <h2 style={{ margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {elevatorId && (
-            <button className="btn btn-secondary" onClick={() => window.history.back()} style={{ padding: '6px', marginRight: '8px' }}>
-              <ArrowLeft size={16} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {elevatorId && (
+              <button className="btn btn-secondary" onClick={() => window.history.back()} style={{ padding: '6px', marginRight: '8px' }}>
+                <ArrowLeft size={16} />
+              </button>
+            )}
+            <AlertCircle color="var(--accent-cyan)" /> Caixa de Ocorrências
+          </h2>
+          
+          <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.05)', padding: '4px', borderRadius: '8px' }}>
+            <button 
+              onClick={() => setFilter('all')} 
+              style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: filter === 'all' ? 'var(--accent-cyan)' : 'transparent', color: filter === 'all' ? '#000' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 'bold' }}>
+              Todos
             </button>
-          )}
-          <AlertCircle color="var(--accent-cyan)" /> Caixa de Ocorrências
-        </h2>
+            <button 
+              onClick={() => setFilter('aberto')} 
+              style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: filter === 'aberto' ? 'var(--accent-yellow)' : 'transparent', color: filter === 'aberto' ? '#000' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 'bold' }}>
+              Abertos
+            </button>
+            <button 
+              onClick={() => setFilter('fechado')} 
+              style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: filter === 'fechado' ? 'var(--accent-green)' : 'transparent', color: filter === 'fechado' ? '#000' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 'bold' }}>
+              Fechados
+            </button>
+          </div>
+        </div>
         
         {loading ? <p>Carregando...</p> : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {tickets.map(t => (
+            {tickets.filter(t => filter === 'all' || t.status === filter).map(t => (
               <div 
                 key={t.id} 
                 onClick={() => openTicket(t)}
@@ -120,7 +156,7 @@ export default function TicketsList() {
                 </div>
               </div>
             ))}
-            {tickets.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Nenhuma ocorrência registrada.</p>}
+            {tickets.filter(t => filter === 'all' || t.status === filter).length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Nenhuma ocorrência encontrada para este filtro.</p>}
           </div>
         )}
       </div>
@@ -135,11 +171,16 @@ export default function TicketsList() {
                   <h3 style={{ margin: '0 0 8px 0' }}>{selectedTicket.title}</h3>
                   <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Obra: {selectedTicket.elevators?.name}</p>
                 </div>
-                {selectedTicket.status !== 'fechado' && (
-                  <button className="btn-glow border-green" onClick={handleCloseTicket} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
-                    <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '4px' }}/> Resolver / Fechar
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {selectedTicket.status !== 'fechado' && (
+                    <button className="btn-glow border-green" onClick={handleCloseTicket} style={{ padding: '8px 16px', fontSize: '0.85rem' }}>
+                      <CheckCircle2 size={16} style={{ display: 'inline', marginRight: '4px' }}/> Resolver
+                    </button>
+                  )}
+                  <button onClick={() => handleDeleteTicket(selectedTicket.id)} className="btn-danger" style={{ padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="Excluir Chamado">
+                    <Trash2 size={16} />
                   </button>
-                )}
+                </div>
               </div>
               <div style={{ marginTop: '16px', background: 'rgba(0,0,0,0.3)', padding: '16px', borderRadius: '8px' }}>
                 <p style={{ margin: 0, color: 'var(--text-primary)' }}><strong>Descrição Original:</strong> {selectedTicket.description}</p>
