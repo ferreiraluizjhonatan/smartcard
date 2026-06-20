@@ -107,7 +107,6 @@ export default function Layout() {
               Chamados
             </NavLink>
           </nav>
-        </div>
 
         <div className="nav-right">
           <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
