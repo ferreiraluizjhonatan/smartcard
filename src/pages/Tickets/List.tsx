@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertCircle, MessageSquare, CheckCircle2, Clock, Plus, Send, ArrowLeft, Trash2 } from 'lucide-react';
+import { AlertCircle, MessageSquare, CheckCircle2, Clock, Plus, Send, ArrowLeft, Trash2, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 
 export default function TicketsList() {
   const [searchParams] = useSearchParams();
@@ -13,6 +13,8 @@ export default function TicketsList() {
   const [newComment, setNewComment] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [filter, setFilter] = useState<'all' | 'aberto' | 'fechado'>('all');
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchTickets();
@@ -97,6 +99,30 @@ export default function TicketsList() {
     }
   };
 
+  const toggleGroup = (id: string) => {
+    if (expandedGroups.includes(id)) {
+      setExpandedGroups(expandedGroups.filter(g => g !== id));
+    } else {
+      setExpandedGroups([...expandedGroups, id]);
+    }
+  };
+
+  const filteredTickets = tickets.filter(t => filter === 'all' || t.status === filter);
+  const groupedTickets = Object.values(
+    filteredTickets.reduce((acc, t) => {
+      const key = t.elevator_id || 'avulso';
+      if (!acc[key]) {
+        acc[key] = {
+          elevator_id: t.elevator_id,
+          elevator_name: t.elevators?.name || 'Obra Desconhecida',
+          tickets: []
+        };
+      }
+      acc[key].tickets.push(t);
+      return acc;
+    }, {} as Record<string, any>)
+  );
+
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', height: 'calc(100vh - 100px)' }}>
       
@@ -132,31 +158,59 @@ export default function TicketsList() {
         </div>
         
         {loading ? <p>Carregando...</p> : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {tickets.filter(t => filter === 'all' || t.status === filter).map(t => (
-              <div 
-                key={t.id} 
-                onClick={() => openTicket(t)}
-                style={{
-                  background: selectedTicket?.id === t.id ? 'rgba(0,255,255,0.1)' : 'rgba(0,0,0,0.2)',
-                  border: selectedTicket?.id === t.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
-                  padding: '16px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
-                }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{t.title}</span>
-                  <span className={`badge ${t.status === 'aberto' ? 'badge-yellow' : 'badge-green'}`}>
-                    {t.status.toUpperCase()}
-                  </span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {groupedTickets.map((group: any) => (
+              <div key={group.elevator_id || 'avulso'} style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid var(--border-color)', borderRadius: '8px', overflow: 'hidden' }}>
+                <div 
+                  onClick={() => toggleGroup(group.elevator_id || 'avulso')}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', background: 'rgba(255,255,255,0.02)', cursor: 'pointer', borderBottom: expandedGroups.includes(group.elevator_id || 'avulso') ? '1px solid var(--border-color)' : 'none' }}>
+                  
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {expandedGroups.includes(group.elevator_id || 'avulso') ? <ChevronDown size={20} color="var(--accent-cyan)" /> : <ChevronRight size={20} color="var(--accent-cyan)" />}
+                    <span style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>{group.elevator_name}</span>
+                    <span className="badge" style={{ background: 'rgba(255,255,255,0.1)' }}>{group.tickets.length}</span>
+                  </div>
+                  
+                  {group.elevator_id && (
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); navigate(`/elevators/${group.elevator_id}`); }}
+                      className="btn-glow" 
+                      style={{ padding: '6px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                      title="Ir para Obra"
+                    >
+                      <ExternalLink size={14} /> Obra
+                    </button>
+                  )}
                 </div>
-                <p style={{ margin: '0 0 8px 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                  {t.elevators?.name || 'Obra Desconhecida'}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                  <Clock size={12} /> {new Date(t.created_at).toLocaleDateString()}
-                </div>
+
+                {expandedGroups.includes(group.elevator_id || 'avulso') && (
+                  <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                    {group.tickets.map((t: any) => (
+                      <div 
+                        key={t.id} 
+                        onClick={() => openTicket(t)}
+                        style={{
+                          background: selectedTicket?.id === t.id ? 'rgba(0,255,255,0.1)' : 'rgba(255,255,255,0.03)',
+                          border: selectedTicket?.id === t.id ? '1px solid var(--accent-cyan)' : '1px solid var(--border-color)',
+                          padding: '16px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s'
+                        }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontWeight: 'bold', fontSize: '1rem', color: '#fff' }}>{t.title}</span>
+                          <span className={`badge ${t.status === 'aberto' ? 'badge-yellow' : 'badge-green'}`} style={{ fontSize: '0.75rem', padding: '2px 6px' }}>
+                            {t.status.toUpperCase()}
+                          </span>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                          <Clock size={12} /> {new Date(t.created_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
-            {tickets.filter(t => filter === 'all' || t.status === filter).length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Nenhuma ocorrência encontrada para este filtro.</p>}
+            
+            {filteredTickets.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>Nenhuma ocorrência encontrada para este filtro.</p>}
           </div>
         )}
       </div>
