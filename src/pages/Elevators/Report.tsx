@@ -86,7 +86,7 @@ export default function ElevatorReport() {
             )}
             
             {reportType === 'completo' && item.pending_items && (
-              <p style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'red' }}><strong>Pendência:</strong> {item.pending_items}</p>
+              <p className="text-red-print" style={{ margin: '0 0 8px 0', fontSize: '0.9rem', color: 'red' }}><strong>Pendência:</strong> {item.pending_items}</p>
             )}
 
             {item.photos_urls && item.photos_urls.length > 0 && (

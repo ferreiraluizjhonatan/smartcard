@@ -247,6 +247,12 @@ h1, h2, h3, h4, h5, h6 {
     color: black !important;
   }
 
+  p.text-red-print, span.text-red-print {
+    color: red !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .no-print {
     display: none !important;
   }
