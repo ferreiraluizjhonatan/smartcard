@@ -731,7 +731,7 @@ export default function Dashboard() {
                               </div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                 Função: {m.role} <br/>
-                                Obra Atual: <strong style={{ color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/elevators/${m.id}`)}>{m.currentObra}{m.project_name ? ` - ${m.project_name}` : ''}</strong>
+                                Obra Atual: <strong style={{ color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/elevators/${m.id}/hub`)}>{m.currentObra}{m.project_name ? ` - ${m.project_name}` : ''}</strong>
                               </div>
                             </div>
                           ))}
@@ -749,7 +749,7 @@ export default function Dashboard() {
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                 <strong 
                                   style={{ color: '#fff', cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center' }}
-                                  onClick={() => navigate(`/elevators/${o.id}`)}
+                                  onClick={() => navigate(`/elevators/${o.id}/hub`)}
                                 >
                                   {o.name}
                                   {o.project_name && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>- {o.project_name}</span>}
@@ -784,7 +784,7 @@ export default function Dashboard() {
                               <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: '6px' }}>
                                 <div 
                                   style={{ flex: 1, color: '#fff', fontWeight: 'bold', cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center' }}
-                                  onClick={() => navigate(`/elevators/${obra.id}`)}
+                                  onClick={() => navigate(`/elevators/${obra.id}/hub`)}
                                 >
                                   {obra.name}
                                   {obra.project_name && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>- {obra.project_name}</span>}
