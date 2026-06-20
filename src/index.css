@@ -249,6 +249,7 @@ h1, h2, h3, h4, h5, h6 {
 
   .text-red-print, .text-red-print * {
     color: red !important;
+    -webkit-text-fill-color: red !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
