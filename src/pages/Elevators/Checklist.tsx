@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, MessageSquare, AlertTriangle, Clock, Camera, Edit2, Award } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, MessageSquare, AlertTriangle, Clock, Camera, Edit2, Award, Plus } from 'lucide-react';
 
 export const renderItemName = (name: string) => {
   if (!name) return name;
@@ -26,9 +26,6 @@ export default function Checklist() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState<string>('');
   const [uploadingItem, setUploadingItem] = useState<string | null>(null);
-
-  const [items, setItems] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [ticketModal, setTicketModal] = useState<any>(null);
   const [ticketDescription, setTicketDescription] = useState('');
   const [deliveryModal, setDeliveryModal] = useState(false);
