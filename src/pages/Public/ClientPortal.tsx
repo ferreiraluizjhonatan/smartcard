@@ -147,11 +147,17 @@ export default function ClientPortal() {
     }
   };
 
-  const handleUpdateProgress = async (itemId: string, tableName: string, newPercentage: number, notes?: string) => {
+  const handleUpdateProgress = async (itemId: string, tableName: string, newPercentage: number, notes?: string, pending_items?: string, reminders?: string) => {
     // Optimistic UI Update
     setItems(items.map(it => {
       if (it.id === itemId) {
-        return { ...it, percentage: newPercentage, notes: notes !== undefined ? notes : it.notes };
+        return { 
+          ...it, 
+          percentage: newPercentage, 
+          notes: notes !== undefined ? notes : it.notes,
+          pending_items: pending_items !== undefined ? pending_items : it.pending_items,
+          reminders: reminders !== undefined ? reminders : it.reminders
+        };
       }
       return it;
     }));
@@ -164,7 +170,9 @@ export default function ClientPortal() {
             phase_table: tableName,
             item_id: itemId,
             percentage: newPercentage,
-            notes: notes
+            notes,
+            pending_items,
+            reminders
           }
         }
       });
@@ -412,26 +420,47 @@ export default function ClientPortal() {
                                   </button>
                                 ))}
                               </div>
-                              <textarea
-                                value={item.notes || ''}
-                                onChange={(e) => {
-                                  // Optimistic local update only for typing smoothness
-                                  setItems(items.map(it => it.id === item.id ? { ...it, notes: e.target.value } : it));
-                                }}
-                                onBlur={(e) => handleUpdateProgress(item.id, item.table_name, item.percentage || 0, e.target.value)}
-                                placeholder="Adicionar anotação ou lembrete do dia..."
-                                style={{
-                                  width: '100%',
-                                  background: 'rgba(0,0,0,0.2)',
-                                  border: '1px solid rgba(255,255,255,0.1)',
-                                  borderRadius: '4px',
-                                  padding: '8px 12px',
-                                  color: 'white',
-                                  resize: 'vertical',
-                                  minHeight: '60px',
-                                  fontSize: '0.9rem'
-                                }}
-                              />
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+                                <div className="input-group" style={{ margin: 0 }}>
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '4px' }}>
+                                    <MessageSquare size={14}/> Observações
+                                  </label>
+                                  <textarea
+                                    value={item.notes || ''}
+                                    onChange={(e) => setItems(items.map(it => it.id === item.id ? { ...it, notes: e.target.value } : it))}
+                                    onBlur={(e) => handleUpdateProgress(item.id, item.table_name, item.percentage || 0, e.target.value, item.pending_items, item.reminders)}
+                                    placeholder="Anotações técnicas..."
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '8px 12px', color: 'white', resize: 'vertical', minHeight: '60px', fontSize: '0.9rem' }}
+                                  />
+                                </div>
+
+                                <div className="input-group" style={{ margin: 0 }}>
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-red)', fontSize: '0.85rem', marginBottom: '4px' }}>
+                                    <AlertTriangle size={14}/> Pendências
+                                  </label>
+                                  <textarea
+                                    value={item.pending_items || ''}
+                                    onChange={(e) => setItems(items.map(it => it.id === item.id ? { ...it, pending_items: e.target.value } : it))}
+                                    onBlur={(e) => handleUpdateProgress(item.id, item.table_name, item.percentage || 0, item.notes, e.target.value, item.reminders)}
+                                    placeholder="Bloqueios ou materiais faltando..."
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255, 59, 48, 0.3)', borderRadius: '4px', padding: '8px 12px', color: 'white', resize: 'vertical', minHeight: '60px', fontSize: '0.9rem' }}
+                                  />
+                                </div>
+
+                                <div className="input-group" style={{ margin: 0, gridColumn: '1 / -1' }}>
+                                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-yellow)', fontSize: '0.85rem', marginBottom: '4px' }}>
+                                    <Clock size={14}/> Lembretes
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={item.reminders || ''}
+                                    onChange={(e) => setItems(items.map(it => it.id === item.id ? { ...it, reminders: e.target.value } : it))}
+                                    onBlur={(e) => handleUpdateProgress(item.id, item.table_name, item.percentage || 0, item.notes, item.pending_items, e.target.value)}
+                                    placeholder="Ex: Trazer chave de torque na próxima visita..."
+                                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '8px 12px', color: 'white', fontSize: '0.9rem' }}
+                                  />
+                                </div>
+                              </div>
                             </div>
                           )}
                         </div>

@@ -73,7 +73,7 @@ serve(async (req) => {
     }
 
     if (action === 'update_progress') {
-      const { phase_table, item_id, percentage, notes } = payload;
+      const { phase_table, item_id, percentage, notes, pending_items, reminders } = payload;
       
       if (!phase_table || !item_id || percentage === undefined) {
         return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -82,6 +82,12 @@ serve(async (req) => {
       const updateData: any = { percentage, updated_at: new Date().toISOString() };
       if (notes !== undefined) {
         updateData.notes = notes;
+      }
+      if (pending_items !== undefined) {
+        updateData.pending_items = pending_items;
+      }
+      if (reminders !== undefined) {
+        updateData.reminders = reminders;
       }
 
       const { error: updateError } = await supabase
