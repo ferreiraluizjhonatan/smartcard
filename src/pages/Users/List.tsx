@@ -42,7 +42,7 @@ const UserRow = ({ user, depth, navigate, handleDeleteUser }: any) => {
         </td>
         <td style={{ padding: '16px' }}>
           <span style={{ color: 'var(--accent-yellow)', fontWeight: 500, textTransform: 'capitalize' }}>
-            {user.role.replace('_', ' ')}
+            {user.role ? user.role.replace('_', ' ') : 'Sem cargo'}
           </span>
         </td>
         <td style={{ padding: '16px' }}>
