@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { Activity, Clock, Users, Calendar, CheckCircle2, Award, Globe, MapPin, Building, ShieldCheck, Filter, ChevronDown, ChevronUp, ChevronRight, TrendingUp, Target, Briefcase } from 'lucide-react';
+import { Activity, Clock, Users, Calendar, CheckCircle2, Award, Globe, MapPin, Building, ShieldCheck, Filter, ChevronDown, ChevronUp, ChevronRight, TrendingUp, Target, Briefcase, Bell } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
@@ -16,6 +16,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [empresasStats, setEmpresasStats] = useState({ total: 0, ativas: 0, inativas: 0, tecnicos: 0 });
+  const [ticketsCount, setTicketsCount] = useState(0);
   
   // Filter States (Persist in localStorage)
   const [isFiltersOpen, setIsFiltersOpen] = useState(localStorage.getItem('dash_isFiltersOpen') === 'true');
@@ -97,6 +98,10 @@ export default function Dashboard() {
     // Fetch Forecasts
     const { data: forecastData } = await supabase.from('previsoes_entrega').select('*');
     if (forecastData) setForecasts(forecastData);
+
+    // Fetch Tickets
+    const { count: tCount } = await supabase.from('tickets').select('id', { count: 'exact', head: true }).neq('status', 'fechado');
+    setTicketsCount(tCount || 0);
 
     // Fetch Assembly Checklists for real productivity calculation
     const { data: chkData } = await supabase.from('assembly_checklists').select('elevator_id, percentage');
@@ -402,6 +407,20 @@ export default function Dashboard() {
               </span>
             </div>
           </div>
+
+          <div className="neon-card border-purple" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
+            <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
+              <Bell size={18} color="var(--accent-purple)" /> Chamados / Mensagens
+            </div>
+            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ocorrências pendentes:</div>
+            <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1', color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-purple)', marginBottom: '16px' }}>{ticketsCount}</div>
+            
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+              Status Global: <span style={{ color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-green)', fontWeight: 'bold' }}>
+                {ticketsCount > 0 ? 'Exige Atenção' : 'Caixa Vazia'}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -599,6 +618,21 @@ export default function Dashboard() {
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>Confiança Média:</span>
             <span style={{ fontWeight: 'bold', color: 'var(--accent-cyan)', fontSize: '1.2rem' }}>{forecastSummary.avgConfidence}%</span>
+          </div>
+        </div>
+
+        {/* Card 5.5: Chamados / Mensagens */}
+        <div className="neon-card border-purple" style={{ padding: '24px', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
+          <div style={{ color: '#fff', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.1rem', fontWeight: 'bold' }}>
+            <Bell size={18} color="var(--accent-purple)" /> Chamados / Mensagens
+          </div>
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Ocorrências pendentes:</div>
+          <div style={{ fontSize: '3.5rem', fontWeight: 'bold', lineHeight: '1', color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-purple)', marginBottom: '16px' }}>{ticketsCount}</div>
+          
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+            Status Global: <span style={{ color: ticketsCount > 0 ? '#ef4444' : 'var(--accent-green)', fontWeight: 'bold' }}>
+              {ticketsCount > 0 ? 'Exige Atenção' : 'Caixa Vazia'}
+            </span>
           </div>
         </div>
 
