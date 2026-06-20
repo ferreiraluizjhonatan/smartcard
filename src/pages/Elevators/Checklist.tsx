@@ -27,10 +27,14 @@ export default function Checklist() {
   const [editingName, setEditingName] = useState<string>('');
   const [uploadingItem, setUploadingItem] = useState<string | null>(null);
 
-  // Ticket Modal State
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [ticketModal, setTicketModal] = useState<any>(null);
   const [ticketDescription, setTicketDescription] = useState('');
-  const [deliveryModal, setDeliveryModal] = useState<boolean>(false);
+  const [deliveryModal, setDeliveryModal] = useState(false);
+  const [generalPendingItems, setGeneralPendingItems] = useState<any[]>([]);
+  const [newPendingItem, setNewPendingItem] = useState('');
+  const [addingPending, setAddingPending] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -43,7 +47,6 @@ export default function Checklist() {
   };
 
   const fetchData = async () => {
-    setLoading(true);
     const { data: el } = await supabase.from('elevators').select('*').eq('id', id).single();
     if (el) {
       setElevator(el);
@@ -56,6 +59,17 @@ export default function Checklist() {
           return numA - numB;
         });
         setItems(chk);
+      }
+
+      if (el.status === 'ajuste') {
+        const { data: pendencias } = await supabase.from('tickets')
+          .select('*')
+          .eq('elevator_id', id)
+          .eq('title', 'Pendência Geral de Ajuste')
+          .order('created_at', { ascending: true });
+        if (pendencias) {
+          setGeneralPendingItems(pendencias);
+        }
       }
     }
     setLoading(false);
@@ -241,6 +255,37 @@ export default function Checklist() {
        setTicketDescription('');
     } else {
        alert('Erro ao abrir chamado: ' + error.message);
+    }
+  };
+
+  const handleAddPendingItem = async () => {
+    if (!newPendingItem.trim()) return;
+    setAddingPending(true);
+    const { data: user } = await supabase.auth.getUser();
+    if (user.user) {
+      const { error } = await supabase.from('tickets').insert({
+        company_id: elevator.company_id,
+        elevator_id: elevator.id,
+        title: 'Pendência Geral de Ajuste',
+        description: newPendingItem,
+        status: 'aberto',
+        created_by: user.user.id
+      });
+      if (!error) {
+        setNewPendingItem('');
+        fetchData();
+      } else {
+        alert('Erro ao adicionar pendência: ' + error.message);
+      }
+    }
+    setAddingPending(false);
+  };
+
+  const handleTogglePendingItem = async (item: any) => {
+    const newStatus = item.status === 'aberto' ? 'fechado' : 'aberto';
+    const { error } = await supabase.from('tickets').update({ status: newStatus }).eq('id', item.id);
+    if (!error) {
+      setGeneralPendingItems(prev => prev.map(p => p.id === item.id ? { ...p, status: newStatus } : p));
     }
   };
 
@@ -447,6 +492,62 @@ export default function Checklist() {
           </div>
         ))}
       </div>
+
+      {elevator?.status === 'ajuste' && (
+        <div className="glass-panel" style={{ padding: '24px', marginTop: '24px' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-red)', marginTop: 0 }}>
+            <AlertTriangle size={20} /> Pendências Gerais da Montagem
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            Anote aqui pendências deixadas pela equipe de montagem. Este campo serve como métrica e não sairá no relatório técnico.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+            {generalPendingItems.length === 0 && (
+              <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Nenhuma pendência anotada.</div>
+            )}
+            {generalPendingItems.map((p) => (
+              <div key={p.id} style={{ 
+                display: 'flex', alignItems: 'center', gap: '12px', 
+                background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px',
+                borderLeft: p.status === 'fechado' ? '4px solid var(--accent-green)' : '4px solid var(--accent-red)'
+              }}>
+                <button 
+                  onClick={() => handleTogglePendingItem(p)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.status === 'fechado' ? 'var(--accent-green)' : 'var(--text-secondary)', padding: 0, display: 'flex', alignItems: 'center' }}>
+                  {p.status === 'fechado' ? <CheckCircle2 size={20} /> : <div style={{ width: '18px', height: '18px', border: '2px solid var(--text-secondary)', borderRadius: '50%' }} />}
+                </button>
+                <span style={{ 
+                  color: 'white', flex: 1, 
+                  textDecoration: p.status === 'fechado' ? 'line-through' : 'none',
+                  opacity: p.status === 'fechado' ? 0.6 : 1
+                }}>
+                  {p.description}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="Digite uma nova pendência..." 
+              value={newPendingItem}
+              onChange={(e) => setNewPendingItem(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleAddPendingItem()}
+              style={{ flex: 1 }}
+            />
+            <button 
+              className="btn-glow border-red" 
+              onClick={handleAddPendingItem} 
+              disabled={addingPending || !newPendingItem.trim()}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Plus size={16} /> Adicionar Pendência
+            </button>
+          </div>
+        </div>
+      )}
 
       {ticketModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '24px' }}>
