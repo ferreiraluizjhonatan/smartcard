@@ -721,12 +721,17 @@ export default function Dashboard() {
                           {filteredMechanics.map((m, idx) => (
                             <div key={idx} style={{ background: 'rgba(234, 179, 8, 0.05)', padding: '12px', borderRadius: '4px', borderLeft: '3px solid var(--accent-yellow)' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <strong style={{ color: '#fff' }}>{m.mechanicName}</strong>
+                                <strong 
+                                  style={{ color: '#fff', cursor: 'help' }}
+                                  title={`Alocado atualmente na obra:\n${m.currentObra}${m.project_name ? ' - ' + m.project_name : ''}\nPrevisão de Liberação: ${new Date(m.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`}
+                                >
+                                  {m.mechanicName}
+                                </strong>
                                 <span style={{ color: 'var(--accent-yellow)', fontSize: '0.85rem' }}>{new Date(m.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
                               </div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                 Função: {m.role} <br/>
-                                Obra Atual: {m.currentObra}
+                                Obra Atual: <strong style={{ color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/elevators/${m.id}`)}>{m.currentObra}{m.project_name ? ` - ${m.project_name}` : ''}</strong>
                               </div>
                             </div>
                           ))}
@@ -742,7 +747,14 @@ export default function Dashboard() {
                           {filteredObras.map((o, idx) => (
                             <div key={idx} style={{ background: 'rgba(6, 182, 212, 0.05)', padding: '12px', borderRadius: '4px', borderLeft: '3px solid var(--accent-cyan)' }}>
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <strong style={{ color: '#fff' }}>{o.name}</strong>
+                                <strong 
+                                  style={{ color: '#fff', cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center' }}
+                                  onClick={() => navigate(`/elevators/${o.id}`)}
+                                >
+                                  {o.name}
+                                  {o.project_name && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>- {o.project_name}</span>}
+                                  <ChevronRight size={14} style={{ color: 'var(--accent-cyan)' }} />
+                                </strong>
                                 <span style={{ color: 'var(--accent-cyan)', fontSize: '0.85rem' }}>{new Date(o.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}</span>
                               </div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
@@ -770,9 +782,21 @@ export default function Dashboard() {
                             const mechanic = filteredMechanics[idx % filteredMechanics.length];
                             return (
                               <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: '6px' }}>
-                                <div style={{ flex: 1, color: '#fff', fontWeight: 'bold' }}>{obra.name}</div>
+                                <div 
+                                  style={{ flex: 1, color: '#fff', fontWeight: 'bold', cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center' }}
+                                  onClick={() => navigate(`/elevators/${obra.id}`)}
+                                >
+                                  {obra.name}
+                                  {obra.project_name && <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>- {obra.project_name}</span>}
+                                  <ChevronRight size={14} style={{ color: 'var(--accent-purple)' }} />
+                                </div>
                                 <div style={{ color: 'var(--accent-purple)' }}><ChevronRight size={20} /></div>
-                                <div style={{ flex: 1, color: 'var(--accent-yellow)', fontWeight: 'bold' }}>{mechanic.mechanicName}</div>
+                                <div 
+                                  style={{ flex: 1, color: 'var(--accent-yellow)', fontWeight: 'bold', cursor: 'help' }}
+                                  title={`Alocado atualmente na obra:\n${mechanic.currentObra}${mechanic.project_name ? ' - ' + mechanic.project_name : ''}\nPrevisão de Liberação: ${new Date(mechanic.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`}
+                                >
+                                  {mechanic.mechanicName}
+                                </div>
                               </div>
                             );
                           })}
