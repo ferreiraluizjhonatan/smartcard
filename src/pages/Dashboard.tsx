@@ -264,22 +264,51 @@ export default function Dashboard() {
           });
         }
       }
-      
-      // Mão de Obra sendo liberada (Términos) -> expected_end_date
-      // Consideramos apenas as que ainda não foram concluídas para o "forecast"
+    });
+
+    // Grouping mechanics to calculate actual Mão de Obra Liberada
+    const mechanicsMap = new Map<string, any>();
+
+    filteredData.forEach(e => {
       if (e.expected_end_date && e.status !== 'concluido') {
+        const mechanicName = e.mechanic_name || e.team_name;
+        if (!mechanicName) return;
+        
         const d = new Date(e.expected_end_date);
-        if (!isNaN(d.getTime()) && d.getFullYear() === currentYear) {
-          const monthIdx = d.getMonth();
-          data[monthIdx].MaoDeObraLiberada += 1;
-          data[monthIdx].mecanicosLivres.push({
-            ...e,
-            mechanicName: e.mechanic_name || e.team_name || 'Mecânico não definido',
+        if (isNaN(d.getTime())) return;
+
+        if (!mechanicsMap.has(mechanicName)) {
+          mechanicsMap.set(mechanicName, {
+            mechanicName,
             role: 'Técnico',
+            latestDate: d,
             expectedDate: e.expected_end_date,
-            currentObra: e.name
+            allocations: []
           });
         }
+
+        const mechanicData = mechanicsMap.get(mechanicName);
+        mechanicData.allocations.push({
+          id: e.id,
+          name: e.name,
+          project_name: e.project_name,
+          expectedDate: e.expected_end_date
+        });
+
+        // Update to latest date
+        if (d > mechanicData.latestDate) {
+          mechanicData.latestDate = d;
+          mechanicData.expectedDate = e.expected_end_date;
+        }
+      }
+    });
+
+    // Assign mechanics to their final release month
+    Array.from(mechanicsMap.values()).forEach(m => {
+      if (m.latestDate.getFullYear() === currentYear) {
+        const monthIdx = m.latestDate.getMonth();
+        data[monthIdx].MaoDeObraLiberada += 1;
+        data[monthIdx].mecanicosLivres.push(m);
       }
     });
     return data;
@@ -723,7 +752,7 @@ export default function Dashboard() {
                               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                 <strong 
                                   style={{ color: '#fff', cursor: 'help' }}
-                                  title={`Alocado atualmente na obra:\n${m.currentObra}${m.project_name ? ' - ' + m.project_name : ''}\nPrevisão de Liberação: ${new Date(m.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`}
+                                  title={`Alocado atualmente em ${m.allocations?.length || 1} obra(s):\n${m.allocations?.map((a: any) => `- ${a.name}${a.project_name ? ' (' + a.project_name + ')' : ''} [Liberação: ${new Date(a.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}]`).join('\n')}`}
                                 >
                                   {m.mechanicName}
                                 </strong>
@@ -731,7 +760,12 @@ export default function Dashboard() {
                               </div>
                               <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                                 Função: {m.role} <br/>
-                                Obra Atual: <strong style={{ color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/elevators/${m.id}/hub`)}>{m.currentObra}{m.project_name ? ` - ${m.project_name}` : ''}</strong>
+                                Obra(s) Atual(is): {m.allocations?.map((a: any, i: number) => (
+                                  <span key={i}>
+                                    <strong style={{ color: 'var(--text-secondary)', cursor: 'pointer', textDecoration: 'underline' }} onClick={() => navigate(`/elevators/${a.id}/hub`)}>{a.name}{a.project_name ? ` - ${a.project_name}` : ''}</strong>
+                                    {i < m.allocations.length - 1 ? ', ' : ''}
+                                  </span>
+                                ))}
                               </div>
                             </div>
                           ))}
@@ -793,7 +827,7 @@ export default function Dashboard() {
                                 <div style={{ color: 'var(--accent-purple)' }}><ChevronRight size={20} /></div>
                                 <div 
                                   style={{ flex: 1, color: 'var(--accent-yellow)', fontWeight: 'bold', cursor: 'help' }}
-                                  title={`Alocado atualmente na obra:\n${mechanic.currentObra}${mechanic.project_name ? ' - ' + mechanic.project_name : ''}\nPrevisão de Liberação: ${new Date(mechanic.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}`}
+                                  title={`Alocado atualmente em ${mechanic.allocations?.length || 1} obra(s):\n${mechanic.allocations?.map((a: any) => `- ${a.name}${a.project_name ? ' (' + a.project_name + ')' : ''} [Liberação: ${new Date(a.expectedDate).toLocaleDateString('pt-BR', { timeZone: 'UTC' })}]`).join('\n')}`}
                                 >
                                   {mechanic.mechanicName}
                                 </div>
