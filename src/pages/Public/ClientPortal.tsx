@@ -538,11 +538,61 @@ export default function ClientPortal() {
         )}
       </div>
       
+      {/* Summary of Notes (Mechanic Only) */}
+      {isMechanic && (
+        <div className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px', border: '1px solid var(--accent-cyan)' }}>
+          <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)' }}>
+            <FileText size={20} /> Resumo de Anotações das Fases
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
+            Lista de todas as observações, pendências e lembretes que você preencheu nos passos acima.
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '400px', overflowY: 'auto', paddingRight: '8px' }}>
+            {items.filter(it => it.notes || it.pending_items || it.reminders).length === 0 ? (
+              <div style={{ padding: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                Nenhuma anotação registrada nos itens da obra.
+              </div>
+            ) : (
+              items.filter(it => it.notes || it.pending_items || it.reminders).map(item => {
+                const cleanItemName = item.item_name.replace(/^\[.*?\]\s*/, '').replace(/^\d+\.\s*/, '');
+                return (
+                  <div key={item.id} style={{ background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px', borderLeft: '4px solid var(--accent-cyan)' }}>
+                    <h5 style={{ margin: '0 0 8px 0', fontSize: '0.95rem', color: 'var(--text-primary)' }}>{renderItemName(cleanItemName)}</h5>
+                    
+                    {item.notes && (
+                      <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                        <MessageSquare size={14} color="var(--text-secondary)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{item.notes}</span>
+                      </div>
+                    )}
+                    
+                    {item.pending_items && (
+                      <div style={{ display: 'flex', gap: '6px', marginBottom: '6px' }}>
+                        <AlertTriangle size={14} color="var(--accent-red)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--accent-red)' }}>{item.pending_items}</span>
+                      </div>
+                    )}
+                    
+                    {item.reminders && (
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <Clock size={14} color="var(--accent-yellow)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--accent-yellow)' }}>{item.reminders}</span>
+                      </div>
+                    )}
+                  </div>
+                )
+              })
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Global Mechanic Notes Panel */}
       {isMechanic && (
         <div className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px', border: '1px solid var(--accent-purple)' }}>
           <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-purple)' }}>
-            <FileText size={20} /> Tarefas e Lembretes da Obra
+            <FileText size={20} /> Anotações Gerais da Obra
           </h3>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
             Bloco de notas geral para o seu controle. O que você anotar aqui ficará salvo para você e o supervisor lerem.

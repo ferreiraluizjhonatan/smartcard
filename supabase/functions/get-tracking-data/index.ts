@@ -35,9 +35,9 @@ serve(async (req) => {
 
     // Fetch all phases
     const [preInst, assem, adjust] = await Promise.all([
-      supabase.from('pre_installation_checklists').select('id, item_name, is_started, percentage, planned_start_date, planned_end_date, photos_urls').eq('elevator_id', elevator_id).order('id'),
-      supabase.from('assembly_checklists').select('id, item_name, is_started, percentage, planned_start_date, planned_end_date, photos_urls').eq('elevator_id', elevator_id).order('id'),
-      supabase.from('adjustment_checklists').select('id, item_name, is_started, percentage, planned_start_date, planned_end_date, photos_urls').eq('elevator_id', elevator_id).order('id')
+      supabase.from('pre_installation_checklists').select('id, item_name, is_started, percentage, planned_start_date, planned_end_date, photos_urls, notes, pending_items, reminders').eq('elevator_id', elevator_id).order('id'),
+      supabase.from('assembly_checklists').select('id, item_name, is_started, percentage, planned_start_date, planned_end_date, photos_urls, notes, pending_items, reminders').eq('elevator_id', elevator_id).order('id'),
+      supabase.from('adjustment_checklists').select('id, item_name, is_started, percentage, planned_start_date, planned_end_date, photos_urls, notes, pending_items, reminders').eq('elevator_id', elevator_id).order('id')
     ]);
 
     let checklists: any[] = [];
