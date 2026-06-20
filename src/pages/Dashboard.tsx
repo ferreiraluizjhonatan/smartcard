@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { supabase } from '../lib/supabase';
-import { Activity, Clock, Users, Calendar, CheckCircle2, Award, Globe, MapPin, Building, ShieldCheck, Filter, ChevronDown, ChevronUp, ChevronRight, TrendingUp, Target, Briefcase, Bell } from 'lucide-react';
+import { Activity, Clock, Users, Calendar, CheckCircle2, Award, Globe, MapPin, Building, ShieldCheck, Filter, ChevronDown, ChevronUp, ChevronRight, TrendingUp, Target, Briefcase, Bell, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
@@ -665,9 +665,18 @@ export default function Dashboard() {
               <div style={{ fontSize: '3rem', fontWeight: 'bold', lineHeight: '1', color: '#fff' }}>{empresasStats.tecnicos}</div>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '16px', marginTop: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-            <div>Ativas: <span style={{ color: 'var(--accent-green)', fontWeight: 'bold' }}>{empresasStats.ativas}</span></div>
-            <div>Inativas: <span style={{ color: '#ef4444', fontWeight: 'bold' }}>{empresasStats.inativas}</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <div style={{ display: 'flex', gap: '16px', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+              <div>Ativas: <span style={{ color: 'var(--accent-green)', fontWeight: 'bold' }}>{empresasStats.ativas}</span></div>
+              <div>Inativas: <span style={{ color: '#ef4444', fontWeight: 'bold' }}>{empresasStats.inativas}</span></div>
+            </div>
+            <button 
+              onClick={(e) => { e.stopPropagation(); navigate('/intelligence'); }}
+              className="btn-glow"
+              style={{ fontSize: '0.8rem', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            >
+              <Sparkles size={14} /> Inteligência Operacional
+            </button>
           </div>
         </div>
       </div>

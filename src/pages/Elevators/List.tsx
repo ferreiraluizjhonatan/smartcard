@@ -79,7 +79,11 @@ const ElevatorCard = ({ elevator, onEdit, onDelete, onStartAjuste, realizedPct =
   };
 
   return (
-    <div className="glass-panel" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', border: '1px solid var(--border-color)' }}>
+    <div 
+      className="glass-panel hover-glow" 
+      onClick={() => navigate(`/elevators/${elevator.id}/hub`)}
+      style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px', border: '1px solid var(--border-color)', cursor: 'pointer', transition: 'all 0.3s' }}
+    >
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -153,7 +157,9 @@ const ElevatorCard = ({ elevator, onEdit, onDelete, onStartAjuste, realizedPct =
             <input 
               type="date"
               value={montagemPrevista}
+              onClick={(e) => e.stopPropagation()}
               onChange={async (e) => {
+                e.stopPropagation();
                 const newVal = e.target.value;
                 setMontagemPrevista(newVal);
                 const { error } = await supabase.from('elevators').update({ data_prevista_montagem: newVal || null }).eq('id', elevator.id);
@@ -180,7 +186,9 @@ const ElevatorCard = ({ elevator, onEdit, onDelete, onStartAjuste, realizedPct =
             <span style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>🔧 Liberação para Montagem:</span>
             <select 
               value={liberacaoStatus}
+              onClick={(e) => e.stopPropagation()}
               onChange={async (e) => {
+                e.stopPropagation();
                 const newVal = e.target.value;
                 setLiberacaoStatus(newVal);
                 const { error } = await supabase.from('elevators').update({ liberacao_montagem: newVal }).eq('id', elevator.id);
