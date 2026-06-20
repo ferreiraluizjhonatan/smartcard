@@ -6,13 +6,14 @@ import { AlertCircle, MessageSquare, CheckCircle2, Clock, Plus, Send, ArrowLeft,
 export default function TicketsList() {
   const [searchParams] = useSearchParams();
   const elevatorId = searchParams.get('elevator_id');
+  const typeParam = searchParams.get('type');
   const [tickets, setTickets] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState('');
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [filter, setFilter] = useState<'all' | 'aberto' | 'fechado'>('all');
+  const [filter, setFilter] = useState<'all' | 'aberto' | 'fechado' | 'mensagens'>(typeParam === 'messages' ? 'mensagens' : 'all');
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
   const navigate = useNavigate();
 
@@ -20,6 +21,10 @@ export default function TicketsList() {
     fetchTickets();
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
   }, []);
+
+  useEffect(() => {
+    if (typeParam === 'messages') setFilter('mensagens');
+  }, [typeParam]);
 
   const fetchTickets = async () => {
     setLoading(true);
@@ -107,7 +112,11 @@ export default function TicketsList() {
     }
   };
 
-  const filteredTickets = tickets.filter(t => filter === 'all' || t.status === filter);
+  const filteredTickets = tickets.filter(t => {
+    if (filter === 'all') return true;
+    if (filter === 'mensagens') return t.title === 'Mensagem do Mestre (Link Público)';
+    return t.status === filter && t.title !== 'Mensagem do Mestre (Link Público)'; // if 'aberto' or 'fechado', only show actual tickets, or maybe all? Let's just filter. Wait, if they just want a filter for messages, let's keep all tickets as they were.
+  });
   const groupedTickets = Object.values(
     filteredTickets.reduce((acc, t) => {
       const key = t.elevator_id || 'avulso';
@@ -153,6 +162,11 @@ export default function TicketsList() {
               onClick={() => setFilter('fechado')} 
               style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: filter === 'fechado' ? 'var(--accent-green)' : 'transparent', color: filter === 'fechado' ? '#000' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 'bold' }}>
               Fechados
+            </button>
+            <button 
+              onClick={() => setFilter('mensagens')} 
+              style={{ padding: '4px 12px', borderRadius: '6px', border: 'none', background: filter === 'mensagens' ? 'var(--accent-purple)' : 'transparent', color: filter === 'mensagens' ? '#fff' : 'var(--text-secondary)', cursor: 'pointer', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <MessageSquare size={14} /> Mensagens
             </button>
           </div>
         </div>
