@@ -173,7 +173,7 @@ export default function TicketsList() {
                   
                   {group.elevator_id && (
                     <button 
-                      onClick={(e) => { e.stopPropagation(); navigate(`/elevators/${group.elevator_id}`); }}
+                      onClick={(e) => { e.stopPropagation(); navigate(`/elevators/${group.elevator_id}/hub`); }}
                       className="btn-glow" 
                       style={{ padding: '6px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px' }}
                       title="Ir para Obra"
