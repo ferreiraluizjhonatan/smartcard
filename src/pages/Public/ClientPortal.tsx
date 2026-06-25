@@ -129,8 +129,9 @@ export default function ClientPortal() {
 
   const handleTogglePendingItem = async (p: any) => {
     const newStatus = p.status === 'aberto' ? 'fechado' : 'aberto';
+    const closedAt = newStatus === 'fechado' ? new Date().toISOString() : null;
     // Optimistic UI
-    setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: newStatus } : t));
+    setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: newStatus, closed_at: closedAt } : t));
     try {
       const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
         body: {
@@ -145,7 +146,7 @@ export default function ClientPortal() {
     } catch(err) {
       console.error(err);
       // Revert Optimistic
-      setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: p.status } : t));
+      setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: p.status, closed_at: p.closed_at } : t));
       alert('Erro ao atualizar status da pendência.');
     }
   };
@@ -757,10 +758,13 @@ export default function ClientPortal() {
                   <div style={{ textAlign: 'right', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                     <div style={{ marginBottom: '4px' }}>
                       {isClosed ? (
-                         <span>{createdDate} - Status: FECHADO{closedDate && ` (${closedDate})`}</span>
+                         <span>Abertura: {createdDate} | Fechamento: {closedDate || createdDate}</span>
                       ) : (
-                         <span>{createdDate} - Status: ABERTO</span>
+                         <span>Abertura: {createdDate}</span>
                       )}
+                    </div>
+                    <div style={{ fontWeight: 'bold', marginTop: '4px', color: isClosed ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>
+                       Status: {p.status.toUpperCase()}
                     </div>
                   </div>
                 </div>

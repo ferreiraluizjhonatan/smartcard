@@ -303,9 +303,10 @@ export default function Checklist() {
 
   const handleTogglePendingItem = async (item: any) => {
     const newStatus = item.status === 'aberto' ? 'fechado' : 'aberto';
-    const { error } = await supabase.from('tickets').update({ status: newStatus }).eq('id', item.id);
+    const closedAt = newStatus === 'fechado' ? new Date().toISOString() : null;
+    const { error } = await supabase.from('tickets').update({ status: newStatus, closed_at: closedAt }).eq('id', item.id);
     if (!error) {
-      setGeneralPendingItems(prev => prev.map(p => p.id === item.id ? { ...p, status: newStatus } : p));
+      setGeneralPendingItems(prev => prev.map(p => p.id === item.id ? { ...p, status: newStatus, closed_at: closedAt } : p));
     }
   };
 
