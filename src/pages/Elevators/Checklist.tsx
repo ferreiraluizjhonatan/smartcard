@@ -31,6 +31,7 @@ export default function Checklist() {
   const [deliveryModal, setDeliveryModal] = useState(false);
   const [generalPendingItems, setGeneralPendingItems] = useState<any[]>([]);
   const [newPendingItem, setNewPendingItem] = useState('');
+  const [newItemPending, setNewItemPending] = useState<Record<string, string>>({});
   const [addingPending, setAddingPending] = useState(false);
 
   useEffect(() => {
@@ -58,15 +59,13 @@ export default function Checklist() {
         setItems(chk);
       }
 
-      if (el.status === 'ajuste') {
-        const { data: pendencias } = await supabase.from('tickets')
-          .select('*')
-          .eq('elevator_id', id)
-          .eq('title', 'Pendência Geral de Ajuste')
-          .order('created_at', { ascending: true });
-        if (pendencias) {
-          setGeneralPendingItems(pendencias);
-        }
+      // Fetch all pending items/tickets for this elevator regardless of phase
+      const { data: pendencias } = await supabase.from('tickets')
+        .select('*')
+        .eq('elevator_id', id)
+        .order('created_at', { ascending: true });
+      if (pendencias) {
+        setGeneralPendingItems(pendencias);
       }
     }
     setLoading(false);
@@ -263,13 +262,37 @@ export default function Checklist() {
       const { error } = await supabase.from('tickets').insert({
         company_id: elevator.company_id,
         elevator_id: elevator.id,
-        title: 'Pendência Geral de Ajuste',
+        title: `Pendência (${elevator.status.toUpperCase()})`,
         description: newPendingItem,
         status: 'aberto',
         created_by: user.user.id
       });
       if (!error) {
         setNewPendingItem('');
+        fetchData();
+      } else {
+        alert('Erro ao adicionar pendência: ' + error.message);
+      }
+    }
+    setAddingPending(false);
+  };
+
+  const handleAddItemPending = async (item: any) => {
+    const text = newItemPending[item.id];
+    if (!text?.trim()) return;
+    setAddingPending(true);
+    const { data: user } = await supabase.auth.getUser();
+    if (user.user) {
+      const { error } = await supabase.from('tickets').insert({
+        company_id: elevator.company_id,
+        elevator_id: elevator.id,
+        title: item.item_name,
+        description: text,
+        status: 'aberto',
+        created_by: user.user.id
+      });
+      if (!error) {
+        setNewItemPending(prev => ({ ...prev, [item.id]: '' }));
         fetchData();
       } else {
         alert('Erro ao adicionar pendência: ' + error.message);
@@ -434,15 +457,55 @@ export default function Checklist() {
                  </div>
 
                  <div className="input-group">
-                   <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-red)' }}><AlertTriangle size={14}/> Pendências</label>
-                   <textarea 
-                     className="input-field" style={{ minHeight: '80px', resize: 'vertical', borderColor: 'rgba(255, 59, 48, 0.3)' }}
-                     defaultValue={item.pending_items || ''}
-                     onBlur={(e) => updateItem(item.id, 'pending_items', e.target.value)}
-                     placeholder="Bloqueios ou materiais faltando..."
-                   />
+                   <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-red)' }}>
+                     <AlertTriangle size={14}/> Pendências Desta Etapa
+                   </label>
+                   
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px', maxHeight: '150px', overflowY: 'auto' }}>
+                     {generalPendingItems.filter(p => p.title === item.item_name || p.title === `Problema: ${item.item_name}`).length === 0 && (
+                       <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.85rem' }}>Nenhuma pendência anotada.</div>
+                     )}
+                     {generalPendingItems.filter(p => p.title === item.item_name || p.title === `Problema: ${item.item_name}`).map((p) => (
+                       <div key={p.id} style={{ 
+                         display: 'flex', alignItems: 'center', gap: '8px', 
+                         background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px',
+                         borderLeft: p.status === 'fechado' ? '3px solid var(--accent-green)' : '3px solid var(--accent-red)'
+                       }}>
+                         <button 
+                           onClick={() => handleTogglePendingItem(p)}
+                           style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.status === 'fechado' ? 'var(--accent-green)' : 'var(--text-secondary)', padding: 0, display: 'flex', alignItems: 'center' }}>
+                           {p.status === 'fechado' ? <CheckCircle2 size={16} /> : <div style={{ width: '14px', height: '14px', border: '2px solid var(--text-secondary)', borderRadius: '50%' }} />}
+                         </button>
+                         <span style={{ 
+                           color: 'white', flex: 1, fontSize: '0.85rem',
+                           textDecoration: p.status === 'fechado' ? 'line-through' : 'none',
+                           opacity: p.status === 'fechado' ? 0.6 : 1
+                         }}>
+                           {p.description}
+                         </span>
+                       </div>
+                     ))}
+                   </div>
+                   
+                   <div style={{ display: 'flex', gap: '8px' }}>
+                     <input 
+                       type="text" 
+                       className="input-field" 
+                       placeholder="Digite uma nova pendência..." 
+                       value={newItemPending[item.id] || ''}
+                       onChange={(e) => setNewItemPending(prev => ({ ...prev, [item.id]: e.target.value }))}
+                       onKeyDown={(e) => e.key === 'Enter' && handleAddItemPending(item)}
+                       style={{ flex: 1, fontSize: '0.85rem', padding: '6px 10px' }}
+                     />
+                     <button 
+                       className="btn-glow border-red" 
+                       onClick={() => handleAddItemPending(item)} 
+                       disabled={addingPending || !(newItemPending[item.id]?.trim())}
+                       style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', padding: '6px 10px' }}>
+                       <Plus size={14} /> Adicionar
+                     </button>
+                   </div>
                  </div>
-
                  {elevator?.status === 'montagem' && (
                    <div className="input-group" style={{ gridColumn: '1 / -1' }}>
                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-yellow)' }}><Clock size={14}/> Lembretes</label>
@@ -490,40 +553,40 @@ export default function Checklist() {
         ))}
       </div>
 
-      {elevator?.status === 'ajuste' && (
-        <div className="glass-panel" style={{ padding: '24px', marginTop: '24px' }}>
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-red)', marginTop: 0 }}>
-            <AlertTriangle size={20} /> Pendências Gerais da Montagem
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            Anote aqui pendências deixadas pela equipe de montagem. Este campo serve como métrica e não sairá no relatório técnico.
-          </p>
+      <div className="glass-panel" style={{ padding: '24px', marginTop: '24px' }}>
+        <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-red)', marginTop: 0 }}>
+          <AlertTriangle size={20} /> Pendências e Chamados
+        </h3>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          Anote aqui as pendências ou problemas relatados desta obra. Clique no ícone para marcá-las como resolvidas.
+        </p>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
-            {generalPendingItems.length === 0 && (
-              <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Nenhuma pendência anotada.</div>
-            )}
-            {generalPendingItems.map((p) => (
-              <div key={p.id} style={{ 
-                display: 'flex', alignItems: 'center', gap: '12px', 
-                background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px',
-                borderLeft: p.status === 'fechado' ? '4px solid var(--accent-green)' : '4px solid var(--accent-red)'
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' }}>
+          {generalPendingItems.length === 0 && (
+            <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic' }}>Nenhuma pendência anotada.</div>
+          )}
+          {generalPendingItems.map((p) => (
+            <div key={p.id} style={{ 
+              display: 'flex', alignItems: 'center', gap: '12px', 
+              background: 'rgba(255,255,255,0.05)', padding: '12px', borderRadius: '8px',
+              borderLeft: p.status === 'fechado' ? '4px solid var(--accent-green)' : '4px solid var(--accent-red)'
+            }}>
+              <button 
+                onClick={() => handleTogglePendingItem(p)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.status === 'fechado' ? 'var(--accent-green)' : 'var(--text-secondary)', padding: 0, display: 'flex', alignItems: 'center' }}>
+                {p.status === 'fechado' ? <CheckCircle2 size={20} /> : <div style={{ width: '18px', height: '18px', border: '2px solid var(--text-secondary)', borderRadius: '50%' }} />}
+              </button>
+              <div style={{ 
+                color: 'white', flex: 1, 
+                textDecoration: p.status === 'fechado' ? 'line-through' : 'none',
+                opacity: p.status === 'fechado' ? 0.6 : 1
               }}>
-                <button 
-                  onClick={() => handleTogglePendingItem(p)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.status === 'fechado' ? 'var(--accent-green)' : 'var(--text-secondary)', padding: 0, display: 'flex', alignItems: 'center' }}>
-                  {p.status === 'fechado' ? <CheckCircle2 size={20} /> : <div style={{ width: '18px', height: '18px', border: '2px solid var(--text-secondary)', borderRadius: '50%' }} />}
-                </button>
-                <span style={{ 
-                  color: 'white', flex: 1, 
-                  textDecoration: p.status === 'fechado' ? 'line-through' : 'none',
-                  opacity: p.status === 'fechado' ? 0.6 : 1
-                }}>
-                  {p.description}
-                </span>
+                {p.title && <strong style={{ color: 'var(--accent-cyan)' }}>{p.title}: </strong>}
+                {p.description}
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
+        </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
             <input 
@@ -544,8 +607,6 @@ export default function Checklist() {
             </button>
           </div>
         </div>
-      )}
-
       {ticketModal && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '24px' }}>
           <div className="neon-card border-red" style={{ width: '100%', maxWidth: '500px' }}>

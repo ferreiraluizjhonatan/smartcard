@@ -23,27 +23,35 @@ serve(async (req) => {
        return new Response(JSON.stringify({ error: "Missing telegramId" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    let mName = '';
-    const { data: profile } = await supabase.from('user_profiles').select('full_name').eq('telegram_id', telegramId).single();
+    const searchId = String(telegramId).trim();
+    const mNames: string[] = [];
     
-    if (profile) {
-      mName = profile.full_name;
-    } else {
-      const { data: tech } = await supabase.from('tecnicos_empresas').select('nome').eq('telegram_id', telegramId).single();
-      if (tech) mName = tech.nome;
-    }
+    const { data: profiles } = await supabase.from('user_profiles').select('full_name').eq('telegram_id', searchId);
+    if (profiles) profiles.forEach((p: any) => { if (p.full_name) mNames.push(p.full_name) });
+    
+    const { data: techs } = await supabase.from('tecnicos_empresas').select('nome').eq('telegram_id', searchId);
+    if (techs) techs.forEach((t: any) => { if (t.nome) mNames.push(t.nome) });
 
-    if (!mName) {
-      return new Response(JSON.stringify({ mechanicName: null, elevators: [] }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
+    const validNames = [...new Set(mNames)];
+    const orParts = [`mestre_telegram.eq.${searchId}`];
+    validNames.forEach(name => {
+      orParts.push(`mechanic_name.ilike.%${name}%`);
+    });
+    const orConditions = orParts.join(',');
 
     const { data: elevs } = await supabase.from('elevators')
       .select('*')
-      .eq('mechanic_name', mName)
+      .or(orConditions)
       .eq('status', 'montagem')
       .order('expected_end_date', { ascending: true });
 
-    return new Response(JSON.stringify({ mechanicName: mName, elevators: elevs || [] }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const displayName = validNames[0];
+
+    return new Response(JSON.stringify({ 
+      mechanicName: displayName, 
+      elevators: elevs || [],
+      debug: { searchId, validNames, foundElevsLength: elevs?.length || 0 }
+    }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error: any) {
     console.error('Error getting mechanic data:', error);
