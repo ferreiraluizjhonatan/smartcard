@@ -205,24 +205,6 @@ export default function ElevatorReport() {
           </div>
         </div>
 
-        {/* Seção de Ocorrências (Apenas se Completo) */}
-        {reportType === 'completo' && tickets.length > 0 && (
-          <div style={{ marginBottom: '40px' }}>
-            <h2 style={{ color: '#ef4444', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '2px solid #ef4444', paddingBottom: '8px', marginBottom: '16px' }}>
-              <AlertTriangle size={24}/> Ocorrências e Histórico de Ações
-            </h2>
-            {tickets.map(t => (
-              <div key={t.id} style={{ padding: '16px', borderLeft: `4px solid ${t.status === 'aberto' ? '#f59e0b' : '#10b981'}`, background: '#fafafa', marginBottom: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <strong style={{ color: '#333' }}>{t.title}</strong>
-                  <span style={{ fontSize: '0.85rem', color: '#666' }}>{new Date(t.created_at).toLocaleDateString()} - Status: {t.status.toUpperCase()}</span>
-                </div>
-                <p style={{ margin: 0, fontSize: '0.9rem', color: '#555' }}>{t.description}</p>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Renderização das Fases */}
         <div style={{ marginBottom: '40px' }}>
           <h2 style={{ color: '#00d2ff', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '2px solid #00d2ff', paddingBottom: '8px', marginBottom: '24px' }}>

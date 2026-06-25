@@ -725,54 +725,6 @@ export default function ClientPortal() {
         </div>
       )}
       
-      {/* Ocorrências e Histórico de Ações (Relatório) */}
-      <div className="glass-panel" style={{ padding: '24px', marginTop: '32px' }}>
-        <h3 style={{ marginTop: 0, marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-red)' }}>
-          <AlertTriangle size={24} /> Ocorrências e Histórico de Ações
-        </h3>
-        
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {generalPendingItems.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>Nenhuma ocorrência registrada.</p>
-          ) : (
-            generalPendingItems.map(p => {
-              const isClosed = p.status === 'fechado';
-              const createdDate = new Date(p.created_at).toLocaleDateString('pt-BR');
-              const closedDate = p.closed_at ? new Date(p.closed_at).toLocaleDateString('pt-BR') : null;
-              
-              return (
-                <div key={p.id} style={{ 
-                  background: 'rgba(255,255,255,0.05)', 
-                  padding: '16px', 
-                  borderRadius: '4px',
-                  borderLeft: isClosed ? '4px solid var(--accent-green)' : '4px solid var(--accent-yellow)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: '16px',
-                  flexWrap: 'wrap'
-                }}>
-                  <div style={{ flex: 1, minWidth: '200px' }}>
-                    <h4 style={{ margin: '0 0 8px 0', fontSize: '1.05rem', color: 'var(--text-primary)' }}>{renderItemName(p.title || 'Pendência Geral')}</h4>
-                    <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '0.95rem' }}>{p.description}</p>
-                  </div>
-                  <div style={{ textAlign: 'right', fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
-                    <div style={{ marginBottom: '4px' }}>
-                      {isClosed ? (
-                         <span>Abertura: {createdDate} | Fechamento: {closedDate || createdDate}</span>
-                      ) : (
-                         <span>Abertura: {createdDate}</span>
-                      )}
-                    </div>
-                    <div style={{ fontWeight: 'bold', marginTop: '4px', color: isClosed ? 'var(--accent-green)' : 'var(--accent-yellow)' }}>
-                       Status: {p.status.toUpperCase()}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
 
       {/* Print styles inserted directly to hide elements when generating PDF */}
       <style>
