@@ -51,10 +51,16 @@ serve(async (req) => {
     }
 
     if (action === 'send_message' || action === 'create_ticket') {
-      const { elevator_id, message, company_id, title } = payload;
+      const { elevator_id, message, company_id, title, tenant_id } = payload;
 
       if (!elevator_id || !message) {
         return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      let final_tenant_id = tenant_id;
+      if (!final_tenant_id) {
+        const { data: el } = await supabase.from('elevators').select('tenant_id').eq('id', elevator_id).single();
+        final_tenant_id = el?.tenant_id;
       }
 
       const { error: insertError } = await supabase
@@ -62,6 +68,7 @@ serve(async (req) => {
         .insert([{
           elevator_id: elevator_id,
           company_id: company_id || null,
+          tenant_id: final_tenant_id,
           title: title || "Mensagem do Mestre (Link Público)",
           description: message,
           status: 'aberto'
