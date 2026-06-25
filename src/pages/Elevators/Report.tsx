@@ -59,10 +59,11 @@ export default function ElevatorReport() {
   const renderChecklistPhase = (title: string, items: any[]) => {
     const pct = calculatePct(items);
     
-    // Filtrar apenas itens com fotos ou anotações/pendências que merecem ir pro relatório
+    // Filtrar apenas itens com fotos ou anotações/pendências/tickets que merecem ir pro relatório
     const relevantItems = items.filter(i => 
       (i.photos_urls && i.photos_urls.length > 0) || 
-      (reportType === 'completo' && (i.notes || i.pending_items))
+      (reportType === 'completo' && (i.notes || i.pending_items)) ||
+      (tickets.some(t => t.title === i.item_name || t.title === `Problema: ${i.item_name}`))
     );
 
     if (relevantItems.length === 0 && pct === 0) return null;
@@ -90,7 +91,7 @@ export default function ElevatorReport() {
             )}
 
             {item.photos_urls && item.photos_urls.length > 0 && (
-              <div style={{ marginTop: '12px' }}>
+              <div style={{ marginTop: '12px', marginBottom: '12px' }}>
                 <p style={{ margin: '0 0 8px 0', fontSize: '0.8rem', color: '#666', display: 'flex', alignItems: 'center', gap: '4px' }}>
                   <Camera size={14}/> Registros Fotográficos
                 </p>
@@ -101,6 +102,15 @@ export default function ElevatorReport() {
                 </div>
               </div>
             )}
+
+            {tickets.filter(t => t.title === item.item_name || t.title === `Problema: ${item.item_name}`).map(t => (
+              <p key={t.id} style={{ margin: '8px 0 0 0', fontSize: '0.9rem', color: t.status === 'fechado' ? 'green' : 'red' }}>
+                 <strong>{t.status === 'fechado' ? '✅ Pendência Resolvida' : '⚠️ Pendência em Aberto'}:</strong> {t.description}
+                 <span style={{ fontSize: '0.8rem', color: '#666', marginLeft: '8px' }}>
+                   (Criado: {new Date(t.created_at).toLocaleDateString('pt-BR')}{t.status === 'fechado' && t.closed_at ? ` | Fechado: ${new Date(t.closed_at).toLocaleDateString('pt-BR')}` : ''})
+                 </span>
+              </p>
+            ))}
           </div>
         ))}
         {relevantItems.length === 0 && <p style={{ color: '#888', fontStyle: 'italic', fontSize: '0.9rem' }}>Nenhum registro fotográfico ou anotação nesta fase.</p>}
