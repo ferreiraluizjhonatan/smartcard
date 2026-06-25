@@ -50,8 +50,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true, photo_url }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
-    if (action === 'send_message') {
-      const { elevator_id, message, company_id } = payload;
+    if (action === 'send_message' || action === 'create_ticket') {
+      const { elevator_id, message, company_id, title } = payload;
 
       if (!elevator_id || !message) {
         return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
@@ -62,12 +62,29 @@ serve(async (req) => {
         .insert([{
           elevator_id: elevator_id,
           company_id: company_id || null,
-          title: "Mensagem do Mestre (Link Público)",
+          title: title || "Mensagem do Mestre (Link Público)",
           description: message,
-          status: 'pendente'
+          status: 'aberto'
         }]);
 
       if (insertError) throw insertError;
+
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    if (action === 'toggle_ticket_status') {
+      const { ticket_id, new_status } = payload;
+      
+      if (!ticket_id || !new_status) {
+        return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const { error: updateError } = await supabase
+        .from('tickets')
+        .update({ status: new_status })
+        .eq('id', ticket_id);
+
+      if (updateError) throw updateError;
 
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }

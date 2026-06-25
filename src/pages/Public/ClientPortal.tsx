@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { renderItemName } from '../Elevators/Checklist';
-import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye } from 'lucide-react';
+import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 export default function ClientPortal() {
@@ -19,6 +19,9 @@ export default function ClientPortal() {
   const [mechanicNotes, setMechanicNotes] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
   const [uploadingItemId, setUploadingItemId] = useState<string | null>(null);
+  const [generalPendingItems, setGeneralPendingItems] = useState<any[]>([]);
+  const [newItemPending, setNewItemPending] = useState<Record<string, string>>({});
+  const [addingPending, setAddingPending] = useState(false);
   const [expandedPhases, setExpandedPhases] = useState<Record<string, boolean>>({
     'pre_installation_checklists': true,
     'assembly_checklists': true,
@@ -55,10 +58,12 @@ export default function ClientPortal() {
         .from('tickets')
         .select('*, ticket_comments(*)')
         .eq('elevator_id', id)
-        .eq('title', 'Mensagem do Mestre (Link Público)')
         .order('created_at', { ascending: false });
         
-      if (ticketsData) setTicketHistory(ticketsData);
+      if (ticketsData) {
+        setTicketHistory(ticketsData.filter(t => t.title === 'Mensagem do Mestre (Link Público)'));
+        setGeneralPendingItems(ticketsData);
+      }
     } catch (err: any) {
       console.error(err);
       // Fallback message if not found
@@ -92,6 +97,56 @@ export default function ClientPortal() {
       alert('Erro ao enviar mensagem.');
     } finally {
       setSendingMsg(false);
+    }
+  };
+
+  const handleAddItemPending = async (item: any) => {
+    const text = newItemPending[item.id];
+    if (!text?.trim()) return;
+    setAddingPending(true);
+    try {
+      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'create_ticket',
+          payload: {
+            elevator_id: id,
+            company_id: elevator?.company_id,
+            title: item.item_name,
+            message: text
+          }
+        }
+      });
+      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+      setNewItemPending(prev => ({ ...prev, [item.id]: '' }));
+      fetchData();
+    } catch(err) {
+      console.error(err);
+      alert('Erro ao adicionar pendência. Tente novamente.');
+    } finally {
+      setAddingPending(false);
+    }
+  };
+
+  const handleTogglePendingItem = async (p: any) => {
+    const newStatus = p.status === 'aberto' ? 'fechado' : 'aberto';
+    // Optimistic UI
+    setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: newStatus } : t));
+    try {
+      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'toggle_ticket_status',
+          payload: {
+            ticket_id: p.id,
+            new_status: newStatus
+          }
+        }
+      });
+      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+    } catch(err) {
+      console.error(err);
+      // Revert Optimistic
+      setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: p.status } : t));
+      alert('Erro ao atualizar status da pendência.');
     }
   };
 
@@ -436,15 +491,53 @@ export default function ClientPortal() {
 
                                 <div className="input-group" style={{ margin: 0 }}>
                                   <label style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--accent-red)', fontSize: '0.85rem', marginBottom: '4px' }}>
-                                    <AlertTriangle size={14}/> Pendências
+                                    <AlertTriangle size={14}/> Pendências Desta Etapa
                                   </label>
-                                  <textarea
-                                    value={item.pending_items || ''}
-                                    onChange={(e) => setItems(items.map(it => it.id === item.id ? { ...it, pending_items: e.target.value } : it))}
-                                    onBlur={(e) => handleUpdateProgress(item.id, item.table_name, item.percentage || 0, item.notes, e.target.value, item.reminders)}
-                                    placeholder="Bloqueios ou materiais faltando..."
-                                    style={{ width: '100%', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255, 59, 48, 0.3)', borderRadius: '4px', padding: '8px 12px', color: 'white', resize: 'vertical', minHeight: '60px', fontSize: '0.9rem' }}
-                                  />
+                                  
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px', maxHeight: '150px', overflowY: 'auto' }}>
+                                    {generalPendingItems.filter(p => p.title === item.item_name || p.title === `Problema: ${item.item_name}`).length === 0 && (
+                                      <div style={{ color: 'var(--text-secondary)', fontStyle: 'italic', fontSize: '0.85rem' }}>Nenhuma pendência anotada.</div>
+                                    )}
+                                    {generalPendingItems.filter(p => p.title === item.item_name || p.title === `Problema: ${item.item_name}`).map((p) => (
+                                      <div key={p.id} style={{ 
+                                        display: 'flex', alignItems: 'center', gap: '8px', 
+                                        background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '6px',
+                                        borderLeft: p.status === 'fechado' ? '3px solid var(--accent-green)' : '3px solid var(--accent-red)'
+                                      }}>
+                                        <button 
+                                          onClick={() => handleTogglePendingItem(p)}
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: p.status === 'fechado' ? 'var(--accent-green)' : 'var(--text-secondary)', padding: 0, display: 'flex', alignItems: 'center' }}>
+                                          {p.status === 'fechado' ? <CheckCircle2 size={16} /> : <div style={{ width: '14px', height: '14px', border: '2px solid var(--text-secondary)', borderRadius: '50%' }} />}
+                                        </button>
+                                        <span style={{ 
+                                          color: 'white', flex: 1, fontSize: '0.85rem',
+                                          textDecoration: p.status === 'fechado' ? 'line-through' : 'none',
+                                          opacity: p.status === 'fechado' ? 0.6 : 1
+                                        }}>
+                                          {p.description}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  
+                                  <div style={{ display: 'flex', gap: '8px' }}>
+                                    <input 
+                                      type="text" 
+                                      className="input-field" 
+                                      placeholder="Digite uma nova pendência..." 
+                                      value={newItemPending[item.id] || ''}
+                                      onChange={(e) => setNewItemPending(prev => ({ ...prev, [item.id]: e.target.value }))}
+                                      onKeyDown={(e) => e.key === 'Enter' && handleAddItemPending(item)}
+                                      style={{ flex: 1, fontSize: '0.85rem', padding: '6px 10px', margin: 0 }}
+                                    />
+                                    <button 
+                                      className="btn-glow border-red" 
+                                      onClick={() => handleAddItemPending(item)} 
+                                      disabled={addingPending || !(newItemPending[item.id]?.trim())}
+                                      style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', padding: '6px 10px' }}>
+                                      <Plus size={14} /> Adicionar
+                                    </button>
+                                  </div>
                                 </div>
 
                                 <div className="input-group" style={{ margin: 0, gridColumn: '1 / -1' }}>
