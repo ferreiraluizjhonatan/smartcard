@@ -189,7 +189,11 @@ export default function ElevatorHub() {
 
           <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ flex: 1 }}>
-              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Pré-Instalação (Conclusão)</label>
+              <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>
+                {elevator?.status === 'pre_instalacao' ? 'Pré-Instalação (Conclusão)' : 
+                 elevator?.status === 'montagem' ? 'Fase Atual: Montagem' : 
+                 elevator?.status === 'ajuste' ? 'Fase Atual: Ajuste' : 'Fase Atual'}
+              </label>
               <input 
                 type="date" 
                 value={elevator?.pre_install_end_date || ''} 
