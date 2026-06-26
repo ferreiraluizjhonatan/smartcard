@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { renderItemName } from '../Elevators/Checklist';
-import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye, Plus } from 'lucide-react';
+import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye, Plus, Trash2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 
 export default function ClientPortal() {
@@ -148,6 +148,28 @@ export default function ClientPortal() {
       // Revert Optimistic
       setGeneralPendingItems(prev => prev.map(t => t.id === p.id ? { ...t, status: p.status, closed_at: p.closed_at } : t));
       alert('Erro ao atualizar status da pendência.');
+    }
+  };
+
+  const handleDeletePendingItem = async (p: any) => {
+    if (!window.confirm("Deseja realmente excluir esta pendência?")) return;
+    
+    // Optimistic UI
+    setGeneralPendingItems(prev => prev.filter(t => t.id !== p.id));
+    
+    try {
+      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'delete_ticket',
+          payload: { ticket_id: p.id }
+        }
+      });
+      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+    } catch(err) {
+      console.error(err);
+      // Revert Optimistic
+      setGeneralPendingItems(prev => [...prev, p]);
+      alert('Erro ao excluir a pendência.');
     }
   };
 
@@ -517,6 +539,12 @@ export default function ClientPortal() {
                                         }}>
                                           {p.description}
                                         </span>
+                                        <button 
+                                          onClick={() => handleDeletePendingItem(p)}
+                                          title="Excluir pendência"
+                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0 4px', display: 'flex', alignItems: 'center' }}>
+                                          <Trash2 size={16} />
+                                        </button>
                                       </div>
                                     ))}
                                   </div>

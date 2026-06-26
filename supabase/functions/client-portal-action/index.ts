@@ -141,6 +141,23 @@ serve(async (req) => {
       return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
+    if (action === 'delete_ticket') {
+      const { ticket_id } = payload;
+      
+      if (!ticket_id) {
+        return new Response(JSON.stringify({ error: "Missing parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const { error: deleteError } = await supabase
+        .from('tickets')
+        .delete()
+        .eq('id', ticket_id);
+
+      if (deleteError) throw deleteError;
+
+      return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
     return new Response(JSON.stringify({ error: "Invalid action" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, MessageSquare, AlertTriangle, Clock, Camera, Edit2, Award, Plus } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, MessageSquare, AlertTriangle, Clock, Camera, Edit2, Award, Plus, Trash2 } from 'lucide-react';
 
 export const renderItemName = (name: string) => {
   if (!name) return name;
@@ -310,6 +310,17 @@ export default function Checklist() {
     }
   };
 
+  const handleDeletePendingItem = async (item: any) => {
+    if (!window.confirm("Deseja realmente excluir esta pendência?")) return;
+    
+    const { error } = await supabase.from('tickets').delete().eq('id', item.id);
+    if (!error) {
+      setGeneralPendingItems(prev => prev.filter(p => p.id !== item.id));
+    } else {
+      alert('Erro ao excluir pendência.');
+    }
+  };
+
   const overall = calculateOverallProgress();
   const isAjusteComplete = elevator?.status === 'ajuste';
   const isPreInstallReady = elevator?.status === 'pre_instalacao' && checkGoldenRule();
@@ -484,6 +495,12 @@ export default function Checklist() {
                          }}>
                            {p.description}
                          </span>
+                         <button 
+                            onClick={() => handleDeletePendingItem(p)}
+                            title="Excluir pendência"
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0 4px', display: 'flex', alignItems: 'center' }}>
+                            <Trash2 size={16} />
+                         </button>
                        </div>
                      ))}
                    </div>
