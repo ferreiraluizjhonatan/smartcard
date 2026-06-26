@@ -247,6 +247,27 @@ export default function Checklist() {
     }
   };
 
+  const handleReturnToMontagem = async () => {
+    if (!window.confirm("Atenção: Deseja realmente retroceder esta obra para a fase de montagem?")) return;
+
+    const { error } = await supabase.from('elevators').update({
+       status: 'montagem'
+    }).eq('id', id);
+
+    if (!error) {
+      await supabase.from('elevator_history').insert({
+         elevator_id: id,
+         old_status: 'ajuste',
+         new_status: 'montagem',
+         notes: 'Retrocesso de fase: O administrador retornou a obra da fase de Ajuste para Montagem.'
+      });
+      alert('Obra retornada para a fase de Montagem com sucesso!');
+      fetchData();
+    } else {
+      alert('Erro ao retornar fase: ' + error.message);
+    }
+  };
+
   const handleCreateTicket = async () => {
     if(!ticketDescription.trim()) return;
     const { data: user } = await supabase.auth.getUser();
@@ -360,9 +381,14 @@ export default function Checklist() {
           </div>
         </div>
         {isAjusteComplete && (
-          <button className="btn-glow border-green" onClick={handleFinishElevator} style={{ padding: '12px 24px', fontSize: '1.1rem' }}>
-            ENTREGAR ELEVADOR
-          </button>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button className="btn btn-secondary" onClick={handleReturnToMontagem} style={{ padding: '12px 24px', fontSize: '1.1rem', border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)' }}>
+              VOLTAR PARA MONTAGEM
+            </button>
+            <button className="btn-glow border-green" onClick={handleFinishElevator} style={{ padding: '12px 24px', fontSize: '1.1rem' }}>
+              ENTREGAR ELEVADOR
+            </button>
+          </div>
         )}
         {elevator?.status === 'pre_instalacao' && (
           <button className="btn-glow border-cyan" onClick={handleAdvanceToMontagem} style={{ padding: '12px 24px', fontSize: '1.1rem' }}>
