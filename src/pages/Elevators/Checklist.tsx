@@ -210,6 +210,22 @@ export default function Checklist() {
   };
 
   const handleAdvanceToMontagem = async () => {
+    if (overall < 100) {
+      alert('Não é possível avançar: Conclua todas as etapas desta fase (100%) primeiro.');
+      return;
+    }
+
+    const openTickets = generalPendingItems.filter(p => p.status !== 'fechado');
+    if (openTickets.length > 0) {
+      alert('Não é possível avançar: Existem pendências em aberto. Resolva todas as pendências antes de avançar para a próxima fase.');
+      return;
+    }
+
+    if (!checkGoldenRule()) {
+      alert('Não é possível avançar: A Regra de Ouro (como Fechamento de Vãos) não foi cumprida.');
+      return;
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const { error } = await supabase.from('elevators').update({
        status: 'montagem',
@@ -222,10 +238,12 @@ export default function Checklist() {
          elevator_id: id,
          old_status: 'pre_instalacao',
          new_status: 'montagem',
-         notes: 'Fase de Pré-Instalação aprovada via Índice de Montabilidade e Regra de Ouro.'
+         notes: 'Fase de Pré-Instalação aprovada (100% concluída sem pendências).'
       });
       alert('Obra liberada para Montagem com sucesso!');
       fetchData();
+    } else {
+      alert('Erro ao avançar de fase: ' + error.message);
     }
   };
 
@@ -346,7 +364,7 @@ export default function Checklist() {
             ENTREGAR ELEVADOR
           </button>
         )}
-        {isPreInstallReady && (
+        {elevator?.status === 'pre_instalacao' && (
           <button className="btn-glow border-cyan" onClick={handleAdvanceToMontagem} style={{ padding: '12px 24px', fontSize: '1.1rem' }}>
             LIBERAR PARA MONTAGEM
           </button>
