@@ -152,7 +152,43 @@ export default function Schedule() {
       {/* Print Header */}
       <div className="print-only" style={{ marginBottom: '12px', textAlign: 'center', width: '100%' }}>
         {tenantConfig.logoUrl && (
-          <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ width: '100%', height: '80px', objectFit: 'cover', marginBottom: '8px' }} />
+          <div style={{ 
+            position: 'relative', 
+            width: '100%', 
+            height: '80px', 
+            marginBottom: '16px', 
+            overflow: 'hidden',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '4px'
+          }}>
+            {/* Fundo Desfocado (Banner Expandido) */}
+            <img 
+              src={tenantConfig.logoUrl} 
+              alt="" 
+              style={{ 
+                position: 'absolute', 
+                width: '100%', 
+                height: '100%', 
+                objectFit: 'cover', 
+                filter: 'blur(15px)',
+                opacity: 0.8,
+                transform: 'scale(1.2)'
+              }} 
+            />
+            {/* Logo Centralizada e Proporcional */}
+            <img 
+              src={tenantConfig.logoUrl} 
+              alt="Logo Empresa" 
+              style={{ 
+                position: 'relative', 
+                height: '100%', 
+                objectFit: 'contain',
+                zIndex: 1
+              }} 
+            />
+          </div>
         )}
         <h1 style={{ color: 'black', margin: '0 0 4px 0', fontSize: '20px' }}>Cronograma de Obras</h1>
         <h2 style={{ color: '#444', margin: 0, fontSize: '16px' }}>Empreendimento: {elevator?.project_name || elevator?.name}</h2>
