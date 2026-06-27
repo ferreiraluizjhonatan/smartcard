@@ -499,7 +499,7 @@ export default function Dashboard() {
               />
             </div>
             <div>
-              <h2 style={{ fontSize: '2.2rem', margin: '0 0 8px 0', color: '#ffffff', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Dashboard Executivo Corporativo</h2>
+              <h2 className="responsive-title" style={{ fontSize: '2.2rem', margin: '0 0 8px 0', color: '#ffffff', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Dashboard Executivo Corporativo</h2>
               <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0, fontSize: '1.1rem' }}>Monitoramento Global de Performance</p>
             </div>
           </div>
@@ -507,7 +507,7 @@ export default function Dashboard() {
       ) : (
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
-            <h2 style={{ fontSize: '2rem', margin: '0 0 8px 0', background: 'linear-gradient(90deg, #fff, var(--accent-cyan))', WebkitBackgroundClip: 'text', color: 'transparent' }}>Dashboard Executivo Corporativo</h2>
+            <h2 className="responsive-title" style={{ fontSize: '2rem', margin: '0 0 8px 0', background: 'linear-gradient(90deg, #fff, var(--accent-cyan))', WebkitBackgroundClip: 'text', color: 'transparent' }}>Dashboard Executivo Corporativo</h2>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Monitoramento Global de Performance</p>
           </div>
         </div>
@@ -789,13 +789,13 @@ export default function Dashboard() {
               
               return (
                 <div style={{ marginTop: '32px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '32px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                    <h3 style={{ margin: 0, color: '#fff', fontSize: '1.2rem' }}>Detalhamento: {selectedForecastMonth}</h3>
-                    <div style={{ display: 'flex', gap: '16px' }}>
+                  <div className="responsive-flex-wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
+                    <h3 className="responsive-title" style={{ margin: 0, color: '#fff', fontSize: '1.2rem' }}>Detalhamento: {selectedForecastMonth}</h3>
+                    <div className="responsive-flex-wrap" style={{ display: 'flex', gap: '16px', flex: '1 1 auto', justifyContent: 'flex-end' }}>
                       <input 
                         type="text" 
                         placeholder="Pesquisar Obra..." 
-                        className="input-field" 
+                        className="input-field responsive-input" 
                         value={forecastFilterObra}
                         onChange={e => setForecastFilterObra(e.target.value)}
                         style={{ width: '200px', margin: 0 }}
@@ -803,7 +803,7 @@ export default function Dashboard() {
                       <input 
                         type="text" 
                         placeholder="Pesquisar Mecânico..." 
-                        className="input-field" 
+                        className="input-field responsive-input" 
                         value={forecastFilterMechanic}
                         onChange={e => setForecastFilterMechanic(e.target.value)}
                         style={{ width: '200px', margin: 0 }}
@@ -811,7 +811,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                  <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                     {/* Left: Mecânicos Livres */}
                     <div style={{ background: 'rgba(255,255,255,0.02)', padding: '16px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
                       <h4 style={{ color: 'var(--accent-yellow)', margin: '0 0 16px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Mecânicos que Ficarão Livres ({filteredMechanics.length})</h4>

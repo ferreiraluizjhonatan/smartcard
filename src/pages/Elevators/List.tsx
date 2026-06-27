@@ -996,12 +996,12 @@ export default function ElevatorsList() {
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div className="responsive-flex-wrap" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', gap: '16px' }}>
         <div>
-          <h2 style={{ fontSize: '1.8rem', margin: 0 }}>Obras e Elevadores</h2>
+          <h2 className="responsive-title" style={{ fontSize: '1.8rem', margin: 0 }}>Obras e Elevadores</h2>
           <p style={{ color: 'var(--text-secondary)' }}>Monitoramento Inteligente</p>
         </div>
-        <div style={{ display: 'flex', gap: '16px' }}>
+        <div className="responsive-flex-wrap" style={{ display: 'flex', gap: '16px' }}>
           <button className="btn btn-secondary" onClick={handleClearDatabase} disabled={loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#ff4b4b', borderColor: 'rgba(255, 75, 75, 0.3)' }}>
             <Trash2 size={16} /> Limpar Base
           </button>

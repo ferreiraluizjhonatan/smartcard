@@ -216,4 +216,26 @@
     flex-direction: column;
     justify-content: center;
   }
+  
+  .responsive-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .responsive-title {
+    font-size: 1.5rem !important;
+    white-space: normal !important;
+  }
+  
+  .responsive-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .responsive-flex-wrap {
+    flex-wrap: wrap !important;
+  }
+  
+  .responsive-input {
+    width: 100% !important;
+  }
 }
