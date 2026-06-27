@@ -24,7 +24,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32px;
+  padding: 0 24px;
   background: rgba(26, 29, 39, 0.95);
   backdrop-filter: blur(12px);
   position: sticky;
@@ -34,8 +34,8 @@
 
 .nav-center {
   display: flex;
-  gap: 24px;
-  margin-left: 48px;
+  gap: 16px;
+  margin-left: 32px;
   height: 100%;
 }
 
@@ -45,11 +45,12 @@
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   border-bottom: 2px solid transparent;
   transition: all 0.2s ease;
   height: 100%;
   padding: 0 4px;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -64,7 +65,7 @@
 .nav-right {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
 .profile-info {
