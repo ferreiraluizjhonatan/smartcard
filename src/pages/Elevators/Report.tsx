@@ -126,19 +126,19 @@ export default function ElevatorReport() {
     <div style={{ background: '#fff', color: '#000', minHeight: '100vh' }}>
       
       {/* Controles de Filtro (Escondidos na impressão) */}
-      <div className="no-print" style={{ background: 'var(--bg-card)', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+      <div className="no-print" style={{ background: 'var(--bg-card)', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap', flex: '1 1 auto' }}>
           <button className="btn btn-secondary hide-print" onClick={() => navigate(-1)} style={{ padding: '8px' }}>
             <ArrowLeft size={20} />
           </button>
-          <h3 style={{ margin: 0, color: 'white' }}>Filtros do Relatório</h3>
+          <h3 style={{ margin: 0, color: 'white', whiteSpace: 'nowrap' }}>Filtros do Relatório</h3>
           
-          <select className="select-field" style={{ width: '250px', marginLeft: '16px' }} value={reportType} onChange={e => setReportType(e.target.value)}>
+          <select className="select-field" style={{ minWidth: '200px', flex: '1 1 auto' }} value={reportType} onChange={e => setReportType(e.target.value)}>
             <option value="completo">Relatório Completo (C/ Ocorrências)</option>
             <option value="resumido">Relatório Cliente (Só Fotos e Status)</option>
           </select>
 
-          <select className="select-field" style={{ width: '200px' }} value={phaseFilter} onChange={e => setPhaseFilter(e.target.value)}>
+          <select className="select-field" style={{ minWidth: '160px', flex: '1 1 auto' }} value={phaseFilter} onChange={e => setPhaseFilter(e.target.value)}>
             <option value="todas">Todas as Fases</option>
             <option value="pre">Só Pré-Instalação</option>
             <option value="montagem_ajuste">Montagem e Ajuste</option>

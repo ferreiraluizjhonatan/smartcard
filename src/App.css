@@ -110,39 +110,98 @@
 }
 
 /* Mobile Responsiveness */
-@media (max-width: 768px) {
+.mobile-menu-btn {
+  display: none;
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+@media (max-width: 992px) {
   .top-navbar {
-    padding: 0 16px;
-    padding-top: env(safe-area-inset-top);
     height: auto;
+    padding: 12px 24px;
+    flex-wrap: wrap;
+  }
+
+  .mobile-menu-btn {
+    display: block;
+    z-index: 100;
+  }
+
+  .nav-container {
+    display: none;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
-    padding-bottom: 16px;
+    width: 100%;
+    background: rgba(26, 29, 39, 0.98);
+    backdrop-filter: blur(16px);
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    padding: 24px;
+    border-bottom: 1px solid var(--border-color);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 90;
+  }
+
+  .nav-container.mobile-open {
+    display: flex;
+    animation: slideDown 0.3s ease forwards;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 
   .nav-center {
-    margin-left: 0;
+    flex-direction: column;
+    align-items: flex-start;
     width: 100%;
-    overflow-x: auto;
-    padding-bottom: 8px;
-    height: auto;
+    gap: 16px;
+    margin-bottom: 24px;
   }
   
   .nav-link {
-    white-space: nowrap;
-    padding-bottom: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border-bottom: none;
+    font-size: 1.1rem;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .nav-link.active {
+    background: rgba(0, 210, 255, 0.1);
+    color: var(--accent-cyan);
+    border-bottom: none;
   }
 
   .nav-right {
+    flex-direction: column;
     width: 100%;
-    justify-content: space-between;
+    align-items: stretch;
+    gap: 16px;
   }
+
+  .nav-right .profile-info {
+    align-items: flex-start;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 8px;
+  }
+}
   
   .profile-info {
     display: none;
   }
 
+@media (max-width: 768px) {
   .page-container {
     padding: 16px;
     padding-bottom: calc(16px + env(safe-area-inset-bottom));

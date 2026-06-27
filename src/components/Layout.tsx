@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { LogOut, Bell, Plus, Sparkles, MessageSquare } from 'lucide-react';
+import { LogOut, Bell, Plus, Sparkles, MessageSquare, Menu, X } from 'lucide-react';
 import { AIChatModal } from './AIChatModal';
 import { useTenant } from '../contexts/TenantContext';
 import { getTenantConfig } from '../config/tenantConfig';
@@ -63,6 +63,12 @@ export default function Layout() {
   }, [activeTenantId]);
 
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu on navigation
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [navigate]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -83,7 +89,8 @@ export default function Layout() {
   return (
     <div className="app-layout">
       <header className="top-navbar">
-        <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer', marginRight: '48px' }} onClick={() => navigate('/')}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer' }} onClick={() => navigate('/')}>
           {tenantConfig.logoUrl ? (
             <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '48px', objectFit: 'contain' }} />
           ) : (
@@ -99,9 +106,19 @@ export default function Layout() {
               </div>
             </>
           )}
+          </div>
+          
+          <button 
+            className="mobile-menu-btn"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            style={{ background: 'none', border: 'none', color: 'white', padding: '8px', cursor: 'pointer' }}
+          >
+            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
 
-        <nav className="nav-center" style={{ marginLeft: 0 }}>
+        <div className={`nav-container ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+          <nav className="nav-center" style={{ marginLeft: 0 }}>
           <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} end>
               Dashboard
             </NavLink>
@@ -215,6 +232,7 @@ export default function Layout() {
             <LogOut size={16} />
             <span className="hide-on-mobile">Sair</span>
           </button>
+        </div>
         </div>
       </header>
 
