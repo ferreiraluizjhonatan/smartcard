@@ -74,10 +74,27 @@ export default function Tenants() {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Create user profile directly (in a real scenario we might send a magic link or use an edge function)
-      // For now we will insert a dummy user profile pending registration
-      alert(`Em um ambiente real de SaaS, um email seria disparado para ${inviteData.email} com o link de acesso da empresa selecionada.`);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error("Não autenticado");
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-tenant-admin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          email: inviteData.email,
+          tenant_id: inviteData.tenant_id
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Erro desconhecido');
+
+      alert(`Convite enviado com sucesso para ${inviteData.email}!`);
       setIsInviteModalOpen(false);
+      setInviteData({ email: '', tenant_id: '' });
     } catch (err: any) {
       alert('Erro ao convidar: ' + err.message);
     }

@@ -1,14 +1,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const TELEGRAM_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN') || '';
+// TELEGRAM_TOKEN is now dynamic per tenant
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || '';
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
-async function sendTelegramMessage(chatId: string, text: string, reply_markup?: any) {
-  const url = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`;
+async function sendTelegramMessage(chatId: string, text: string, botToken: string, reply_markup?: any) {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
   const body: any = { chat_id: chatId, text, parse_mode: 'Markdown' };
   if (reply_markup) body.reply_markup = reply_markup;
 
@@ -34,12 +34,12 @@ async function sendTelegramMessage(chatId: string, text: string, reply_markup?: 
 }
 
 // Function to handle the state machine logic
-async function processMessage(senderId: string, text: string, platform: 'telegram' | 'whatsapp') {
+async function processMessage(senderId: string, text: string, platform: 'telegram' | 'whatsapp', botToken: string) {
   const tLower = text.trim().toLowerCase();
   
   if (tLower === 'meu id' || tLower === '/id') {
     if (platform === 'telegram') {
-      await sendTelegramMessage(senderId, `Seu ID do Telegram é: ${senderId}\n\nCopie este número e cole no seu cadastro de usuário no sistema Smart Card!`);
+      await sendTelegramMessage(senderId, `Seu ID do Telegram é: ${senderId}\n\nCopie este número e cole no seu cadastro de usuário no sistema Smart Card!`, botToken);
     }
     return;
   }
@@ -55,7 +55,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
   if (!states || states.length === 0) {
     if (platform === 'telegram') {
       const msg = `Olá! Que bom falar com você! 👋\n\nAqui é o assistente virtual da Smart Card, sempre pronto pra te ajudar a manter suas obras organizadas e em dia.\n\nVamos dar uma olhada se temos alguma atualização pra fazer hoje? Só clicar no botão abaixo! 👇`;
-      await sendTelegramMessage(senderId, msg, {
+      await sendTelegramMessage(senderId, msg, botToken, {
         inline_keyboard: [
           [{ text: '🔄 Sincronizar / Atualizar Obras', callback_data: 'check_updates' }]
         ]
@@ -78,7 +78,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
 
     const greeting = `${reason}\n\n👋 Olá! Bem-vindo ao assistente da Smart Card.\n\nPara verificar se há pendências nas suas obras ou iniciar suas atualizações, clique no botão abaixo:`;
     if (platform === 'telegram') {
-      await sendTelegramMessage(senderId, greeting, {
+      await sendTelegramMessage(senderId, greeting, botToken, {
         inline_keyboard: [
           [{ text: '🔄 Sincronizar / Atualizar Obras', callback_data: 'check_updates' }]
         ]
@@ -107,7 +107,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
           const phase = nextElevator ? nextElevator.status.replace('_', ' ').toUpperCase() : '';
           const msg = `Excelente! 🛠️\n\nAgora vamos atualizar a obra *${projectName}* (Fase: ${phase}).\n\nQual o progresso atual?`;
           if (platform === 'telegram') {
-            await sendTelegramMessage(senderId, msg, {
+            await sendTelegramMessage(senderId, msg, botToken, {
               inline_keyboard: [
                 [{ text: '✅ 100% (Concluído)', callback_data: '100' }],
                 [{ text: '🟦 75% Concluído', callback_data: '75' }],
@@ -120,7 +120,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        } else if (nextState.current_step === 'asking_checklist') {
           const msg = `Tudo certo! 👍\n\nAgora vamos para o checklist de segurança da obra *${projectName}*. Podemos começar?`;
           if (platform === 'telegram') {
-            await sendTelegramMessage(senderId, msg, {
+            await sendTelegramMessage(senderId, msg, botToken, {
               inline_keyboard: [
                 [{ text: '👍 Sim, começar checklist', callback_data: 'start_checklist' }]
               ]
@@ -130,7 +130,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
     } else {
        // No more states
        const msg = `🎉 Tudo 100% atualizado!\n\nLembre-se de anexar fotos e ocorrências nos links que enviei.\n\nTenha um ótimo descanso e um excelente trabalho! 🚀`;
-       if (platform === 'telegram') await sendTelegramMessage(senderId, msg);
+       if (platform === 'telegram') await sendTelegramMessage(senderId, msg, botToken);
     }
   }
 
@@ -177,14 +177,14 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
       const questionMsg = `Excelente escolha! 👍\n\n🏢 Obra: *${chosenTask.projectDisplayName}*\n📌 Fase ${chosenTask.firstPendingIndex + 1}/${chosenTask.checklists.length} – *${firstItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
       
       if (platform === 'telegram') {
-        await sendTelegramMessage(senderId, questionMsg, {
+        await sendTelegramMessage(senderId, questionMsg, botToken, {
           inline_keyboard: [[{ text: 'SIM', callback_data: 'YES' }], [{ text: 'NÃO', callback_data: 'NO' }]]
         });
       }
     } catch (err: any) {
       console.error(err);
       if (platform === 'telegram') {
-        await sendTelegramMessage(senderId, `Ocorreu um erro ao processar sua escolha: ${err.message}`);
+        await sendTelegramMessage(senderId, `Ocorreu um erro ao processar sua escolha: ${err.message}`, botToken);
       }
     }
     return;
@@ -210,10 +210,10 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
       const link = `${frontendUrl}/mecanico/${senderId}`;
       const projectName = `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
       const msg = `Feito! Obra *${projectName}* atualizada para ${percentage}%.\n🔗 Seu Painel de Obras: ${link}`;
-      if (platform === 'telegram') await sendTelegramMessage(senderId, msg);
+      if (platform === 'telegram') await sendTelegramMessage(senderId, msg, botToken);
     } catch (err) {
       console.error("Error finalizing mechanic percentage:", err);
-      if (platform === 'telegram') await sendTelegramMessage(senderId, `Feito! Obra atualizada para ${percentage}%. Obrigado!`);
+      if (platform === 'telegram') await sendTelegramMessage(senderId, `Feito! Obra atualizada para ${percentage}%. Obrigado!`, botToken);
     }
 
     // Move to next question!
@@ -259,7 +259,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
            const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
            
            if (platform === 'telegram') {
-             await sendTelegramMessage(senderId, msg, {
+             await sendTelegramMessage(senderId, msg, botToken, {
                inline_keyboard: [
                   [{ text: 'SIM', callback_data: 'YES' }],
                   [{ text: 'NÃO', callback_data: 'NO' }]
@@ -277,7 +277,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
          const msg = `🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${currentItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nEscolha a evolução da atividade:`;
          
          if (platform === 'telegram') {
-           await sendTelegramMessage(senderId, msg, {
+           await sendTelegramMessage(senderId, msg, botToken, {
              inline_keyboard: [
                 [{ text: '✅ 100% (Concluído)', callback_data: '100' }],
                 [{ text: '🟦 75% Concluído', callback_data: '75' }],
@@ -305,10 +305,10 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        }
        const projectName = md.projectName || `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
        const msg = `Obrigado por completar o checklist da obra *${projectName}*!\n🔗 Seu Painel de Obras: ${link}`;
-       if (platform === 'telegram') await sendTelegramMessage(senderId, msg);
+       if (platform === 'telegram') await sendTelegramMessage(senderId, msg, botToken);
     } catch (err) {
        console.error("Error finalizing checklist:", err);
-       if (platform === 'telegram') await sendTelegramMessage(senderId, `Checklist finalizado com sucesso! Obrigado!`);
+       if (platform === 'telegram') await sendTelegramMessage(senderId, `Checklist finalizado com sucesso! Obrigado!`, botToken);
     }
 
     await checkAndSendNextState();
@@ -354,7 +354,7 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
          const msg = `Anotado! 📝\n\n🏢 Obra: *${projectName}*\n📌 Fase ${currentIndex + 1}/${totalItems} – *${nextItem.item_name.replace(/^\d+\.\s*/, '')}*\n\nA atividade foi executada?`;
          
          if (platform === 'telegram') {
-           await sendTelegramMessage(senderId, msg, {
+           await sendTelegramMessage(senderId, msg, botToken, {
              inline_keyboard: [
                 [{ text: 'SIM', callback_data: 'YES' }],
                 [{ text: 'NÃO', callback_data: 'NO' }]
@@ -380,10 +380,10 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
        }
        const projectName = md.projectName || `${elev.project_name || 'Obra'} (Equip: ${elev.equipment_id || 'N/A'})`;
        const msg = `Obrigado por atualizar a evolução da obra *${projectName}*!\n🔗 Seu Painel de Obras: ${link}`;
-       if (platform === 'telegram') await sendTelegramMessage(senderId, msg);
+       if (platform === 'telegram') await sendTelegramMessage(senderId, msg, botToken);
     } catch (err) {
        console.error("Error finalizing checklist:", err);
-       if (platform === 'telegram') await sendTelegramMessage(senderId, `Checklist finalizado com sucesso! Obrigado!`);
+       if (platform === 'telegram') await sendTelegramMessage(senderId, `Checklist finalizado com sucesso! Obrigado!`, botToken);
     }
 
     await checkAndSendNextState();
@@ -393,13 +393,29 @@ async function processMessage(senderId: string, text: string, platform: 'telegra
 
 serve(async (req) => {
   try {
+    const url = new URL(req.url);
+    const tenant_id = url.searchParams.get('tenant_id');
+    let botToken = Deno.env.get('TELEGRAM_BOT_TOKEN') || '';
+    
+    if (tenant_id) {
+      const { data: tenant } = await supabase.from('tenants').select('telegram_bot_token').eq('id', tenant_id).single();
+      if (tenant && tenant.telegram_bot_token) {
+        botToken = tenant.telegram_bot_token;
+      }
+    }
+    
+    if (!botToken) {
+      console.error('No bot token found for tenant:', tenant_id);
+      return new Response("Unauthorized", { status: 401 });
+    }
+
     const body = await req.json();
 
     // === TELEGRAM WEBHOOK LOGIC ===
     if (body.message && body.message.chat && body.message.text) {
       const chatId = body.message.chat.id.toString();
       const text = body.message.text;
-      await processMessage(chatId, text, 'telegram');
+      await processMessage(chatId, text, 'telegram', botToken);
       return new Response("OK", { status: 200 });
     }
 
@@ -408,7 +424,7 @@ serve(async (req) => {
       const data = body.callback_query.data; 
 
       // Answer callback query to remove loading state from the button
-      const ansUrl = `https://api.telegram.org/bot${TELEGRAM_TOKEN}/answerCallbackQuery`;
+      const ansUrl = `https://api.telegram.org/bot${botToken}/answerCallbackQuery`;
       await fetch(ansUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -416,7 +432,7 @@ serve(async (req) => {
       });
 
       if (data === 'check_updates') {
-        await sendTelegramMessage(chatId, "Buscando atualizações na sua obra...");
+        await sendTelegramMessage(chatId, "Buscando atualizações na sua obra...", botToken);
         
         // Trigger cron synchronously so the edge function doesn't kill the request
         const cronUrl = `https://jmwbjvogmslpftkxsgyl.supabase.co/functions/v1/chatbot-cron`;
@@ -437,7 +453,7 @@ serve(async (req) => {
         return new Response("OK", { status: 200 });
       }
 
-      await processMessage(chatId, data, 'telegram');
+      await processMessage(chatId, data, 'telegram', botToken);
       return new Response("OK", { status: 200 });
     }
 
@@ -448,7 +464,7 @@ serve(async (req) => {
       const fromNumber = waMessage.from; // Sender number
       const text = waMessage.text?.body;
       if (text) {
-        await processMessage(fromNumber, text, 'whatsapp');
+        await processMessage(fromNumber, text, 'whatsapp', botToken);
       }
       return new Response("OK", { status: 200 });
     }
