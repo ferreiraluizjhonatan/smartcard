@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, UserX, UserCheck, Trash2, ChevronDown, ChevronRight, ChevronUp } from 'lucide-react';
+import { useTenant } from '../../contexts/TenantContext';
 
 const UserRow = ({ user, depth, navigate, handleDeleteUser }: any) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -108,15 +109,22 @@ const UserRow = ({ user, depth, navigate, handleDeleteUser }: any) => {
 };
 
 export default function UsersList() {
+  const { activeTenantId } = useTenant();
   const [users, setUsers] = useState<any[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [activeTenantId]);
 
   const fetchUsers = async () => {
-    const { data, error } = await supabase.from('user_profiles').select('*, companies:company_id(name)').order('created_at', { ascending: false });
+    let query = supabase.from('user_profiles').select('*, companies:company_id(name)').order('created_at', { ascending: false });
+    
+    if (activeTenantId) {
+      query = query.eq('tenant_id', activeTenantId);
+    }
+
+    const { data, error } = await query;
     if (error) console.error("Error fetching users:", error);
     if (data) setUsers(data);
   };

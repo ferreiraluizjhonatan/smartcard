@@ -3,12 +3,14 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { LogOut, Bell, Plus, Sparkles, MessageSquare } from 'lucide-react';
 import { AIChatModal } from './AIChatModal';
+import { useTenant } from '../contexts/TenantContext';
 
 export default function Layout() {
   const [profile, setProfile] = useState<any>(null);
   const [openTicketsCount, setOpenTicketsCount] = useState(0);
   const [openMessagesCount, setOpenMessagesCount] = useState(0);
   const navigate = useNavigate();
+  const { activeTenantId, setActiveTenantId, tenants, loadingTenants } = useTenant();
 
   useEffect(() => {
     let subscription: any;
@@ -20,17 +22,24 @@ export default function Layout() {
              setProfile(data);
              if(data) {
                 const fetchCount = () => {
-                  supabase.from('tickets').select('id', { count: 'exact' })
-                    .eq('company_id', data.company_id)
+                  let qTickets = supabase.from('tickets').select('id', { count: 'exact' })
                     .eq('ticket_type', 'chamado')
-                    .neq('status', 'fechado')
-                    .then(({ count }) => setOpenTicketsCount(count || 0));
+                    .neq('status', 'fechado');
                   
-                  supabase.from('tickets').select('id', { count: 'exact' })
-                    .eq('company_id', data.company_id)
+                  let qMessages = supabase.from('tickets').select('id', { count: 'exact' })
                     .eq('ticket_type', 'mensagem')
-                    .neq('status', 'fechado')
-                    .then(({ count }) => setOpenMessagesCount(count || 0));
+                    .neq('status', 'fechado');
+                    
+                  if (activeTenantId) {
+                    qTickets = qTickets.eq('tenant_id', activeTenantId);
+                    qMessages = qMessages.eq('tenant_id', activeTenantId);
+                  } else {
+                    qTickets = qTickets.eq('company_id', data.company_id);
+                    qMessages = qMessages.eq('company_id', data.company_id);
+                  }
+                  
+                  qTickets.then(({ count }) => setOpenTicketsCount(count || 0));
+                  qMessages.then(({ count }) => setOpenMessagesCount(count || 0));
                 };
                 
                 fetchCount();
@@ -49,7 +58,7 @@ export default function Layout() {
     return () => {
       if (subscription) supabase.removeChannel(subscription);
     };
-  }, []);
+  }, [activeTenantId]);
 
   const [isAIModalOpen, setIsAIModalOpen] = useState(false);
 
@@ -173,6 +182,20 @@ export default function Layout() {
             <button onClick={() => navigate('/users/new')} className="btn-glow" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Plus size={16} /> Novo Cadastro
             </button>
+          )}
+
+          {profile?.is_super_admin && !loadingTenants && tenants.length > 0 && (
+            <select
+              value={activeTenantId || ''}
+              onChange={(e) => setActiveTenantId(e.target.value || null)}
+              className="select"
+              style={{ padding: '6px 12px', fontSize: '0.85rem', width: 'auto', minWidth: '150px' }}
+            >
+              <option value="">Todas as Empresas (Visão Global)</option>
+              {tenants.map(t => (
+                <option key={t.id} value={t.id}>{t.name}</option>
+              ))}
+            </select>
           )}
 
           <div className="profile-info">

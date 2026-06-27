@@ -3,9 +3,11 @@ import { supabase } from '../lib/supabase';
 import { Activity, Clock, Users, Calendar, CheckCircle2, Award, Globe, MapPin, Building, ShieldCheck, Filter, ChevronDown, ChevronUp, ChevronRight, TrendingUp, Target, Briefcase, Bell, Sparkles } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { useTenant } from '../contexts/TenantContext';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { activeTenantId } = useTenant();
   const [elevators, setElevators] = useState<any[]>([]);
   const [forecasts, setForecasts] = useState<any[]>([]);
   const [assemblyChecklists, setAssemblyChecklists] = useState<any[]>([]);
@@ -48,7 +50,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [activeTenantId]);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -58,6 +60,11 @@ export default function Dashboard() {
       if (profile) {
         setUserRole(profile.role);
         let query = supabase.from('elevators').select('*');
+        
+        if (activeTenantId) {
+          query = query.eq('tenant_id', activeTenantId);
+        }
+
         // Only restrict visibility for mechanics. Managers/Supervisors see everything.
         if (profile.company_id && ['montador', 'ajustador', 'pre_instalador'].includes(profile.role)) {
           query = query.eq('company_id', profile.company_id);

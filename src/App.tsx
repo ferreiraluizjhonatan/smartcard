@@ -25,6 +25,7 @@ import { EmpresaDetail } from './pages/EmpresaDetail';
 import MestrePortal from './pages/MestrePortal';
 import MechanicPortal from './pages/MechanicPortal';
 import ClientWeeklyReport from './pages/Public/ClientWeeklyReport';
+import { TenantProvider } from './contexts/TenantContext';
 import './App.css';
 
 function App() {
@@ -59,7 +60,7 @@ function App() {
         <Route path="/client-report/:id" element={<ClientWeeklyReport />} />
         <Route path="/mestre/:projectName" element={<MestrePortal />} />
         <Route path="/mecanico/:telegramId" element={<MechanicPortal />} />
-        <Route path="/" element={session ? <Layout /> : <Navigate to="/login" />}>
+        <Route path="/" element={session ? <TenantProvider><Layout /></TenantProvider> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
           <Route path="/forecasts" element={<Forecasts />} />
           <Route path="/tenants" element={<Tenants />} />

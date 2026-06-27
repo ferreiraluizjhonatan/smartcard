@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Plus, Building2, Users, Wrench, Bell, CheckCircle2, TrendingUp, Edit, Trash2, UploadCloud, Download, XCircle, ChevronDown, ChevronUp, Search, Settings2, MapPin, Navigation, Send } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import { useTenant } from '../../contexts/TenantContext';
 
 // Subcomponent for each Elevator Card
 const ElevatorCard = ({ elevator, onEdit, onDelete, onStartAjuste, realizedPct = 0 }: { elevator: any, onEdit: (el: any) => void, onDelete: (el: any) => void, onStartAjuste?: (el: any) => void, realizedPct?: number }) => {
@@ -430,6 +431,7 @@ const ProjectGroupCard = ({ group, colorClass, accentColor, onEdit, onDelete, on
 };
 
 export default function ElevatorsList() {
+  const { activeTenantId } = useTenant();
   const [elevators, setElevators] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -498,6 +500,10 @@ export default function ElevatorsList() {
 
   useEffect(() => {
     fetchElevators();
+    fetchUsersAndCompanies();
+  }, [activeTenantId]);
+
+  const fetchUsersAndCompanies = async () => {
     supabase.from('user_profiles').select('id, full_name, role, region_name, branch_name, company_id').order('full_name').then(({data}) => {
       if(data) setUsersList(data);
     });
@@ -507,7 +513,7 @@ export default function ElevatorsList() {
     supabase.from('tecnicos_empresas').select('id, nome, funcao, empresa_id, telefone, telegram_id').order('nome').then(({data}) => {
       if(data) setTecnicosList(data);
     });
-  }, []);
+  };
 
   const fetchElevators = async () => {
     const { data: user } = await supabase.auth.getUser();
@@ -518,6 +524,10 @@ export default function ElevatorsList() {
     
     let query = supabase.from('elevators').select('*').order('created_at', { ascending: false });
     
+    if (activeTenantId) {
+      query = query.eq('tenant_id', activeTenantId);
+    }
+
     // Only restrict visibility for mechanics. Managers/Supervisors see everything.
     if (profile.company_id && ['montador', 'ajustador', 'pre_instalador'].includes(profile.role)) {
       query = query.eq('company_id', profile.company_id);

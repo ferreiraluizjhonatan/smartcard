@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertCircle, MessageSquare, CheckCircle2, Clock, Plus, Send, ArrowLeft, Trash2, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { useTenant } from '../../contexts/TenantContext';
 
 export default function TicketsList() {
+  const { activeTenantId } = useTenant();
   const [searchParams] = useSearchParams();
   const elevatorId = searchParams.get('elevator_id');
   const typeParam = searchParams.get('type');
@@ -20,7 +22,7 @@ export default function TicketsList() {
   useEffect(() => {
     fetchTickets();
     supabase.auth.getUser().then(({ data }) => setCurrentUser(data.user));
-  }, []);
+  }, [activeTenantId]);
 
   useEffect(() => {
     if (typeParam === 'messages') setFilter('mensagens');
@@ -34,9 +36,14 @@ export default function TicketsList() {
       if(profile) {
         let query = supabase.from('tickets')
           .select(`*, elevators (name)`)
-          .eq('company_id', profile.company_id)
           .in('ticket_type', ['chamado', 'mensagem'])
           .order('created_at', { ascending: false });
+
+        if (activeTenantId) {
+          query = query.eq('tenant_id', activeTenantId);
+        } else {
+          query = query.eq('company_id', profile.company_id);
+        }
           
         if (elevatorId) {
            query = query.eq('elevator_id', elevatorId);
