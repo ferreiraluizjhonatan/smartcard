@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Wrench, ArrowRight, CheckCircle2, Clock, MapPin, Building2 } from 'lucide-react';
+import { getTenantConfig } from '../../config/tenantConfig';
 
 export default function MechanicPortal() {
   const { telegramId } = useParams();
   const navigate = useNavigate();
   const [mechanicName, setMechanicName] = useState<string>('');
   const [elevators, setElevators] = useState<any[]>([]);
+  const tenantConfig = getTenantConfig(elevators.length > 0 ? elevators[0].tenant_id : null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -55,6 +57,9 @@ export default function MechanicPortal() {
           <Wrench size={24} />
         </div>
         <div>
+          {tenantConfig.logoUrl && (
+            <img src={tenantConfig.logoUrl} alt="Logo" style={{ height: '32px', objectFit: 'contain', marginBottom: '8px' }} />
+          )}
           <h1 style={{ margin: '0 0 4px 0', fontSize: '1.5rem', color: '#fff' }}>Painel do Mecânico</h1>
           <p style={{ margin: 0, color: 'var(--text-secondary)' }}>Bem-vindo, <strong style={{ color: 'var(--accent-cyan)' }}>{mechanicName}</strong></p>
         </div>
