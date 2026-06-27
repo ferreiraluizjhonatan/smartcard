@@ -454,17 +454,61 @@ export default function Dashboard() {
   // EXECUTIVE VIEW
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {tenantConfig.logoUrl && (
-            <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '56px', width: 'auto', objectFit: 'contain' }} />
-          )}
+      {tenantConfig.logoUrl ? (
+        <div className="glass-panel" style={{ 
+          position: 'relative', 
+          width: '100%', 
+          minHeight: '140px', 
+          marginBottom: '32px', 
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-start',
+          padding: '32px',
+          borderRadius: '16px',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          {/* Fundo Desfocado da Logo */}
+          <img 
+            src={tenantConfig.logoUrl} 
+            alt="" 
+            style={{ 
+              position: 'absolute', 
+              top: 0, left: 0,
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover', 
+              filter: 'blur(40px)',
+              opacity: 0.5,
+              transform: 'scale(1.5)',
+              zIndex: 0
+            }} 
+          />
+          {/* Overlay Escuro para dar contraste ao texto */}
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.9) 0%, rgba(10,15,30,0.4) 100%)', zIndex: 1 }} />
+          
+          <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', gap: '32px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '16px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <img 
+                src={tenantConfig.logoUrl} 
+                alt="Logo Empresa" 
+                style={{ height: '70px', objectFit: 'contain' }} 
+              />
+            </div>
+            <div>
+              <h2 style={{ fontSize: '2.2rem', margin: '0 0 8px 0', color: '#ffffff', fontWeight: 'bold', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Dashboard Executivo Corporativo</h2>
+              <p style={{ color: 'rgba(255,255,255,0.7)', margin: 0, fontSize: '1.1rem' }}>Monitoramento Global de Performance</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
           <div>
             <h2 style={{ fontSize: '2rem', margin: '0 0 8px 0', background: 'linear-gradient(90deg, #fff, var(--accent-cyan))', WebkitBackgroundClip: 'text', color: 'transparent' }}>Dashboard Executivo Corporativo</h2>
             <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Monitoramento Global de Performance</p>
           </div>
         </div>
-      </div>
+      )}
 
       {tenantConfig.features.customMonitoring && (
         <div className="neon-card border-cyan" style={{ marginBottom: '32px', background: 'rgba(6, 182, 212, 0.05)' }}>
