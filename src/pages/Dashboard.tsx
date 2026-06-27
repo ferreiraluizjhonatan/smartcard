@@ -881,11 +881,11 @@ export default function Dashboard() {
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '24px' }}>Mapeamento automático: Cruzando obras que vão iniciar com mecânicos que ficarão livres no mês.</p>
                       
                       {filteredObras.length > 0 && filteredMechanics.length > 0 ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
+                        <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
                           {filteredObras.map((obra, idx) => {
                             const mechanic = filteredMechanics[idx % filteredMechanics.length];
                             return (
-                              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: '6px' }}>
+                              <div key={idx} className="responsive-flex" style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'rgba(0,0,0,0.2)', padding: '12px 16px', borderRadius: '6px' }}>
                                 <div 
                                   style={{ flex: 1, color: '#fff', fontWeight: 'bold', cursor: 'pointer', display: 'flex', gap: '8px', alignItems: 'center' }}
                                   onClick={() => navigate(`/elevators/${obra.id}/hub`)}
@@ -919,7 +919,7 @@ export default function Dashboard() {
       </div>
 
       {/* Charts Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '32px' }}>
+      <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '32px' }}>
         
         <div className="glass-panel" style={{ padding: '24px' }}>
           <h3 style={{ margin: '0 0 24px 0', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -966,7 +966,7 @@ export default function Dashboard() {
       </div>
 
       {/* Rankings Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+      <div className="responsive-grid-2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         
         <div className="glass-panel" style={{ padding: '24px' }}>
             <h3 style={{ margin: '0 0 24px 0', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-cyan)' }}>
