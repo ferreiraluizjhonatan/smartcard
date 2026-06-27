@@ -160,7 +160,8 @@ export default function Schedule() {
             overflow: 'hidden',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
+            justifyContent: 'flex-start',
+            paddingLeft: '24px',
             borderRadius: '4px'
           }}>
             {/* Fundo Desfocado (Banner Expandido) */}
@@ -172,9 +173,9 @@ export default function Schedule() {
                 width: '100%', 
                 height: '100%', 
                 objectFit: 'cover', 
-                filter: 'blur(15px)',
+                filter: 'blur(25px)',
                 opacity: 0.8,
-                transform: 'scale(1.2)'
+                transform: 'scale(1.5)'
               }} 
             />
             {/* Logo Centralizada e Proporcional */}
