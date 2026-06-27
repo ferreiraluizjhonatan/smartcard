@@ -154,17 +154,55 @@ export default function ElevatorReport() {
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px', background: 'white' }}>
         
         {/* Cabeçalho */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #00d2ff', paddingBottom: '16px', marginBottom: '32px' }}>
-          <div>
-            {tenantConfig.logoUrl ? (
-               <img src={tenantConfig.logoUrl} alt="Logo" style={{ height: '40px', objectFit: 'contain', marginBottom: '12px' }} />
-            ) : null}
-            <h1 style={{ color: '#000', margin: '0 0 8px 0', fontSize: '2.2rem' }}>Relatório de Inspeção Técnica</h1>
-            <p style={{ margin: 0, color: '#555', fontSize: '1.1rem' }}>Smartcard - Gestão Ágil de Elevadores NI</p>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Data de Emissão:</p>
-            <p style={{ margin: 0, color: '#666' }}>{new Date().toLocaleDateString('pt-BR')}</p>
+        <div style={{ marginBottom: '32px' }}>
+          {tenantConfig.logoUrl ? (
+            <div style={{ 
+              position: 'relative', 
+              width: '100%', 
+              height: '80px', 
+              marginBottom: '24px', 
+              overflow: 'hidden',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-start',
+              paddingLeft: '24px',
+              borderRadius: '4px'
+            }}>
+              {/* Fundo Desfocado */}
+              <img 
+                src={tenantConfig.logoUrl} 
+                alt="" 
+                style={{ 
+                  position: 'absolute', 
+                  top: 0, left: 0,
+                  width: '100%', 
+                  height: '100%', 
+                  objectFit: 'cover', 
+                  filter: 'blur(25px)',
+                  opacity: 0.8,
+                  transform: 'scale(1.5)'
+                }} 
+              />
+              {/* Logo Proporcional */}
+              <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center' }}>
+                <img 
+                  src={tenantConfig.logoUrl} 
+                  alt="Logo" 
+                  style={{ height: '50px', objectFit: 'contain' }} 
+                />
+              </div>
+            </div>
+          ) : null}
+          
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #00d2ff', paddingBottom: '16px' }}>
+            <div>
+              <h1 style={{ color: '#000', margin: '0 0 8px 0', fontSize: '2.2rem' }}>Relatório de Inspeção Técnica</h1>
+              <p style={{ margin: 0, color: '#555', fontSize: '1.1rem' }}>Smartcard - Gestão Ágil de Elevadores NI</p>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <p style={{ margin: '0 0 4px 0', fontWeight: 'bold' }}>Data de Emissão:</p>
+              <p style={{ margin: 0, color: '#666' }}>{new Date().toLocaleDateString('pt-BR')}</p>
+            </div>
           </div>
         </div>
 
