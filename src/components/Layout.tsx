@@ -85,7 +85,7 @@ export default function Layout() {
       <header className="top-navbar">
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer', marginRight: '48px' }} onClick={() => navigate('/')}>
           {tenantConfig.logoUrl ? (
-            <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '32px', objectFit: 'contain' }} />
+            <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '48px', objectFit: 'contain' }} />
           ) : (
             <>
               <div style={{ marginRight: '16px', color: 'var(--accent-cyan)' }}>
