@@ -110,9 +110,7 @@ export default function Layout() {
                 <NavLink to="/companies" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
                   Filiais
                 </NavLink>
-                <NavLink to="/empresas-contratadas" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-                  Empresas Parceiras
-                </NavLink>
+
                 <button 
                   onClick={() => setIsAIModalOpen(true)}
                   className="nav-link"
@@ -125,9 +123,7 @@ export default function Layout() {
             <NavLink to="/elevators" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
               Obras
             </NavLink>
-            <NavLink to="/tickets" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
-              Chamados
-            </NavLink>
+
           </nav>
 
         <div className="nav-right">
