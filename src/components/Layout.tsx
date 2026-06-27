@@ -88,6 +88,11 @@ export default function Layout() {
           <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} end>
               Dashboard
             </NavLink>
+            {profile?.is_super_admin && (
+              <NavLink to="/tenants" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>
+                Empresas Clientes
+              </NavLink>
+            )}
             {profile?.can_register_users && (
               <>
                 <NavLink to="/users" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}>

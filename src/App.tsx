@@ -18,6 +18,7 @@ import OperationalIntelligence from './pages/Intelligence/Dashboard';
 import ClientPortal from './pages/Public/ClientPortal';
 import TicketsList from './pages/Tickets/List';
 import Forecasts from './pages/Forecasts';
+import Tenants from './pages/Admin/Tenants';
 import Layout from './components/Layout';
 import { EmpresasContratadasList } from './pages/EmpresasContratadasList';
 import { EmpresaDetail } from './pages/EmpresaDetail';
@@ -61,6 +62,7 @@ function App() {
         <Route path="/" element={session ? <Layout /> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
           <Route path="/forecasts" element={<Forecasts />} />
+          <Route path="/tenants" element={<Tenants />} />
           <Route path="/users" element={<UsersList />} />
           <Route path="/users/new" element={<UsersForm />} />
           <Route path="/users/:id/edit" element={<UsersForm />} />
