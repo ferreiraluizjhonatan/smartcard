@@ -280,6 +280,7 @@ export default function Checklist() {
       title: `Problema: ${ticketModal.item_name}`,
       description: ticketDescription,
       status: 'aberto',
+      ticket_type: 'chamado',
       created_by: user.user.id
     });
 
@@ -304,6 +305,7 @@ export default function Checklist() {
         title: `Pendência (${elevator.status.toUpperCase()})`,
         description: newPendingItem,
         status: 'aberto',
+        ticket_type: 'pendencia',
         created_by: user.user.id
       });
       if (!error) {
@@ -328,6 +330,7 @@ export default function Checklist() {
         title: item.item_name,
         description: text,
         status: 'aberto',
+        ticket_type: 'pendencia',
         created_by: user.user.id
       });
       if (!error) {

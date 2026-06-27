@@ -35,6 +35,7 @@ export default function TicketsList() {
         let query = supabase.from('tickets')
           .select(`*, elevators (name)`)
           .eq('company_id', profile.company_id)
+          .in('ticket_type', ['chamado', 'mensagem'])
           .order('created_at', { ascending: false });
           
         if (elevatorId) {

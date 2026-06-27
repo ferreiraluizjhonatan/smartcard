@@ -71,7 +71,8 @@ serve(async (req) => {
           tenant_id: final_tenant_id,
           title: title || "Mensagem do Mestre (Link Público)",
           description: message,
-          status: 'aberto'
+          status: 'aberto',
+          ticket_type: 'mensagem'
         }]);
 
       if (insertError) throw insertError;

@@ -22,13 +22,13 @@ export default function Layout() {
                 const fetchCount = () => {
                   supabase.from('tickets').select('id', { count: 'exact' })
                     .eq('company_id', data.company_id)
-                    .neq('title', 'Mensagem do Mestre (Link Público)')
+                    .eq('ticket_type', 'chamado')
                     .neq('status', 'fechado')
                     .then(({ count }) => setOpenTicketsCount(count || 0));
                   
                   supabase.from('tickets').select('id', { count: 'exact' })
                     .eq('company_id', data.company_id)
-                    .eq('title', 'Mensagem do Mestre (Link Público)')
+                    .eq('ticket_type', 'mensagem')
                     .neq('status', 'fechado')
                     .then(({ count }) => setOpenMessagesCount(count || 0));
                 };
