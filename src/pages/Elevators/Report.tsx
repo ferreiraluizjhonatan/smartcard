@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Printer, FileText, CheckCircle2, AlertTriangle, Camera } from 'lucide-react';
 import { renderItemName } from './Checklist';
+import { getTenantConfig } from '../../config/tenantConfig';
 
 export default function ElevatorReport() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function ElevatorReport() {
   
   const [loading, setLoading] = useState(true);
   const [elevator, setElevator] = useState<any>(null);
+  const tenantConfig = getTenantConfig(elevator?.tenant_id);
   
   // Dados brutos
   const [preItems, setPreItems] = useState<any[]>([]);
@@ -154,6 +156,9 @@ export default function ElevatorReport() {
         {/* Cabeçalho */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '3px solid #00d2ff', paddingBottom: '16px', marginBottom: '32px' }}>
           <div>
+            {tenantConfig.logoUrl ? (
+               <img src={tenantConfig.logoUrl} alt="Logo" style={{ height: '40px', objectFit: 'contain', marginBottom: '12px' }} />
+            ) : null}
             <h1 style={{ color: '#000', margin: '0 0 8px 0', fontSize: '2.2rem' }}>Relatório de Inspeção Técnica</h1>
             <p style={{ margin: 0, color: '#555', fontSize: '1.1rem' }}>Smartcard - Gestão Ágil de Elevadores NI</p>
           </div>

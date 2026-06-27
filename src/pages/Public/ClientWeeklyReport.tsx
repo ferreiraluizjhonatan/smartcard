@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Activity, Calendar, Flag, Clock, BrainCircuit, CalendarDays, Info } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { getTenantConfig } from '../../config/tenantConfig';
 
 export default function ClientWeeklyReport() {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +47,7 @@ export default function ClientWeeklyReport() {
   }
 
   const { elevator, totalChecklists, completedChecklists, currentRealized, weeklyData, daysPassed } = data;
+  const tenantConfig = getTenantConfig(elevator?.tenant_id);
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -80,12 +82,22 @@ export default function ClientWeeklyReport() {
         
         {/* Header */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+          {tenantConfig.logoUrl && (
+            <img src={tenantConfig.logoUrl} alt="Logo" style={{ height: '48px', objectFit: 'contain', marginBottom: '16px' }} />
+          )}
           <div style={{ 
-            width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', 
-            border: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'center', alignItems: 'center',
-            marginBottom: '16px'
+            background: 'var(--accent-cyan)', 
+            color: '#000', 
+            padding: '4px 12px', 
+            borderRadius: '16px', 
+            fontSize: '0.85rem', 
+            fontWeight: 'bold',
+            marginBottom: '16px',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px'
           }}>
-            <Activity size={32} color="var(--accent-cyan)" />
+            <Activity size={14} /> Report Semanal
           </div>
           <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem', fontWeight: '800' }}>
             {elevator.project_name || elevator.name}

@@ -4,12 +4,14 @@ import { supabase } from '../../lib/supabase';
 import { renderItemName } from '../Elevators/Checklist';
 import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye, Plus, Trash2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import { getTenantConfig } from '../../config/tenantConfig';
 
 export default function ClientPortal() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const [isMechanic, setIsMechanic] = useState(searchParams.get('role') === 'mechanic');
   const [elevator, setElevator] = useState<any>(null);
+  const tenantConfig = getTenantConfig(elevator?.tenant_id);
   const [items, setItems] = useState<any[]>([]);
   const [phaseTable, setPhaseTable] = useState<string>('pre_installation_checklists');
   const [loading, setLoading] = useState(true);
@@ -314,6 +316,9 @@ export default function ClientPortal() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
         <div>
+          {tenantConfig.logoUrl && (
+            <img src={tenantConfig.logoUrl} alt="Logo" style={{ height: '40px', objectFit: 'contain', marginBottom: '12px' }} />
+          )}
           <h1 style={{ margin: '0 0 8px 0', fontSize: '2rem' }}>Acompanhamento de Obra</h1>
           <div style={{ display: 'flex', gap: '16px', color: 'var(--text-secondary)' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={16}/> {elevator.name}</span>
