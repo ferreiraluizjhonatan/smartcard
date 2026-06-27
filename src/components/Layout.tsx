@@ -98,8 +98,24 @@ export default function Layout() {
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer' }} onClick={() => navigate('/')}>
           {tenantConfig.logoUrl ? (
-            <div style={{ height: '72px', display: 'flex', alignItems: 'center', marginLeft: '-24px', padding: '0 24px', background: 'rgba(0,0,0,0.15)', borderRight: '1px solid rgba(255,255,255,0.05)' }}>
-              <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '48px', maxWidth: '240px', objectFit: 'contain' }} />
+            <div style={{ 
+               height: '72px', 
+               width: '35vw', 
+               maxWidth: '500px',
+               position: 'relative', 
+               display: 'flex', 
+               alignItems: 'center', 
+               marginLeft: '-24px', 
+               overflow: 'hidden'
+            }}>
+              {/* Fundo dinâmico borrado para estender o gradiente da logo sem distorcer o texto */}
+              <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center', filter: 'blur(20px)', transform: 'scale(1.3)', zIndex: 0 }} />
+              
+              {/* Degradê para mesclar suavemente o final da logo com a cor da navbar */}
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, transparent 50%, rgba(26, 29, 39, 0.95) 100%)', zIndex: 1 }} />
+              
+              {/* Logo nítida preservada à esquerda */}
+              <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ position: 'relative', zIndex: 2, height: '48px', width: '100%', objectFit: 'contain', objectPosition: 'left center', paddingLeft: '24px' }} />
             </div>
           ) : (
             <>
