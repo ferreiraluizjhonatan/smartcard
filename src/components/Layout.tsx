@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { LogOut, Bell, Plus, Sparkles, MessageSquare } from 'lucide-react';
 import { AIChatModal } from './AIChatModal';
 import { useTenant } from '../contexts/TenantContext';
+import { getTenantConfig } from '../config/tenantConfig';
 
 export default function Layout() {
   const [profile, setProfile] = useState<any>(null);
@@ -11,6 +12,7 @@ export default function Layout() {
   const [openMessagesCount, setOpenMessagesCount] = useState(0);
   const navigate = useNavigate();
   const { activeTenantId, setActiveTenantId, tenants, loadingTenants } = useTenant();
+  const tenantConfig = getTenantConfig(activeTenantId);
 
   useEffect(() => {
     let subscription: any;
@@ -82,15 +84,21 @@ export default function Layout() {
     <div className="app-layout">
       <header className="top-navbar">
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer', marginRight: '48px' }} onClick={() => navigate('/')}>
-          <div style={{ marginRight: '16px', color: 'var(--accent-cyan)' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </div>
-          <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-            <h3 style={{ fontSize: '1.2rem', margin: 0, lineHeight: 1, letterSpacing: '0.5px' }}>Smartcard</h3>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gestão Ágil de Elevadores NI</span>
-          </div>
+          {tenantConfig.logoUrl ? (
+            <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '32px', objectFit: 'contain' }} />
+          ) : (
+            <>
+              <div style={{ marginRight: '16px', color: 'var(--accent-cyan)' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </div>
+              <div style={{ paddingTop: '8px', paddingBottom: '8px' }}>
+                <h3 style={{ fontSize: '1.2rem', margin: 0, lineHeight: 1, letterSpacing: '0.5px' }}>Smartcard</h3>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-secondary)' }}>Gestão Ágil de Elevadores NI</span>
+              </div>
+            </>
+          )}
         </div>
 
         <nav className="nav-center" style={{ marginLeft: 0 }}>
