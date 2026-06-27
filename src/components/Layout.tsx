@@ -98,8 +98,8 @@ export default function Layout() {
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer' }} onClick={() => navigate('/')}>
           {tenantConfig.logoUrl ? (
-            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '8px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '40px', objectFit: 'contain' }} />
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '6px 16px', borderRadius: '12px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+              <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '56px', objectFit: 'contain' }} />
             </div>
           ) : (
             <>
