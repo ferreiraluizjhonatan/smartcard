@@ -12,7 +12,7 @@ export default function Layout() {
   const [openMessagesCount, setOpenMessagesCount] = useState(0);
   const navigate = useNavigate();
   const { activeTenantId, setActiveTenantId, tenants, loadingTenants } = useTenant();
-  const tenantConfig = getTenantConfig(activeTenantId);
+  const tenantConfig = getTenantConfig(activeTenantId || profile?.company_id);
 
   useEffect(() => {
     let subscription: any;
