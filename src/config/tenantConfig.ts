@@ -4,8 +4,8 @@ export interface TenantConfig {
   features: { customMonitoring: boolean; customReports: boolean };
 }
 export const tenantConfigs: Record<string, TenantConfig> = {
-  // SUBSTITUA "COLOQUE_O_ID_DA_TKELEVADORES_AQUI" PELO ID REAL DA EMPRESA LÁ NO SUPABASE
-  'COLOQUE_O_ID_DA_TKELEVADORES_AQUI': {
+  // SUBSTITUA "a6430624-d8d5-42a1-a599-5e26b93cbfd6" PELO ID REAL DA EMPRESA LÁ NO SUPABASE
+  'a6430624-d8d5-42a1-a599-5e26b93cbfd6': {
     logoUrl: '/logos/tkelevadores.png', // Exemplo: coloque o arquivo da logo na pasta public/logos/
     features: {
       customMonitoring: true,
