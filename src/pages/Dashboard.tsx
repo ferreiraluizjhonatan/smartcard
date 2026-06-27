@@ -9,7 +9,8 @@ import { getTenantConfig } from '../config/tenantConfig';
 export default function Dashboard() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
-  const tenantConfig = getTenantConfig(activeTenantId);
+  const [userTenantId, setUserTenantId] = useState<string | null>(null);
+  const tenantConfig = getTenantConfig(activeTenantId || userTenantId);
   const [elevators, setElevators] = useState<any[]>([]);
   const [forecasts, setForecasts] = useState<any[]>([]);
   const [assemblyChecklists, setAssemblyChecklists] = useState<any[]>([]);
@@ -58,9 +59,11 @@ export default function Dashboard() {
     setLoading(true);
     const { data: user } = await supabase.auth.getUser();
     if (user.user) {
-      const { data: profile } = await supabase.from('user_profiles').select('company_id, role, branch_name, can_register_users').eq('id', user.user.id).single();
+      const { data: profile } = await supabase.from('user_profiles').select('company_id, tenant_id, role, branch_name, can_register_users').eq('id', user.user.id).single();
       if (profile) {
         setUserRole(profile.role);
+        if (profile.tenant_id) setUserTenantId(profile.tenant_id);
+        
         let query = supabase.from('elevators').select('*');
         
         if (activeTenantId) {
