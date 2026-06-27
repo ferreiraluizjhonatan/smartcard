@@ -177,7 +177,7 @@ export default function Layout() {
             <select
               value={activeTenantId || ''}
               onChange={(e) => setActiveTenantId(e.target.value || null)}
-              className="select"
+              className="select-field"
               style={{ padding: '6px 12px', fontSize: '0.85rem', width: 'auto', minWidth: '150px' }}
             >
               <option value="">Todas as Empresas (Visão Global)</option>
@@ -194,7 +194,16 @@ export default function Layout() {
             </span>
           </div>
 
-          <button onClick={handleLogout} className="btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 16px' }}>
+          <button onClick={handleLogout} className="btn" style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            padding: '8px 16px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            color: 'var(--accent-red)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '8px'
+          }}>
             <LogOut size={16} />
             <span className="hide-on-mobile">Sair</span>
           </button>
