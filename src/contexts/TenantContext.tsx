@@ -27,7 +27,7 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
       const { data: user } = await supabase.auth.getUser();
       if (user.user) {
         const { data: profile } = await supabase.from('user_profiles').select('is_super_admin, role').eq('id', user.user.id).single();
-        if (profile?.is_super_admin || profile?.role === 'supervisor' || profile?.role === 'coordenador_nacional') {
+        if (profile?.is_super_admin) {
           const { data } = await supabase.from('tenants').select('*').order('name');
           if (data) {
             setTenants(data);

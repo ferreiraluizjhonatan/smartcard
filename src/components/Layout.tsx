@@ -180,7 +180,7 @@ export default function Layout() {
             </button>
           )}
 
-          {(profile?.is_super_admin || profile?.role === 'supervisor' || profile?.role === 'coordenador_nacional') && !loadingTenants && tenants.length > 0 && (
+          {profile?.is_super_admin && !loadingTenants && tenants.length > 0 && (
             <select
               value={activeTenantId || ''}
               onChange={(e) => setActiveTenantId(e.target.value || null)}
