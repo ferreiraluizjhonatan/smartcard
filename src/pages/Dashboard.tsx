@@ -513,15 +513,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {tenantConfig.features.customMonitoring && (
-        <div className="neon-card border-cyan" style={{ marginBottom: '32px', background: 'rgba(6, 182, 212, 0.05)' }}>
-          <h3 style={{ margin: '0 0 16px 0', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Activity size={24} /> Novo Monitoramento Especial
-          </h3>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Este painel de monitoramento foi ativado exclusivamente para esta empresa através do sistema de configurações por código.</p>
-        </div>
-      )}
-
       {/* Advanced Filters Toggle */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isFiltersOpen ? '16px' : '32px' }}>
         <button 
