@@ -150,9 +150,9 @@ export default function Schedule() {
       </style>
       
       {/* Print Header */}
-      <div className="print-only" style={{ marginBottom: '12px', textAlign: 'center' }}>
+      <div className="print-only" style={{ marginBottom: '12px', textAlign: 'center', width: '100%' }}>
         {tenantConfig.logoUrl && (
-          <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '48px', objectFit: 'contain', marginBottom: '8px' }} />
+          <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ width: '100%', height: '80px', objectFit: 'cover', marginBottom: '8px' }} />
         )}
         <h1 style={{ color: 'black', margin: '0 0 4px 0', fontSize: '20px' }}>Cronograma de Obras</h1>
         <h2 style={{ color: '#444', margin: 0, fontSize: '16px' }}>Empreendimento: {elevator?.project_name || elevator?.name}</h2>
