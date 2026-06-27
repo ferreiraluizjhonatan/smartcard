@@ -4,10 +4,12 @@ import { Activity, Clock, Users, Calendar, CheckCircle2, Award, Globe, MapPin, B
 import { useNavigate } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { useTenant } from '../contexts/TenantContext';
+import { getTenantConfig } from '../config/tenantConfig';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { activeTenantId } = useTenant();
+  const tenantConfig = getTenantConfig(activeTenantId);
   const [elevators, setElevators] = useState<any[]>([]);
   const [forecasts, setForecasts] = useState<any[]>([]);
   const [assemblyChecklists, setAssemblyChecklists] = useState<any[]>([]);
@@ -453,11 +455,25 @@ export default function Dashboard() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div>
-          <h2 style={{ fontSize: '2rem', margin: '0 0 8px 0', background: 'linear-gradient(90deg, #fff, var(--accent-cyan))', WebkitBackgroundClip: 'text', color: 'transparent' }}>Dashboard Executivo Corporativo</h2>
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Monitoramento Global de Performance</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {tenantConfig.logoUrl && (
+            <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '56px', width: 'auto', objectFit: 'contain' }} />
+          )}
+          <div>
+            <h2 style={{ fontSize: '2rem', margin: '0 0 8px 0', background: 'linear-gradient(90deg, #fff, var(--accent-cyan))', WebkitBackgroundClip: 'text', color: 'transparent' }}>Dashboard Executivo Corporativo</h2>
+            <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Monitoramento Global de Performance</p>
+          </div>
         </div>
       </div>
+
+      {tenantConfig.features.customMonitoring && (
+        <div className="neon-card border-cyan" style={{ marginBottom: '32px', background: 'rgba(6, 182, 212, 0.05)' }}>
+          <h3 style={{ margin: '0 0 16px 0', color: 'var(--accent-cyan)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Activity size={24} /> Novo Monitoramento Especial
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Este painel de monitoramento foi ativado exclusivamente para esta empresa através do sistema de configurações por código.</p>
+        </div>
+      )}
 
       {/* Advanced Filters Toggle */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: isFiltersOpen ? '16px' : '32px' }}>
