@@ -3,6 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Wand2, Calendar as CalIcon, Save, RefreshCw, Printer } from 'lucide-react';
 import { renderItemName } from './Checklist';
+import { getTenantConfig } from '../../config/tenantConfig';
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -10,6 +11,7 @@ export default function Schedule() {
   
   const [elevator, setElevator] = useState<any>(null);
   const [items, setItems] = useState<any[]>([]);
+  const tenantConfig = getTenantConfig(elevator?.tenant_id);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   
@@ -149,6 +151,9 @@ export default function Schedule() {
       
       {/* Print Header */}
       <div className="print-only" style={{ marginBottom: '12px', textAlign: 'center' }}>
+        {tenantConfig.logoUrl && (
+          <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '48px', objectFit: 'contain', marginBottom: '8px' }} />
+        )}
         <h1 style={{ color: 'black', margin: '0 0 4px 0', fontSize: '20px' }}>Cronograma de Obras</h1>
         <h2 style={{ color: '#444', margin: 0, fontSize: '16px' }}>Empreendimento: {elevator?.project_name || elevator?.name}</h2>
         {elevator?.address && <p style={{ color: '#666', margin: '4px 0 0 0', fontSize: '12px' }}>{elevator.address}</p>}
