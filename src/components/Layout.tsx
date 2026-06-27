@@ -126,7 +126,7 @@ export default function Layout() {
 
           </nav>
 
-        <div className="nav-right">
+        <div className="nav-right" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => navigate('/tickets')}>
             <div style={{ 
               background: openMessagesCount > 0 ? 'rgba(6, 182, 212, 0.1)' : 'rgba(255,255,255,0.05)', 
@@ -134,8 +134,7 @@ export default function Layout() {
               padding: '8px', 
               borderRadius: '50%',
               border: openMessagesCount > 0 ? '1px solid rgba(6, 182, 212, 0.3)' : '1px solid var(--border-color)',
-              transition: 'all 0.3s',
-              marginRight: '8px'
+              transition: 'all 0.3s'
             }}>
               <MessageSquare size={18} />
             </div>
@@ -173,12 +172,6 @@ export default function Layout() {
               }}>{openTicketsCount}</span>
             )}
           </div>
-
-          {profile?.can_register_users && (
-            <button onClick={() => navigate('/users/new')} className="btn-glow" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Plus size={16} /> Novo Cadastro
-            </button>
-          )}
 
           {profile?.is_super_admin && !loadingTenants && tenants.length > 0 && (
             <select
