@@ -88,11 +88,19 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
-      <header className="top-navbar">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+      <header className="top-navbar" style={{ position: 'relative', overflow: 'hidden' }}>
+        {tenantConfig.logoUrl && (
+          <>
+            <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', opacity: 0.5, transform: 'scale(1.5)', zIndex: 0 }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.4) 100%)', zIndex: 1 }} />
+          </>
+        )}
+        <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer' }} onClick={() => navigate('/')}>
           {tenantConfig.logoUrl ? (
-            <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '48px', objectFit: 'contain' }} />
+            <div style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 12px', borderRadius: '8px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ height: '40px', objectFit: 'contain' }} />
+            </div>
           ) : (
             <>
               <div style={{ marginRight: '16px', color: 'var(--accent-cyan)' }}>
