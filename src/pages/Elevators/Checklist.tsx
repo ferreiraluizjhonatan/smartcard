@@ -51,12 +51,40 @@ export default function Checklist() {
       const tableName = getTableName(el.status);
       const { data: chk } = await supabase.from(tableName).select('*').eq('elevator_id', id).order('id');
       if (chk) {
-        chk.sort((a, b) => {
+        // --- AUTO-HEALER: Remover duplicatas geradas por triggers de banco de dados ---
+        const nameMap = new Map();
+        const idsToDelete: string[] = [];
+        const uniqueItems: any[] = [];
+
+        for (const item of chk) {
+          if (!nameMap.has(item.item_name)) {
+            nameMap.set(item.item_name, item);
+            uniqueItems.push(item);
+          } else {
+            const existing = nameMap.get(item.item_name);
+            // Se o item duplicado tiver um percentual maior, mantemos ele e marcamos o outro pra deletar
+            if (item.percentage > existing.percentage) {
+               idsToDelete.push(existing.id);
+               nameMap.set(item.item_name, item);
+               const idx = uniqueItems.findIndex(i => i.id === existing.id);
+               if(idx !== -1) uniqueItems[idx] = item;
+            } else {
+               idsToDelete.push(item.id);
+            }
+          }
+        }
+
+        if (idsToDelete.length > 0) {
+           // Cleanup silently in background
+           supabase.from(tableName).delete().in('id', idsToDelete).then();
+        }
+
+        uniqueItems.sort((a, b) => {
           const numA = parseInt(a.item_name.match(/\d+/)?.[0] || '0');
           const numB = parseInt(b.item_name.match(/\d+/)?.[0] || '0');
           return numA - numB;
         });
-        setItems(chk);
+        setItems(uniqueItems);
       }
 
       // Fetch all pending items/tickets for this elevator regardless of phase
