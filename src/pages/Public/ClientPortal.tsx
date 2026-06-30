@@ -306,12 +306,27 @@ export default function ClientPortal() {
     const validItems = relevantItems.filter(i => i.planned_start_date && i.planned_end_date);
     
     if (!validItems.length) {
-      // Fallback
-      if (!elevator?.start_date || !elevator?.expected_end_date) return 0;
-      const start = new Date(elevator.start_date).getTime();
-      const end = new Date(elevator.expected_end_date).getTime();
+      // Robust Fallback: If no start date, assume it started when created.
+      // If no end date, assume 30 days of project length from start.
+      let startStr = elevator?.start_date || elevator?.created_at;
+      let endStr = elevator?.expected_end_date;
+      
+      if (!startStr) return 0;
+      
+      if (!endStr) {
+        const d = new Date(startStr);
+        d.setDate(d.getDate() + 30); // Default 30 days
+        endStr = d.toISOString();
+      }
+
+      const start = new Date(startStr).getTime();
+      const end = new Date(endStr).getTime();
+      
+      if (isNaN(start) || isNaN(end)) return 0;
+      
       if (today < start) return 0;
       if (today > end) return 100;
+      
       return Math.round(((today - start) / (end - start)) * 100);
     }
 
