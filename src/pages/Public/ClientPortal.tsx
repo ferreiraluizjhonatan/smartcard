@@ -56,11 +56,15 @@ export default function ClientPortal() {
       }
       
       // Fetch ticket history for this elevator
-      const { data: ticketsData } = await supabase
+      const { data: ticketsData, error: ticketsError } = await supabase
         .from('tickets')
-        .select('*, ticket_comments(*)')
+        .select('*')
         .eq('elevator_id', id)
         .order('created_at', { ascending: false });
+        
+      if (ticketsError) {
+        console.error('Error fetching tickets:', ticketsError);
+      }
         
       if (ticketsData) {
         setTicketHistory(ticketsData.filter(t => t.title === 'Mensagem do Mestre (Link Público)'));
