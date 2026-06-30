@@ -287,21 +287,44 @@ export default function ClientPortal() {
   };
 
   const getPercentageCompleted = () => {
-    if (!items || !items.length) return 0;
-    const completed = items.filter(i => i.percentage === 100).length;
-    return Math.round((completed / items.length) * 100);
+    let relevantItems = items || [];
+    if (isMechanic) {
+      relevantItems = relevantItems.filter(i => i.table_name !== 'pre_installation_checklists');
+    }
+    if (!relevantItems.length) return 0;
+    const completed = relevantItems.filter(i => i.percentage === 100).length;
+    return Math.round((completed / relevantItems.length) * 100);
   };
 
   const getExpectedPercentage = () => {
-    if (!elevator?.start_date || !elevator?.expected_end_date) return 0;
-    const start = new Date(elevator.start_date).getTime();
-    const end = new Date(elevator.expected_end_date).getTime();
+    let relevantItems = items || [];
+    if (isMechanic) {
+      relevantItems = relevantItems.filter(i => i.table_name !== 'pre_installation_checklists');
+    }
+    
     const today = new Date().getTime();
+    const validItems = relevantItems.filter(i => i.planned_start_date && i.planned_end_date);
     
-    if (today < start) return 0;
-    if (today > end) return 100;
+    if (!validItems.length) {
+      // Fallback
+      if (!elevator?.start_date || !elevator?.expected_end_date) return 0;
+      const start = new Date(elevator.start_date).getTime();
+      const end = new Date(elevator.expected_end_date).getTime();
+      if (today < start) return 0;
+      if (today > end) return 100;
+      return Math.round(((today - start) / (end - start)) * 100);
+    }
+
+    const startDates = validItems.map(i => new Date(i.planned_start_date).getTime());
+    const endDates = validItems.map(i => new Date(i.planned_end_date).getTime());
     
-    return Math.round(((today - start) / (end - start)) * 100);
+    const minStart = Math.min(...startDates);
+    const maxEnd = Math.max(...endDates);
+    
+    if (today < minStart) return 0;
+    if (today > maxEnd) return 100;
+    
+    return Math.round(((today - minStart) / (maxEnd - minStart)) * 100);
   };
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: 'var(--accent-cyan)' }}>Carregando dados da obra...</div>;
