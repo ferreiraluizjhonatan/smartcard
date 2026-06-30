@@ -91,8 +91,8 @@ export default function Layout() {
       <header className="top-navbar" style={{ position: 'relative', overflow: 'hidden' }}>
         {tenantConfig.logoUrl && (
           <>
-            <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', opacity: 0.5, transform: 'scale(1.5)', zIndex: 0 }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.4) 100%)', zIndex: 1 }} />
+            <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', opacity: 0.5, transform: 'scale(1.5)', zIndex: 0, pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.4) 100%)', zIndex: 1, pointerEvents: 'none' }} />
           </>
         )}
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -109,10 +109,10 @@ export default function Layout() {
                overflow: 'hidden'
             }}>
               {/* Fundo dinâmico borrado para estender o gradiente da logo sem distorcer o texto */}
-              <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center', filter: 'blur(20px)', transform: 'scale(1.3)', zIndex: 0 }} />
+              <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'right center', filter: 'blur(20px)', transform: 'scale(1.3)', zIndex: 0, pointerEvents: 'none' }} />
               
               {/* Degradê para mesclar suavemente o final da logo com a cor da navbar */}
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, transparent 50%, rgba(26, 29, 39, 0.95) 100%)', zIndex: 1 }} />
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, transparent 50%, rgba(26, 29, 39, 0.95) 100%)', zIndex: 1, pointerEvents: 'none' }} />
               
               {/* Logo nítida preservada à esquerda */}
               <img src={tenantConfig.logoUrl} alt="Logo Empresa" style={{ position: 'relative', zIndex: 2, height: '48px', width: '100%', objectFit: 'contain', objectPosition: 'left center', paddingLeft: '24px' }} />
@@ -141,7 +141,7 @@ export default function Layout() {
           </button>
         </div>
 
-        <div className={`nav-container ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className={`nav-container ${isMobileMenuOpen ? 'mobile-open' : ''}`} style={{ position: 'relative', zIndex: 3 }}>
           <nav className="nav-center" style={{ marginLeft: 0 }}>
           <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} end>
               Dashboard

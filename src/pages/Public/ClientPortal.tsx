@@ -55,20 +55,9 @@ export default function ClientPortal() {
         setPhaseTable(result.phase_table);
       }
       
-      // Fetch ticket history for this elevator
-      const { data: ticketsData, error: ticketsError } = await supabase
-        .from('tickets')
-        .select('*')
-        .eq('elevator_id', id)
-        .order('created_at', { ascending: false });
-        
-      if (ticketsError) {
-        console.error('Error fetching tickets:', ticketsError);
-      }
-        
-      if (ticketsData) {
-        setTicketHistory(ticketsData.filter(t => t.title === 'Mensagem do Mestre (Link Público)'));
-        setGeneralPendingItems(ticketsData);
+      if (result.tickets) {
+        setTicketHistory(result.tickets.filter((t: any) => t.title === 'Mensagem do Mestre (Link Público)'));
+        setGeneralPendingItems(result.tickets);
       }
     } catch (err: any) {
       console.error(err);

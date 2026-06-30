@@ -57,8 +57,13 @@ serve(async (req) => {
     if (adjust.data) {
        checklists = checklists.concat(sortByNumber(adjust.data).map(i => ({...i, item_name: `[Ajuste] ${i.item_name}`, table_name: 'adjustment_checklists'})));
     }
+    const { data: tickets } = await supabase
+        .from('tickets')
+        .select('*')
+        .eq('elevator_id', elevator_id)
+        .order('created_at', { ascending: false });
 
-    return new Response(JSON.stringify({ elevator, checklists }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    return new Response(JSON.stringify({ elevator, checklists, tickets: tickets || [] }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error(error);
