@@ -88,12 +88,12 @@ export default function Layout() {
 
   return (
     <div className="app-layout">
-      <header className="top-navbar" style={{ position: 'relative', overflow: 'hidden' }}>
+      <header className="top-navbar" style={{ position: 'relative' }}>
         {tenantConfig.logoUrl && (
-          <>
-            <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', opacity: 0.5, transform: 'scale(1.5)', zIndex: 0, pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.4) 100%)', zIndex: 1, pointerEvents: 'none' }} />
-          </>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', zIndex: 0, pointerEvents: 'none', borderRadius: 'inherit' }}>
+            <img src={tenantConfig.logoUrl} alt="" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover', filter: 'blur(40px)', opacity: 0.5, transform: 'scale(1.5)' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'linear-gradient(to right, rgba(10,15,30,0.95) 0%, rgba(10,15,30,0.4) 100%)' }} />
+          </div>
         )}
         <div style={{ position: 'relative', zIndex: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', height: '100%', cursor: 'pointer' }} onClick={() => navigate('/')}>
@@ -141,7 +141,7 @@ export default function Layout() {
           </button>
         </div>
 
-        <div className={`nav-container ${isMobileMenuOpen ? 'mobile-open' : ''}`} style={{ position: 'relative', zIndex: 3 }}>
+        <div className={`nav-container ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
           <nav className="nav-center" style={{ marginLeft: 0 }}>
           <NavLink to="/" className={({ isActive }) => isActive ? "nav-link active" : "nav-link"} end>
               Dashboard
