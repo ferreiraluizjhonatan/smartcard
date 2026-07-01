@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Printer, FileText, CheckCircle2, AlertTriangle, Camera } from 'lucide-react';
+import { ArrowLeft, Printer, FileText, CheckCircle2, AlertTriangle, Camera, AlertCircle } from 'lucide-react';
 import { renderItemName } from './Checklist';
 import { getTenantConfig } from '../../config/tenantConfig';
 // @ts-ignore
