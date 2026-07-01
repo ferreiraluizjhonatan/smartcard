@@ -677,6 +677,12 @@ export default function Checklist() {
                 {p.title && <strong style={{ color: 'var(--accent-cyan)' }}>{p.title}: </strong>}
                 {p.description}
               </div>
+              <button 
+                 onClick={() => handleDeletePendingItem(p)}
+                 title="Excluir pendência"
+                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0 4px', display: 'flex', alignItems: 'center' }}>
+                 <Trash2 size={16} />
+              </button>
             </div>
           ))}
         </div>
