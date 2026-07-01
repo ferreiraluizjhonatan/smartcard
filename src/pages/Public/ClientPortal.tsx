@@ -31,6 +31,8 @@ export default function ClientPortal() {
     'assembly_checklists': true,
     'adjustment_checklists': true
   });
+  const [ticketModal, setTicketModal] = useState<any | null>(null);
+  const [ticketDescription, setTicketDescription] = useState('');
 
   const togglePhase = (phase: string) => {
     setExpandedPhases(prev => ({ ...prev, [phase]: !prev[phase] }));
@@ -103,10 +105,10 @@ export default function ClientPortal() {
 
   const handleAddItemPending = async (item: any) => {
     const text = newItemPending[item.id];
-    if (!text?.trim()) return;
+    if (!text || !text.trim()) return;
     setAddingPending(true);
     try {
-      const { data: result, error: fnError } = await supabase.functions.invoke('client-portal-action', {
+      const { data: result, error } = await supabase.functions.invoke('client-portal-action', {
         body: {
           action: 'create_ticket',
           payload: {
@@ -118,14 +120,52 @@ export default function ClientPortal() {
           }
         }
       });
-      if (fnError || (result && result.error)) throw fnError || new Error(result.error);
+
+      if (error) throw error;
+      
+      const newTicket = result.tickets?.[0] || {
+        id: Date.now().toString(),
+        title: `Problema: ${item.item_name}`,
+        description: text,
+        status: 'aberto',
+        created_at: new Date().toISOString()
+      };
+      
+      setGeneralPendingItems([newTicket, ...generalPendingItems]);
       setNewItemPending(prev => ({ ...prev, [item.id]: '' }));
-      fetchData();
-    } catch(err) {
-      console.error(err);
-      alert('Erro ao adicionar pendência. Tente novamente.');
+    } catch (err: any) {
+      alert('Erro ao adicionar pendência: ' + err.message);
     } finally {
       setAddingPending(false);
+    }
+  };
+
+  const handleCreateOfficialTicket = async () => {
+    if (!ticketModal || !ticketDescription.trim()) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('client-portal-action', {
+        body: {
+          action: 'create_ticket',
+          payload: {
+            elevator_id: id,
+            company_id: elevator?.company_id,
+            title: `Problema: ${ticketModal.item_name}`,
+            message: ticketDescription,
+            ticket_type: 'chamado'
+          }
+        }
+      });
+
+      if (error) throw error;
+      alert('Chamado / Ocorrência aberta com sucesso! A equipe de suporte foi notificada.');
+      setTicketModal(null);
+      setTicketDescription('');
+    } catch (err: any) {
+      alert('Erro ao abrir chamado: ' + err.message);
+    } finally {
+      setLoading(false);
+      fetchData(); // recarrega a lista para mostrar o chamado nas pendências caso necessario
     }
   };
 
@@ -546,6 +586,14 @@ export default function ClientPortal() {
                                {uploadingItemId === item.id ? 'Enviando...' : 'Anexar'}
                                <input type="file" accept="image/*" style={{ display: 'none' }} disabled={uploadingItemId === item.id} onChange={(e) => handleUploadPhoto(e, item.id, item.table_name)} />
                             </label>
+
+                            {isMechanic && (
+                              <button 
+                                onClick={() => setTicketModal(item)}
+                                className="btn-glow border-red print-hide" style={{ padding: '4px 10px', fontSize: '0.8rem', color: 'var(--accent-red)' }}>
+                                <AlertTriangle size={14} style={{ display: 'inline', marginRight: '4px' }} /> Abrir Chamado
+                              </button>
+                            )}
                           </div>
                           
                           {/* Mechanic Controls */}
@@ -841,6 +889,31 @@ export default function ClientPortal() {
           }
         `}
       </style>
+
+      {ticketModal && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '24px' }}>
+          <div className="neon-card border-red" style={{ width: '100%', maxWidth: '500px', background: 'var(--bg-dark)' }}>
+            <h3 style={{ color: 'var(--accent-red)', marginTop: 0 }}>Abrir Chamado / Pendência</h3>
+            <p style={{ color: 'var(--text-secondary)' }}>Relate o problema impeditivo para: <strong style={{ color: 'white' }}>{ticketModal.item_name}</strong></p>
+            
+            <textarea 
+               className="input-field" 
+               rows={4} 
+               placeholder="Descreva o problema ou pendência detalhadamente..."
+               value={ticketDescription}
+               onChange={(e) => setTicketDescription(e.target.value)}
+               style={{ width: '100%', marginBottom: '16px', background: 'rgba(255,255,255,0.05)', resize: 'vertical' }}
+            />
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+               <button className="btn btn-secondary" onClick={() => setTicketModal(null)}>Cancelar</button>
+               <button className="btn-glow border-red" onClick={handleCreateOfficialTicket} disabled={loading || !ticketDescription.trim()}>
+                 {loading ? 'Enviando...' : 'Criar Chamado Oficial'}
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
