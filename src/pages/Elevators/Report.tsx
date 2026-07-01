@@ -288,6 +288,33 @@ export default function ElevatorReport() {
           {(phaseFilter === 'todas' || phaseFilter === 'montagem_ajuste') && renderChecklistPhase('Fase: Montagem Mecânica', assemblyItems)}
           {(phaseFilter === 'todas' || phaseFilter === 'montagem_ajuste') && renderChecklistPhase('Fase: Ajuste e Partida', adjustmentItems)}
         </div>
+        
+        {/* Histórico de Chamados e Ocorrências Gerais */}
+        {reportType === 'completo' && tickets.some(t => !t.title.startsWith('Problema: ')) && (
+          <div style={{ marginBottom: '40px' }}>
+             <h2 style={{ color: '#00d2ff', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '2px solid #00d2ff', paddingBottom: '8px', marginBottom: '24px' }}>
+               <AlertCircle size={24} /> Histórico de Ocorrências e Chamados
+             </h2>
+             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+               {tickets.filter(t => !t.title.startsWith('Problema: ') && !assemblyItems.some(i => i.item_name === t.title) && !preItems.some(i => i.item_name === t.title) && !adjustmentItems.some(i => i.item_name === t.title)).map(ticket => (
+                 <div key={ticket.id} style={{ background: '#fafafa', border: '1px solid #eee', padding: '16px', borderRadius: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                      <span style={{ fontWeight: 'bold', color: ticket.ticket_type === 'chamado' ? '#d32f2f' : '#1976d2' }}>
+                        {ticket.title}
+                      </span>
+                      <span style={{ fontSize: '0.85rem', color: '#666' }}>
+                        {new Date(ticket.created_at).toLocaleDateString('pt-BR')}
+                      </span>
+                    </div>
+                    <p style={{ margin: '0 0 12px 0', color: '#444' }}>{ticket.description}</p>
+                    <p style={{ margin: 0, fontSize: '0.85rem', color: ticket.status === 'fechado' ? 'green' : 'red', fontWeight: 'bold' }}>
+                      Status: {ticket.status === 'fechado' ? 'Fechado/Resolvido' : 'Em Aberto'}
+                    </p>
+                 </div>
+               ))}
+             </div>
+          </div>
+        )}
 
         {/* Rodapé */}
         <div style={{ marginTop: '60px', paddingTop: '20px', borderTop: '1px solid #ccc', textAlign: 'center', color: '#888', fontSize: '0.85rem' }}>

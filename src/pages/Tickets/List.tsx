@@ -36,7 +36,7 @@ export default function TicketsList() {
       if(profile) {
         let query = supabase.from('tickets')
           .select(`*, elevators (name)`)
-          .in('ticket_type', ['chamado', 'mensagem'])
+          .in('ticket_type', ['chamado', 'mensagem', 'pendencia'])
           .order('created_at', { ascending: false });
 
         if (activeTenantId) {
@@ -122,8 +122,8 @@ export default function TicketsList() {
 
   const filteredTickets = tickets.filter(t => {
     if (filter === 'all') return true;
-    if (filter === 'mensagens') return t.title === 'Mensagem do Mestre (Link Público)';
-    return t.status === filter && t.title !== 'Mensagem do Mestre (Link Público)'; // if 'aberto' or 'fechado', only show actual tickets, or maybe all? Let's just filter. Wait, if they just want a filter for messages, let's keep all tickets as they were.
+    if (filter === 'mensagens') return t.ticket_type === 'mensagem';
+    return t.status === filter && t.ticket_type !== 'mensagem';
   });
   const groupedTickets = Object.values(
     filteredTickets.reduce((acc, t) => {

@@ -25,7 +25,7 @@ export default function Layout() {
              if(data) {
                 const fetchCount = () => {
                   let qTickets = supabase.from('tickets').select('id', { count: 'exact' })
-                    .eq('ticket_type', 'chamado')
+                    .in('ticket_type', ['chamado', 'pendencia'])
                     .neq('status', 'fechado');
                   
                   let qMessages = supabase.from('tickets').select('id', { count: 'exact' })
