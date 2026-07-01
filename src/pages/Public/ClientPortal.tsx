@@ -68,7 +68,7 @@ export default function ClientPortal() {
     setLoading(false);
   };
 
-  const requestVisit = async () => {
+  const requestVisit = async (ticketType: 'mensagem' | 'chamado' = 'mensagem') => {
     if (!message.trim()) {
        alert("Por favor, digite sua mensagem ou solicitação.");
        return;
@@ -81,17 +81,18 @@ export default function ClientPortal() {
           payload: { 
             elevator_id: id, 
             message: message, 
-            company_id: elevator?.company_id 
+            company_id: elevator?.company_id,
+            ticket_type: ticketType
           }
         }
       });
       if (error || (result && result.error)) throw error || new Error(result.error);
-      alert('Mensagem enviada com sucesso! A equipe SmartCard entrará em contato em breve.');
+      alert(ticketType === 'chamado' ? 'Chamado aberto com sucesso! A equipe entrará em contato.' : 'Mensagem enviada com sucesso! A equipe SmartCard entrará em contato em breve.');
       setMessage('');
       fetchData(); // Refresh history
     } catch(err) {
       console.error(err);
-      alert('Erro ao enviar mensagem.');
+      alert('Erro ao enviar.');
     } finally {
       setSendingMsg(false);
     }
@@ -395,7 +396,17 @@ export default function ClientPortal() {
             }}
             style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            <MessageSquare size={18} /> Abrir Chamado
+            <MessageSquare size={18} /> Enviar Mensagem
+          </button>
+
+          <button 
+            className="btn-glow border-red" 
+            onClick={() => {
+              document.getElementById('messages-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Bell size={18} /> Abrir Chamado
           </button>
           
           <button 
@@ -678,10 +689,10 @@ export default function ClientPortal() {
 
       <div id="messages-section" className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px' }}>
         <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <MessageSquare size={20} color="var(--accent-cyan)"/> Abrir Chamado ou Solicitação
+          <MessageSquare size={20} color="var(--accent-cyan)"/> Enviar Mensagem ou Abrir Chamado
         </h3>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
-          Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Envie uma mensagem direta para nossa equipe técnica.
+          Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Escolha abaixo se deseja enviar uma mensagem comum ou abrir um chamado.
         </p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -693,14 +704,24 @@ export default function ClientPortal() {
              placeholder="Digite sua solicitação aqui... ex: A obra está liberada para instalação do poço amanhã."
              style={{ resize: 'vertical' }}
            />
-           <button 
-             onClick={requestVisit} 
-             disabled={sendingMsg}
-             className="btn-glow border-cyan" 
-             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
-           >
-             {sendingMsg ? 'Enviando...' : <><Send size={16}/> Abrir Chamado</>}
-           </button>
+           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+             <button 
+               onClick={() => requestVisit('mensagem')} 
+               disabled={sendingMsg}
+               className="btn-glow border-cyan" 
+               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
+             >
+               {sendingMsg ? 'Enviando...' : <><MessageSquare size={16}/> Enviar Mensagem</>}
+             </button>
+             <button 
+               onClick={() => requestVisit('chamado')} 
+               disabled={sendingMsg}
+               className="btn-glow border-red" 
+               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
+             >
+               {sendingMsg ? 'Enviando...' : <><Bell size={16}/> Abrir Chamado Técnico</>}
+             </button>
+           </div>
         </div>
 
         {/* Ticket History */}
