@@ -36,7 +36,7 @@ export default function TicketsList() {
       if(profile) {
         let query = supabase.from('tickets')
           .select(`*, elevators (name)`)
-          .in('ticket_type', ['chamado', 'mensagem', 'pendencia'])
+          .in('ticket_type', ['chamado', 'mensagem'])
           .order('created_at', { ascending: false });
 
         if (activeTenantId) {
@@ -222,8 +222,17 @@ export default function TicketsList() {
                             {t.status.toUpperCase()}
                           </span>
                         </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-                          <Clock size={12} /> {new Date(t.created_at).toLocaleDateString()}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            <Clock size={12} /> {new Date(t.created_at).toLocaleDateString()}
+                          </div>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleDeleteTicket(t.id); }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '4px' }}
+                            title="Excluir"
+                          >
+                            <Trash2 size={16} />
+                          </button>
                         </div>
                       </div>
                     ))}
