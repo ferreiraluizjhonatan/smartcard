@@ -114,7 +114,7 @@ export default function ClientPortal() {
             company_id: elevator?.company_id,
             title: item.item_name,
             message: text,
-            ticket_type: 'pendencia'
+            ticket_type: 'chamado'
           }
         }
       });
@@ -391,27 +391,7 @@ export default function ClientPortal() {
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Building2 size={16}/> {elevator.customer_company || 'Cliente'} - {elevator.project_name || 'Obra'}</span>
           </div>
         </div>
-        <div className="print-hide" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '16px' }}>
-          <button 
-            className="btn-glow border-cyan" 
-            onClick={() => {
-              document.getElementById('messages-section')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <MessageSquare size={18} /> Enviar Mensagem
-          </button>
-
-          <button 
-            className="btn-glow border-red" 
-            onClick={() => {
-              document.getElementById('messages-section')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <Bell size={18} /> Abrir Chamado
-          </button>
-          
+        <div className="print-hide" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '16px' }}>          
           <button 
             id="pdf-btn"
             className="btn-glow border-cyan" 
@@ -694,10 +674,10 @@ export default function ClientPortal() {
 
       <div id="messages-section" className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px' }}>
         <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <MessageSquare size={20} color="var(--accent-cyan)"/> Enviar Mensagem ou Abrir Chamado
+          <MessageSquare size={20} color="var(--accent-cyan)"/> Enviar Mensagem
         </h3>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
-          Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Escolha abaixo se deseja enviar uma mensagem comum ou abrir um chamado.
+          Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Envie uma mensagem direta para nossa equipe técnica.
         </p>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -709,24 +689,14 @@ export default function ClientPortal() {
              placeholder="Digite sua solicitação aqui... ex: A obra está liberada para instalação do poço amanhã."
              style={{ resize: 'vertical' }}
            />
-           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-             <button 
-               onClick={() => requestVisit('mensagem')} 
-               disabled={sendingMsg}
-               className="btn-glow border-cyan" 
-               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
-             >
-               {sendingMsg ? 'Enviando...' : <><MessageSquare size={16}/> Enviar Mensagem</>}
-             </button>
-             <button 
-               onClick={() => requestVisit('chamado')} 
-               disabled={sendingMsg}
-               className="btn-glow border-red" 
-               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
-             >
-               {sendingMsg ? 'Enviando...' : <><Bell size={16}/> Abrir Chamado Técnico</>}
-             </button>
-           </div>
+           <button 
+             onClick={() => requestVisit('mensagem')} 
+             disabled={sendingMsg}
+             className="btn-glow border-cyan" 
+             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
+           >
+             <Send size={18} /> {sendingMsg ? 'Enviando Mensagem...' : 'Enviar Mensagem'}
+           </button>
         </div>
 
         {/* Ticket History */}
