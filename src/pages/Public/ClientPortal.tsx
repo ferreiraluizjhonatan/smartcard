@@ -630,12 +630,14 @@ export default function ClientPortal() {
                                         }}>
                                           {p.description}
                                         </span>
-                                        <button 
-                                          onClick={() => handleDeletePendingItem(p)}
-                                          title="Excluir pendência"
-                                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0 4px', display: 'flex', alignItems: 'center' }}>
-                                          <Trash2 size={16} />
-                                        </button>
+                                        {!isMechanic && (
+                                          <button 
+                                            onClick={() => handleDeletePendingItem(p)}
+                                            title="Excluir pendência"
+                                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red)', padding: '0 4px', display: 'flex', alignItems: 'center' }}>
+                                            <Trash2 size={16} />
+                                          </button>
+                                        )}
                                       </div>
                                     ))}
                                   </div>
