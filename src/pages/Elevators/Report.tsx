@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Printer, FileText, CheckCircle2, AlertTriangle, Camera } from 'lucide-react';
 import { renderItemName } from './Checklist';
 import { getTenantConfig } from '../../config/tenantConfig';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 export default function ElevatorReport() {
   const navigate = useNavigate();
@@ -120,6 +122,27 @@ export default function ElevatorReport() {
     );
   };
 
+  const handleGeneratePDF = async () => {
+    const element = document.getElementById('report-content');
+    if (!element) return;
+    
+    const printBtn = document.getElementById('pdf-btn');
+    if (printBtn) printBtn.style.display = 'none';
+
+    try {
+      // @ts-ignore
+      await html2pdf().set({
+        margin:       10,
+        filename:     `Relatorio_${elevator?.name || 'Obra'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    } finally {
+      if (printBtn) printBtn.style.display = 'flex';
+    }
+  };
+
   if (loading) return <div style={{ padding: '24px' }}>Gerando Relatório...</div>;
 
   return (
@@ -145,13 +168,13 @@ export default function ElevatorReport() {
           </select>
         </div>
 
-        <button className="btn-glow border-cyan" onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '1rem', fontWeight: 'bold' }}>
+        <button id="pdf-btn" className="btn-glow border-cyan" onClick={handleGeneratePDF} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', fontSize: '1rem', fontWeight: 'bold' }}>
           <Printer size={18} /> IMPRIMIR PDF
         </button>
       </div>
 
       {/* Conteúdo do Relatório Formato A4 */}
-      <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px', background: 'white' }}>
+      <div id="report-content" style={{ maxWidth: '900px', margin: '0 auto', padding: '40px', background: 'white' }}>
         
         {/* Cabeçalho */}
         <div style={{ marginBottom: '32px' }}>

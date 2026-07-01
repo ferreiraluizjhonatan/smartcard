@@ -5,6 +5,8 @@ import { renderItemName } from '../Elevators/Checklist';
 import { Printer, Calendar, CheckCircle2, Image as ImageIcon, MapPin, Building2, Clock, AlertCircle, Upload, Send, MessageSquare, ChevronDown, ChevronUp, BarChart2, FileText, Camera, AlertTriangle, History, Lock, Eye, Plus, Trash2 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { getTenantConfig } from '../../config/tenantConfig';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 export default function ClientPortal() {
   const { id } = useParams();
@@ -279,6 +281,27 @@ export default function ClientPortal() {
     }
   };
 
+  const handleGeneratePDF = async () => {
+    const element = document.getElementById('report-content');
+    if (!element) return;
+    
+    const printBtn = document.getElementById('pdf-btn');
+    if (printBtn) printBtn.style.display = 'none';
+
+    try {
+      // @ts-ignore
+      await html2pdf().set({
+        margin:       10,
+        filename:     `Relatorio_${elevator?.name || 'Obra'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      }).from(element).save();
+    } finally {
+      if (printBtn) printBtn.style.display = 'flex';
+    }
+  };
+
   const getPercentageCompleted = () => {
     let relevantItems = items || [];
     if (isMechanic) {
@@ -342,7 +365,7 @@ export default function ClientPortal() {
   const expectedPerc = getExpectedPercentage();
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
+    <div id="report-content" style={{ maxWidth: '800px', margin: '0 auto', padding: '24px', fontFamily: 'Inter, sans-serif' }}>
       
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
@@ -357,8 +380,9 @@ export default function ClientPortal() {
           </div>
         </div>
         <button 
+          id="pdf-btn"
           className="btn-glow border-cyan print-hide" 
-          onClick={() => window.print()}
+          onClick={handleGeneratePDF}
           style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
         >
           <Printer size={18} /> Gerar Relatório PDF

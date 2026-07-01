@@ -4,6 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Wand2, Calendar as CalIcon, Save, RefreshCw, Printer } from 'lucide-react';
 import { renderItemName } from './Checklist';
 import { getTenantConfig } from '../../config/tenantConfig';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 export default function Schedule() {
   const navigate = useNavigate();
@@ -129,8 +131,29 @@ export default function Schedule() {
   const minDateStr = validItems.length > 0 ? new Date(Math.min(...validItems.map(i => new Date(i.planned_start_date).getTime()))).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '---';
   const maxDateStr = validItems.length > 0 ? new Date(Math.max(...validItems.map(i => new Date(i.planned_end_date).getTime()))).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '---';
 
+  const handleGeneratePDF = async () => {
+    const element = document.getElementById('report-content');
+    if (!element) return;
+    
+    const printBtn = document.getElementById('pdf-btn');
+    if (printBtn) printBtn.style.display = 'none';
+
+    try {
+      // @ts-ignore
+      await html2pdf().set({
+        margin:       10,
+        filename:     `Cronograma_${elevator?.name || 'Obra'}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'landscape' }
+      }).from(element).save();
+    } finally {
+      if (printBtn) printBtn.style.display = 'flex';
+    }
+  };
+
   return (
-    <div className="print-container">
+    <div id="report-content" className="print-container">
       <style>
         {`
           @media screen {
@@ -140,11 +163,11 @@ export default function Schedule() {
             body { background: white !important; color: black !important; }
             .no-print { display: none !important; }
             .print-only { display: block !important; }
-            .print-container { padding: 0 !important; background: white !important; zoom: 0.9; }
-            .print-text { color: black !important; }
-            .print-border { border-bottom: 1px solid #ccc !important; }
-            .neon-card, .glass-panel { border: none !important; box-shadow: none !important; background: white !important; }
-            @page { size: landscape; margin: 8mm; }
+            .schedule-container { background: white !important; padding: 0 !important; }
+            * { color: black !important; }
+          }
+          @media screen {
+            .print-only { display: none !important; }
           }
         `}
       </style>
@@ -216,8 +239,9 @@ export default function Schedule() {
         <div style={{ display: 'flex', gap: '12px' }}>
           {items.length > 0 && (
             <button 
+              id="pdf-btn"
               className="btn btn-secondary no-print" 
-              onClick={() => window.print()} 
+              onClick={handleGeneratePDF} 
               style={{ padding: '12px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Printer size={18} />
               Imprimir / PDF
