@@ -109,7 +109,8 @@ export default function ClientPortal() {
             elevator_id: id,
             company_id: elevator?.company_id,
             title: item.item_name,
-            message: text
+            message: text,
+            ticket_type: 'pendencia'
           }
         }
       });
@@ -658,7 +659,7 @@ export default function ClientPortal() {
 
       <div className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px' }}>
         <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <MessageSquare size={20} color="var(--accent-cyan)"/> Enviar Mensagem ou Solicitação
+          <MessageSquare size={20} color="var(--accent-cyan)"/> Abrir Chamado ou Solicitação
         </h3>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px', fontSize: '0.9rem' }}>
           Precisa de apoio técnico, quer agendar uma vistoria presencial ou relatar um problema na obra? Envie uma mensagem direta para nossa equipe técnica.
@@ -679,8 +680,7 @@ export default function ClientPortal() {
              className="btn-glow border-cyan" 
              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: sendingMsg ? 0.5 : 1 }}
            >
-             <Send size={18} />
-             {sendingMsg ? 'Enviando Mensagem...' : 'Enviar Mensagem'}
+             {sendingMsg ? 'Enviando...' : <><Send size={16}/> Abrir Chamado</>}
            </button>
         </div>
 
