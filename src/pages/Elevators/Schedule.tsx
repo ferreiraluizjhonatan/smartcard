@@ -132,6 +132,13 @@ export default function Schedule() {
   const maxDateStr = validItems.length > 0 ? new Date(Math.max(...validItems.map(i => new Date(i.planned_end_date).getTime()))).toLocaleDateString('pt-BR', { timeZone: 'UTC' }) : '---';
 
   const handleGeneratePDF = async () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+      window.print();
+      return;
+    }
+
     const element = document.getElementById('report-content');
     if (!element) return;
     

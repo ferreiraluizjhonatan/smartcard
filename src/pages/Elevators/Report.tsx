@@ -123,6 +123,13 @@ export default function ElevatorReport() {
   };
 
   const handleGeneratePDF = async () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+      window.print();
+      return;
+    }
+
     const element = document.getElementById('report-content');
     if (!element) return;
     

@@ -283,6 +283,13 @@ export default function ClientPortal() {
   };
 
   const handleGeneratePDF = async () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    
+    if (isIOS) {
+      window.print();
+      return;
+    }
+
     const element = document.getElementById('report-content');
     if (!element) return;
     
@@ -380,14 +387,26 @@ export default function ClientPortal() {
             <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Building2 size={16}/> {elevator.customer_company || 'Cliente'} - {elevator.project_name || 'Obra'}</span>
           </div>
         </div>
-        <button 
-          id="pdf-btn"
-          className="btn-glow border-cyan print-hide" 
-          onClick={handleGeneratePDF}
-          style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-        >
-          <Printer size={18} /> Gerar Relatório PDF
-        </button>
+        <div className="print-hide" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'flex-end', marginTop: '16px' }}>
+          <button 
+            className="btn-glow border-cyan" 
+            onClick={() => {
+              document.getElementById('messages-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <MessageSquare size={18} /> Abrir Chamado
+          </button>
+          
+          <button 
+            id="pdf-btn"
+            className="btn-glow border-cyan" 
+            onClick={handleGeneratePDF}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <Printer size={18} /> Gerar Relatório PDF
+          </button>
+        </div>
       </div>
 
       {/* Supervisor Notes Alert */}
@@ -657,7 +676,7 @@ export default function ClientPortal() {
         </div>
       </div>
 
-      <div className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px' }}>
+      <div id="messages-section" className="glass-panel print-hide" style={{ padding: '24px', marginTop: '24px' }}>
         <h3 style={{ marginTop: 0, marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
           <MessageSquare size={20} color="var(--accent-cyan)"/> Abrir Chamado ou Solicitação
         </h3>
