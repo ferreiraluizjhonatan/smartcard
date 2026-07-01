@@ -82,7 +82,10 @@ export default function ClientPortal() {
             elevator_id: id, 
             message: message, 
             company_id: elevator?.company_id,
-            ticket_type: ticketType
+            ticket_type: ticketType,
+            title: ticketType === 'chamado' 
+              ? (isMechanic ? 'Chamado Técnico (Mecânico)' : 'Chamado Técnico (Cliente)')
+              : (isMechanic ? 'Mensagem do Mecânico' : 'Mensagem do Mestre (Link Público)')
           }
         }
       });
