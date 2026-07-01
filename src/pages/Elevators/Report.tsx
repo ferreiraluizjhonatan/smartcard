@@ -290,13 +290,13 @@ export default function ElevatorReport() {
         </div>
         
         {/* Histórico de Chamados e Ocorrências Gerais */}
-        {reportType === 'completo' && tickets.length > 0 && (
+        {reportType === 'completo' && tickets.filter(t => t.ticket_type !== 'pendencia').length > 0 && (
           <div style={{ marginBottom: '40px' }}>
              <h2 style={{ color: '#00d2ff', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '2px solid #00d2ff', paddingBottom: '8px', marginBottom: '24px' }}>
                <AlertCircle size={24} /> Histórico de Ocorrências e Chamados
              </h2>
              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-               {tickets.map(ticket => (
+               {tickets.filter(t => t.ticket_type !== 'pendencia').map(ticket => (
                  <div key={ticket.id} style={{ background: '#fafafa', border: '1px solid #eee', padding: '16px', borderRadius: '8px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span style={{ fontWeight: 'bold', color: ticket.ticket_type === 'chamado' ? '#d32f2f' : '#1976d2' }}>
