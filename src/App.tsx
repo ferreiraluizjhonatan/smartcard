@@ -20,6 +20,7 @@ import TicketsList from './pages/Tickets/List';
 import Forecasts from './pages/Forecasts';
 import Tenants from './pages/Admin/Tenants';
 import Layout from './components/Layout';
+import { RoleProtectedRoute } from './components/RoleProtectedRoute';
 import { EmpresasContratadasList } from './pages/EmpresasContratadasList';
 import { EmpresaDetail } from './pages/EmpresaDetail';
 import MestrePortal from './pages/MestrePortal';
@@ -63,13 +64,21 @@ function App() {
         <Route path="/" element={session ? <TenantProvider><Layout /></TenantProvider> : <Navigate to="/login" />}>
           <Route index element={<Dashboard />} />
           <Route path="/forecasts" element={<Forecasts />} />
-          <Route path="/tenants" element={<Tenants />} />
-          <Route path="/users" element={<UsersList />} />
-          <Route path="/users/new" element={<UsersForm />} />
-          <Route path="/users/:id/edit" element={<UsersForm />} />
-          <Route path="/companies" element={<CompaniesList />} />
-          <Route path="/companies/new" element={<CompaniesForm />} />
-          <Route path="/companies/:id/edit" element={<CompaniesForm />} />
+          <Route element={<RoleProtectedRoute requireSuperAdmin={true} />}>
+            <Route path="/tenants" element={<Tenants />} />
+          </Route>
+          
+          <Route element={<RoleProtectedRoute requiredPermission="can_register_users" />}>
+            <Route path="/users" element={<UsersList />} />
+            <Route path="/users/new" element={<UsersForm />} />
+            <Route path="/users/:id/edit" element={<UsersForm />} />
+          </Route>
+          
+          <Route element={<RoleProtectedRoute requiredPermission="is_super_admin" />}>
+            <Route path="/companies" element={<CompaniesList />} />
+            <Route path="/companies/new" element={<CompaniesForm />} />
+            <Route path="/companies/:id/edit" element={<CompaniesForm />} />
+          </Route>
           <Route path="/elevators" element={<ElevatorsList />} />
           <Route path="/elevators/:id/hub" element={<ElevatorHub />} />
           <Route path="/elevators/:id/checklist" element={<ElevatorsChecklist />} />
